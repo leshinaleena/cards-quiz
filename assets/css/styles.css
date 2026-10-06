@@ -478,7 +478,7 @@ a { color: inherit; }
   overflow-x: auto; overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   margin: 26px calc(var(--gutter) * -1) 0;
-  padding: 30px var(--gutter) 10px;
+  padding: 48px var(--gutter) 10px;
   scroll-padding-inline: var(--gutter);
   scrollbar-width: none;
 }
@@ -505,9 +505,10 @@ a { color: inherit; }
 .res-card__title { font-family: var(--f-head); font-weight: 800; font-size: 22px; color: var(--wine); letter-spacing: -.01em; line-height: 1.15; }
 .res-card__tag { margin-top: 4px; font-family: var(--f-head); font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
 .res-card__facts { list-style: none; margin-top: 14px; border-top: 1px solid var(--line); }
-.res-card__facts li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.res-card__facts li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .res-card__facts span { color: var(--ink2); }
-.res-card__facts b { font-weight: 600; text-align: right; }
+.res-card__facts span { flex: none; }
+.res-card__facts b { font-weight: 600; text-align: right; line-height: 1.35; }
 .res-card__pick { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--ink2); }
 .res-card__radio {
   width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line);
@@ -520,13 +521,13 @@ a { color: inherit; }
 
 /* Рукописный акцент */
 .res-card__rec {
-  position: absolute; z-index: 3; top: -24px; right: 14px;
+  position: absolute; z-index: 3; top: -46px; right: 10px;
   display: flex; align-items: flex-start; gap: 2px;
   font-family: var(--f-hand); font-weight: 600; font-size: 27px; line-height: 1;
   color: var(--accent);
   transform: rotate(-4deg);
 }
-.res-card__rec svg { width: 40px; height: 28px; margin-top: 10px; transform: scaleX(-1) rotate(-10deg); }
+.res-card__rec svg { width: 38px; height: 30px; margin-top: 14px; transform: scaleX(-1) rotate(4deg); }
 .screen.is-enter .res-card__rec span { animation: write 1s var(--ease) .9s both; }
 .screen.is-enter .res-card__rec path { stroke-dasharray: 80; animation: drawPath 1s var(--ease) 1.4s both; }
 @keyframes write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
