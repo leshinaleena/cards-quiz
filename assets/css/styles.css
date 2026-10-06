@@ -251,14 +251,14 @@ a { color: inherit; }
   transition: --edge-a .8s var(--ease), --edge-b .8s var(--ease), background .6s;
 }
 .tc__front[data-tone="ink"], .tc__back[data-tone="ink"] {
-  --c-soft: #D9B8BC;
+  --c-soft: #E2C48F;
   background:
-    radial-gradient(130% 120% at 0% 0%, #4A2A30 0%, rgba(42, 20, 24, 0) 55%),
-    linear-gradient(150deg, #3A1D23 0%, #2A1418 45%, #170A0D 100%);
+    radial-gradient(120% 110% at 100% 0%, rgba(226, 196, 143, .18) 0%, transparent 50%),
+    linear-gradient(150deg, #2C2829 0%, #1C191A 50%, #0F0D0E 100%);
   box-shadow:
-    0 1.6em 2.6em -1.2em rgba(23, 10, 13, .6),
-    0 .3em .8em -.3em rgba(23, 10, 13, .35),
-    inset 0 0 0 1px color-mix(in srgb, var(--edge-a) 35%, transparent);
+    0 1.6em 2.6em -1.2em rgba(15, 13, 14, .6),
+    0 .3em .8em -.3em rgba(15, 13, 14, .35),
+    inset 0 0 0 1px rgba(226, 196, 143, .3);
 }
 .tc__front[data-tone="pearl"], .tc__back[data-tone="pearl"] {
   --c-text: var(--wine);
@@ -283,7 +283,16 @@ a { color: inherit; }
   pointer-events: none;
 }
 .tc__pattern { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--edge-a); opacity: .16; pointer-events: none; }
-.tc__front[data-tone="pearl"] .tc__pattern { color: var(--wine); opacity: .1; }
+.tc__front[data-tone="pearl"] .tc__pattern { display: none; }
+.tc__front[data-tone="ink"] .tc__pattern { display: none; }
+/* Графит: тонкая диагональная штриховка; жемчуг: сетка координат */
+.tc__front[data-tone="ink"]::after, .tc__front[data-tone="pearl"]::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.tc__front[data-tone="ink"]::after { background: repeating-linear-gradient(135deg, rgba(226, 196, 143, .07) 0 1px, transparent 1px 7px); }
+.tc__front[data-tone="pearl"]::after {
+  background:
+    radial-gradient(circle at 78% 60%, transparent 0 22%, rgba(105, 19, 29, .09) 22.3% 22.8%, transparent 23% 34%, rgba(105, 19, 29, .07) 34.3% 34.8%, transparent 35%),
+    repeating-linear-gradient(0deg, rgba(105, 19, 29, .05) 0 1px, transparent 1px 14%);
+}
 
 .tc__top, .tc__mid, .tc__bottom { position: relative; z-index: 1; display: flex; align-items: center; }
 .tc__top, .tc__bottom { justify-content: space-between; }
@@ -394,6 +403,15 @@ a { color: inherit; }
 .opt:active { transform: scale(.99); }
 .opt.is-on { border-color: var(--wine); background: var(--blush); }
 .opt__label { flex: 1; }
+.opt__art {
+  flex: none; width: 54px; height: 54px; margin: -4px 0 -4px -8px;
+  display: grid; place-items: center; border-radius: 14px;
+  background: var(--blush); color: var(--wine);
+  transition: background-color .25s, transform .4s var(--ease);
+}
+.opt__art svg { width: 44px; height: 44px; }
+.opt:hover .opt__art { transform: translateY(-2px); }
+.opt.is-on .opt__art { background: #fff; }
 .opt__photo { flex: none; width: 54px; height: 54px; margin: -4px 0 -4px -8px; border-radius: 14px; overflow: hidden; background: var(--blush-2); transition: box-shadow .35s; }
 .opt__photo img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -484,6 +502,33 @@ a { color: inherit; }
   .res-card:hover { transform: translateY(-4px); }
   .res-dots { display: none; }
 }
+
+/* Почему этот вариант + кнопка сразу под карточками */
+.why {
+  margin-top: 26px; padding: clamp(22px, 5vw, 36px);
+  border-radius: var(--r-lg); background: var(--blush); border: 1px solid var(--line);
+}
+.why__title { font-family: var(--f-head); font-weight: 800; font-size: clamp(22px, 5.4vw, 30px); line-height: 1.1; letter-spacing: -.03em; color: var(--ink); }
+.why__title .serif { font-size: 1.08em; }
+.why__list { list-style: none; margin-top: 18px; display: grid; gap: 12px; }
+.why__list li { position: relative; padding-left: 32px; font-size: 15px; line-height: 1.45; color: var(--text); }
+.why__list li::before {
+  content: ""; position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--wine) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12.5 4 4L18 8'/%3E%3C/svg%3E") center / 12px no-repeat;
+}
+.why__list b { display: block; font-weight: 600; color: var(--ink); }
+.why__list b::first-letter { text-transform: uppercase; }
+.why__actions { margin-top: 24px; display: grid; gap: 12px; }
+.why__actions .btn { width: 100%; }
+.why__phone { text-align: center; font-size: 13px; color: var(--muted); text-decoration: none; padding: 6px 0; }
+.why__phone b { color: var(--ink); font-weight: 600; }
+.why .cta__hint { background: #fff; border-color: var(--line); color: var(--ink); }
+.why .cta__hint svg { color: var(--wine); }
+@media (min-width: 640px) {
+  .why__actions { grid-template-columns: auto auto; justify-content: start; align-items: center; gap: 24px; }
+  .why__actions .btn { width: auto; }
+}
+@media (min-width: 900px) { .why { display: grid; grid-template-columns: 1fr 1.1fr; gap: 8px 48px; } .why__title { grid-row: span 2; } .why__list { margin-top: 0; } .why__actions, .why .cta__hint { grid-column: 2; } }
 
 /* Таблица сравнения */
 .compare { margin-top: clamp(48px, 9vw, 88px); }

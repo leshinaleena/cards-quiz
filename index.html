@@ -136,6 +136,19 @@
           <div class="res-track reveal" style="--d:3" id="resTrack" role="radiogroup" aria-labelledby="resultHeading"></div>
           <div class="res-dots" id="resDots" aria-hidden="true"></div>
 
+          <div class="why reveal" style="--d:4" data-cta aria-live="polite">
+            <h3 class="why__title" id="whyTitle"></h3>
+            <ul class="why__list" id="whyList"></ul>
+            <div class="why__actions">
+              <a class="btn btn--primary btn--xl js-tg" href="https://t.me/TopRiders_Travel" target="_blank" rel="noopener"><span id="whyBtnText">Обсудить с менеджером</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5 3.5 10.6l6.4 2.3 2.3 6.6 8.3-16z"/><path d="m9.9 12.9 4.6-4.6"/></svg></a>
+              <a class="why__phone js-phone" href="tel:+79259908289"><span data-t="ctaPhoneLabel">или позвоните</span> <b class="js-phone-text">+7 925 990 8289</b></a>
+            </div>
+            <p class="cta__hint js-hint" role="status" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg>
+            <span class="js-hint-text"></span>
+          </p>
+          </div>
+
           <div class="compare">
             <h3 class="h3"><span data-t="compareTitle">Сравнение</span> <em class="serif" data-t="compareTitleAccent">вариантов</em></h3>
             <div class="cmp" id="cmp" role="table" aria-label="Сравнение вариантов"></div>
@@ -152,7 +165,7 @@
           <div class="card-slot card-slot--none" id="slotNone"></div>
         </div>
 
-        <div class="cta reveal" style="--d:4">
+        <div class="cta reveal" style="--d:4" data-cta>
           <h3 class="h2 cta__title"><span data-t="ctaTitle">Обсудим</span> <em class="serif" data-t="ctaTitleAccent">детали?</em></h3>
           <p class="cta__text" data-t="ctaText"></p>
           <div class="cta__manager" id="ctaManager" hidden>
@@ -170,9 +183,9 @@
               <span class="js-phone-text">+7 925 990 8289</span>
             </a>
           </div>
-          <p class="cta__hint" id="ctaHint" role="status" hidden>
+          <p class="cta__hint js-hint" role="status" hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg>
-            <span id="ctaHintText"></span>
+            <span class="js-hint-text"></span>
           </p>
           <div class="cta__links">
             <a id="linkChannel" href="https://t.me/topriders_usa" target="_blank" rel="noopener"><span>Telegram-канал TOP RIDERS</span> ↗</a>

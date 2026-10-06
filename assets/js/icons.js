@@ -70,3 +70,23 @@ export const globeBadgeSVG = (text) => { const id = `badge${++uid}`; return `<sv
   <g class="badge-globe__ring"><text font-family="Montserrat, Arial, sans-serif" font-weight="600" font-size="11" fill="currentColor"><textPath href="#${id}" textLength="388" lengthAdjust="spacing">${text}</textPath></text></g>
   <g transform="translate(44 52) scale(.6)" class="badge-globe__mark" fill="none" stroke="currentColor" stroke-linecap="round">${globeSVG().replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g>
 </svg>`; };
+
+// Линейные иллюстрации направлений для вопроса «В какие страны» (stroke = currentColor)
+const art = (body) => `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
+export const destinations = {
+  // Эйфелева башня
+  europe: art(`<path d="M24 3v5"/><path d="M22.4 8h3.2"/><path d="M23 8c-.6 8-2.6 15-5.6 22M25 8c.6 8 2.6 15 5.6 22"/>
+    <path d="M19.6 20.5h8.8"/><path d="M17.4 30h13.2"/><path d="M17.4 30 13 44M30.6 30 35 44"/>
+    <path d="M18.6 44c1.6-5.4 3.4-8 5.4-8s3.8 2.6 5.4 8"/><path d="M20.3 24.5l7.4-4M27.7 24.5l-7.4-4M18.6 36l10.8-6M29.4 36l-10.8-6"/><path d="M9 44h30"/>`),
+  // Ворота-тории и солнце
+  asia: art(`<circle cx="35" cy="12" r="4.5"/><path d="M5 14.5c12 3 26 3 38 0"/><path d="M8 13.4 7 11.2M40 13.4l1-2.2"/>
+    <path d="M10 21h28"/><path d="M14 16.3V44M34 16.3V44"/><path d="M24 17v4"/><path d="M11 44h6M31 44h6"/><path d="M4 44h40" opacity=".5"/>`),
+  // Статуя Свободы
+  usa: art(`<path d="M27.6 4.5c-1.2 1.4-1.2 2.8 0 4 1.2-1.2 1.2-2.6 0-4z"/><path d="M26.2 8.6h2.8l-.6 2.2h-1.6z"/><path d="M27.4 10.8 25 18"/>
+    <circle cx="21.6" cy="15.6" r="2.6"/><path d="M18.6 13.6l-1.8-1.6M20 12.2l-.8-2.2M22 11.8l.2-2.3M23.8 12.4l1.2-1.9"/>
+    <path d="M19.2 18.6c-1.4 5-2 11-2.4 17.4h10.4c-.4-6.4-1-12.4-2.4-17.4"/><path d="M19.4 22.6l-3.2 4.2 2 1.4"/>
+    <path d="M14 36h16v8H14z"/><path d="M11 44h22"/><path d="M17 40h10"/>`),
+  // Глобус с маршрутом
+  mixed: art(`<circle cx="22" cy="26" r="15"/><ellipse cx="22" cy="26" rx="6.4" ry="15"/><path d="M7.6 21h28.8M7.6 31h28.8"/>
+    <path d="M6 12c8-9 26-10 36 0" stroke-dasharray="2 3"/><path d="m42.6 8.6-.2 4.6-4.4-1"/>`),
+};

@@ -1,4 +1,4 @@
-import { icons, logoSVG, planeSolid } from './icons.js';
+import { icons, logoSVG, planeSolid, destinations } from './icons.js';
 import { TravelCard, cardFaceHTML } from './card.js';
 import { pickCards, isEmpty } from './scoring.js';
 import { initAnalytics, track, getUtm } from './analytics.js';
@@ -13,11 +13,11 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 // Три исполнения карты: бордо, графит, жемчуг — и их кант
 const TONES = [
   { tone: 'wine', edge: ['#F3D9AE', '#B9806A'] },
-  { tone: 'ink', edge: ['#E9CF9F', '#A9845A'] },
+  { tone: 'ink', edge: ['#EBD3A0', '#A9845A'] },
   { tone: 'pearl', edge: ['#AB2328', '#69131D'] },
   { tone: 'wine', edge: ['#F1CDB3', '#C48B6E'] },
   { tone: 'ink', edge: ['#F3D3BE', '#B98670'] },
-];
+]
 
 let cfg;
 let card;
@@ -89,11 +89,11 @@ function renderStep(dir = 1) {
   $('#qHint').textContent = q.type === 'multi' ? (q.hint || t('multiHint')) : (q.hint || '');
   $('#qHint').hidden = !$('#qHint').textContent;
 
-  // Фото у вариантов показываем, только если они есть у всех вариантов вопроса
-  const withPhotos = q.options.every((o) => o.photo && photoOk[o.photo]);
+  // Иллюстрации у вариантов — только если они есть у всех вариантов вопроса
+  const withArt = q.options.every((o) => destinations[o.art]);
   $('#opts').innerHTML = q.options.map((o) => `
     <button type="button" class="opt${chosen.includes(o.id) ? ' is-on' : ''}" data-id="${esc(o.id)}" aria-pressed="${chosen.includes(o.id)}">
-      ${withPhotos ? `<span class="opt__photo"><img src="${esc(o.photo)}" alt="" loading="lazy" decoding="async" onerror="this.parentNode.remove()"></span>` : ''}
+      ${withArt ? `<span class="opt__art">${destinations[o.art]}</span>` : ''}
       <span class="opt__label">${esc(o.label)}</span>
       <span class="opt__check">${icons.check}</span>
     </button>`).join('');
@@ -315,10 +315,7 @@ function renderResults() {
       : i === 0
         ? `<span class="res-card__best" aria-hidden="true">${icons.check}${esc(t('best'))}</span>`
         : '';
-    // «Подходит Вам, потому что…» — из ответов клиента, без повторов, максимум 3
-    const reasons = [...new Set(it.reasons || [])].slice(0, 3);
-    const why = reasons.length
-      ? `<p class="res-card__why"><span>${esc(t('why'))}:</span> ${reasons.map(esc).join(' · ')}</p>` : '';
+
     const facts = [['Срок', c.term], ['Стоимость', c.price]]
       .map(([k, v]) => `<li><span>${k}</span><b>${esc(isEmpty(v) ? t('unknown') : v)}</b></li>`).join('');
     return `
@@ -330,7 +327,6 @@ function renderResults() {
         </div></div></div></div>
         <h3 class="res-card__title">${esc(label)}</h3>
         ${c.tag ? `<p class="res-card__tag">${esc(c.tag)}</p>` : ''}
-        ${why}
         <ul class="res-card__facts">${facts}</ul>
         <span class="res-card__pick"><span class="res-card__radio">${icons.check}</span><span class="res-card__pick-text"></span></span>
       </article>`;
@@ -359,6 +355,50 @@ function renderResults() {
   updateSelection();
 }
 
+// Чем вариант выделяется среди показанных: только реальные отличия из данных карт
+function advantages(idx, items) {
+  const c = items[idx].card;
+  const others = items.filter((_, i) => i !== idx).map((x) => x.card);
+  const out = [];
+  const unique = (field, text) => {
+    if (c[field] === true && others.length && others.every((o) => o[field] === false)) out.push(text);
+  };
+  unique('applePay', 'единственный из вариантов с Apple Pay');
+  unique('booking', 'единственный подходит для брони авто и отелей');
+  unique('multiCurrency', 'единственный с мультивалютным счётом');
+  const num = (o, f) => (typeof o[f] === 'number' ? o[f] : null);
+  const best = (f, text) => {
+    const v = num(c, f);
+    if (v === null || !others.length) return;
+    if (others.every((o) => num(o, f) !== null && num(o, f) > v)) out.push(text);
+  };
+  best('termDays', `самый быстрый выпуск: ${c.term}`);
+  best('priceValue', `самый доступный: ${c.price}`);
+  return out;
+}
+
+function renderWhy() {
+  const res = state.result;
+  if (res?.status !== 'ok') return;
+  const it = res.items[state.selected];
+  const { label } = displayInfo(it, state.selected);
+  const isBest = state.selected === 0 && !it.alternative;
+  const reasons = [...new Set(it.reasons || [])].slice(0, 3);
+  const adv = advantages(state.selected, res.items);
+  $('#whyTitle').innerHTML = isBest
+    ? `Почему мы рекомендуем <em class="serif">${esc(label)}</em>`
+    : `Чем хорош <em class="serif">${esc(label)}</em>`;
+  const rows = [];
+  if (reasons.length) rows.push(`<li><b>${esc(t('why'))}</b><span>${reasons.map(esc).join(' · ')}</span></li>`);
+  adv.forEach((a) => rows.push(`<li><b>${esc(a.split(':')[0])}</b>${a.includes(':') ? `<span>${esc(a.split(':').slice(1).join(':').trim())}</span>` : ''}</li>`));
+  // Сильные стороны карты из конфига (факты со страниц продукта), всего не больше 4 пунктов
+  (it.card.strengths || []).filter((x) => !adv.some((a) => a.includes(x)))
+    .slice(0, Math.max(0, 4 - rows.length)).forEach((x) => rows.push(`<li><b>${esc(x)}</b></li>`));
+  if (!rows.length) rows.push(`<li><b>${esc(t('whyFallback'))}</b></li>`);
+  $('#whyList').innerHTML = rows.join('');
+  $('#whyBtnText').textContent = `${t('whyCta')} ${label}`;
+}
+
 function updateSelection() {
   const res = state.result;
   if (res?.status === 'ok') {
@@ -374,10 +414,11 @@ function updateSelection() {
     const { label } = displayInfo(it, state.selected);
     $('#ctaChoice').innerHTML = `Вы выбрали: <b>${esc(label)}</b>${it.card.tag ? ` · ${esc(it.card.tag)}` : ''}`;
     $('#ctaChoice').hidden = false;
+    renderWhy();
   } else {
     $('#ctaChoice').hidden = true;
   }
-  $('#ctaHint').hidden = true;
+  $$('.js-hint').forEach((h) => { h.hidden = true; });
 }
 
 function selectCard(i, focus = false) {
@@ -477,12 +518,13 @@ function copyText(text) {
   return Promise.resolve(ok);
 }
 
-function onContact() {
+function onContact(e) {
   // Копируем синхронно в рамках клика; ссылка открывается штатно (target=_blank)
   const text = buildSummary();
-  const hint = $('#ctaHint');
+  const box = e?.currentTarget?.closest('[data-cta]') || $('.cta');
+  const hint = box.querySelector('.js-hint');
   copyText(text).then((ok) => {
-    $('#ctaHintText').textContent = ok ? t('ctaCopied') : t('ctaCopyFailed');
+    hint.querySelector('.js-hint-text').textContent = ok ? t('ctaCopied') : t('ctaCopyFailed');
     hint.hidden = false;
     hint.classList.remove('is-shown');
     void hint.offsetWidth;
