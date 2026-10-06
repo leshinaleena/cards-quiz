@@ -488,6 +488,65 @@ function observeCompare() {
   io.observe(el);
 }
 
+/* ---------- Форма заявки → Google Таблица ---------- */
+function leadPayload(form) {
+  const fd = new FormData(form);
+  const data = {
+    'Имя': fd.get('name').trim(),
+    'Телефон': fd.get('phone').trim(),
+    'Email': fd.get('email').trim(),
+    website: fd.get('website'),
+    'Страница': location.href.split('#')[0],
+  };
+  const res = state.result;
+  if (res?.status === 'ok') {
+    const it = res.items[state.selected];
+    data['Вариант (код)'] = `${displayInfo(it, state.selected).label} (код ${it.card.id})`;
+    data['Фишка варианта'] = it.card.tag || '';
+    data['Также предложены'] = res.items.filter((_, i) => i !== state.selected).map((x) => x.card.id).join(', ');
+  } else {
+    data['Вариант (код)'] = 'индивидуальный подбор';
+  }
+  for (const q of cfg.questions) {
+    data[q.short || q.title] = (state.answers[q.id] || []).map((id) => q.options.find((o) => o.id === id)?.label).filter(Boolean).join(', ');
+  }
+  Object.assign(data, utm);
+  return data;
+}
+
+function setupLead() {
+  const form = $('#leadForm');
+  const ep = cfg.leads?.endpoint;
+  if (!ep) return;
+  form.hidden = false;
+  if (cfg.leads.privacyUrl) { $('#leadPrivacy').href = cfg.leads.privacyUrl; $('#leadPrivacy').hidden = false; }
+  const status = (text, ok) => {
+    const el = $('#leadStatus');
+    el.textContent = text; el.hidden = false; el.classList.toggle('is-error', !ok);
+  };
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const phone = form.phone.value.replace(/\D/g, '');
+    if (!form.name.value.trim()) { form.name.focus(); return; }
+    if (phone.length < 10) { status(t('leadPhoneError'), false); form.phone.focus(); return; }
+    if (!form.consent.checked) { form.consent.focus(); return; }
+    const btn = $('#leadSubmit');
+    btn.disabled = true; btn.querySelector('span').textContent = t('leadSending');
+    try {
+      // Apps Script не отдаёт CORS-заголовки, поэтому no-cors: ответ не читаем, ошибкой считаем только сбой сети
+      await fetch(ep, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(leadPayload(form)) });
+      status(t('leadDone'), true);
+      btn.querySelector('span').textContent = t('leadSent');
+      form.querySelectorAll('input, button').forEach((el) => { el.disabled = true; });
+      const it = state.result?.status === 'ok' ? state.result.items[state.selected] : null;
+      track(cfg.analytics?.goals?.lead, { variant: it ? it.card.id : 'none' });
+    } catch (_) {
+      status(t('leadError'), false);
+      btn.disabled = false; btn.querySelector('span').textContent = t('leadSubmit');
+    }
+  });
+}
+
 /* ---------- Связь с менеджером ---------- */
 function buildSummary() {
   const c = cfg.clipboard || {};
@@ -699,6 +758,7 @@ async function init() {
   }
   fillStatic();
   renderLists();
+  setupLead();
   setupPhotos();
   initAnalytics(cfg.analytics);
 

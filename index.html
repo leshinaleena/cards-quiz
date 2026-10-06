@@ -187,6 +187,19 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg>
             <span class="js-hint-text"></span>
           </p>
+          <form class="lead" id="leadForm" hidden novalidate>
+            <h4 class="lead__title" data-t="leadTitle">Или оставьте заявку</h4>
+            <p class="lead__text" data-t="leadText"></p>
+            <div class="lead__fields">
+              <label class="lead__field"><span data-t="leadName">Имя</span><input name="name" type="text" autocomplete="name" maxlength="80" required></label>
+              <label class="lead__field"><span data-t="leadPhone">Телефон</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7" maxlength="24" required></label>
+              <label class="lead__field lead__field--wide"><span data-t="leadEmail">Email (необязательно)</span><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="120"></label>
+              <input class="lead__trap" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+            </div>
+            <label class="lead__consent"><input name="consent" type="checkbox" required><span><span data-t="leadConsent">Согласен(на) на обработку персональных данных</span> <a id="leadPrivacy" href="#" target="_blank" rel="noopener" hidden>(политика)</a></span></label>
+            <button class="btn btn--outline-light" type="submit" id="leadSubmit"><span data-t="leadSubmit">Отправить заявку</span></button>
+            <p class="lead__status" id="leadStatus" role="status" hidden></p>
+          </form>
           <div class="cta__links">
             <a id="linkChannel" href="https://t.me/topriders_usa" target="_blank" rel="noopener"><span>Telegram-канал TOP RIDERS</span> ↗&#xFE0E;</a>
             <a id="linkSite" href="https://topriders.ru" target="_blank" rel="noopener"><span>topriders.ru</span> ↗&#xFE0E;</a>

@@ -651,3 +651,32 @@ a { color: inherit; }
 /* Ручное копирование, если браузер запретил доступ к буферу */
 .cta__hint:not([hidden]) { display: grid; grid-template-columns: 20px 1fr; column-gap: 10px; }
 .cta__manual { grid-column: 1 / -1; margin-top: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--ink); font: 13px/1.45 var(--f-body); resize: vertical; }
+
+/* Форма заявки в тёмном блоке */
+.lead { margin-top: 30px; padding-top: 26px; border-top: 1px solid rgba(255, 255, 255, .18); }
+.lead__title { font-family: var(--f-head); font-weight: 800; font-size: 20px; letter-spacing: -.02em; color: #fff; }
+.lead__text { margin-top: 6px; font-size: 14px; color: rgba(255, 255, 255, .7); max-width: 34em; }
+.lead__fields { display: grid; gap: 12px; margin-top: 18px; }
+.lead__field { display: grid; gap: 6px; font-size: 12.5px; color: rgba(255, 255, 255, .7); }
+.lead__field input {
+  min-height: 52px; padding: 0 16px; border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .08); color: #fff;
+  font: 500 16px/1 var(--f-body); transition: border-color .25s, background-color .25s;
+}
+.lead__field input::placeholder { color: rgba(255, 255, 255, .4); }
+.lead__field input:focus { outline: none; border-color: #fff; background: rgba(255, 255, 255, .12); }
+.lead__trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.lead__consent { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; font-size: 13px; line-height: 1.45; color: rgba(255, 255, 255, .75); cursor: pointer; }
+.lead__consent input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--gold); flex: none; }
+.lead__consent a { color: #fff; }
+.btn--outline-light { margin-top: 18px; border: 1.5px solid rgba(255, 255, 255, .7); color: #fff; width: 100%; }
+.btn--outline-light::before { background: rgba(255, 255, 255, .12); }
+.btn--outline-light:hover::before { transform: none; }
+.btn--outline-light:disabled { opacity: .6; cursor: default; }
+.lead__status { margin-top: 12px; font-size: 14px; color: #fff; }
+.lead__status.is-error { color: #FFD3D6; }
+@media (min-width: 640px) {
+  .lead__fields { grid-template-columns: 1fr 1fr; }
+  .lead__field--wide { grid-column: 1 / -1; }
+  .btn--outline-light { width: auto; }
+}

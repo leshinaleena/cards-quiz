@@ -27,7 +27,8 @@
       "result": "quiz_result",
       "nonstandard": "quiz_nonstandard",
       "contact": "contact_manager",
-      "phone": "contact_phone"
+      "phone": "contact_phone",
+      "lead": "lead_form"
     }
   },
   "texts": {
@@ -87,7 +88,19 @@
     "heroAlt": "Лаунж аэропорта: чемодан у панорамного окна, за стеклом самолёт на закате",
     "whyCta": "Обсудить",
     "whyFallback": "Хорошо закрывает задачи из Ваших ответов",
-    "howAlt": "Оплата картой в кафе во время поездки"
+    "howAlt": "Оплата картой в кафе во время поездки",
+    "leadTitle": "Или оставьте заявку",
+    "leadText": "Менеджер свяжется с Вами удобным способом. Ответы квиза придут вместе с заявкой.",
+    "leadName": "Имя",
+    "leadPhone": "Телефон",
+    "leadEmail": "Email (необязательно)",
+    "leadConsent": "Согласен(на) на обработку персональных данных",
+    "leadSubmit": "Отправить заявку",
+    "leadSending": "Отправляем…",
+    "leadDone": "Спасибо! Заявка отправлена, менеджер скоро свяжется с Вами.",
+    "leadError": "Не получилось отправить. Проверьте интернет или напишите нам в Telegram.",
+    "leadPhoneError": "Укажите телефон полностью, с кодом страны",
+    "leadSent": "Заявка отправлена ✓"
   },
   "clipboard": {
     "greeting": "Здравствуйте! Я прошёл(а) подбор карты на сайте TOP RIDERS.",
@@ -1348,5 +1361,10 @@
       "passportRF": false,
       "foreignPassport": "yes"
     }
-  ]
+  ],
+  "leads": {
+    "_readme": "URL веб-приложения Apps Script (см. apps-script/Code.gs). Пусто — форма заявки не показывается.",
+    "endpoint": "",
+    "privacyUrl": ""
+  }
 }
