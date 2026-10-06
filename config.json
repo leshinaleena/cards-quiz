@@ -12,11 +12,18 @@
   },
   "photos": {
     "_readme": "Фото кладутся в папку assets/photos/ с этими именами. Если файла нет, блок просто не показывается.",
-    "hero": "assets/photos/hero.jpg",
+    "hero": [
+      "assets/photos/hero.jpg",
+      "assets/photos/hero-2.jpg",
+      "assets/photos/hero-3.jpg"
+    ],
     "heroAlt": "Путешествие с картой TOP RIDERS",
     "manager": "assets/photos/manager.jpg",
     "managerName": "",
-    "managerRole": "Менеджер TOP RIDERS, отвечает в Telegram"
+    "managerRole": "Менеджер TOP RIDERS, отвечает в Telegram",
+    "band": "assets/photos/band.jpg",
+    "cta": "assets/photos/cta.jpg",
+    "loading": "assets/photos/loading.jpg"
   },
   "analytics": {
     "metrikaId": "",
@@ -778,5 +785,33 @@
         }
       }
     }
-  ]
+  ],
+  "uses": {
+    "eyebrow": "Где пригодится карта",
+    "titleStrong": "От аэропорта",
+    "titleLight": "до отеля",
+    "cta": "Подобрать карту",
+    "items": [
+      {
+        "photo": "assets/photos/use-car.jpg",
+        "title": "Аренда авто",
+        "text": "Для брони машины часто просят карту с кредитным БИН. Подскажем, какая подойдёт."
+      },
+      {
+        "photo": "assets/photos/use-hotel.jpg",
+        "title": "Отели",
+        "text": "Бронирование и депозит при заселении в отеле."
+      },
+      {
+        "photo": "assets/photos/use-flight.jpg",
+        "title": "Перелёты",
+        "text": "Билеты, багаж, такси и покупки в аэропорту, в валюте страны."
+      }
+    ]
+  },
+  "band": {
+    "titleStrong": "Путешествуйте уверенно —",
+    "titleLight": "мы всё уже просчитали",
+    "city": "Washington, D.C."
+  }
 }

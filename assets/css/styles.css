@@ -191,7 +191,17 @@ a { color: inherit; }
   outline-offset: 8px;
   animation: photoIn 1.4s var(--ease) backwards;
 }
-.hero__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; }
+.hero__slides { position: absolute; inset: 0; }
+.hero__slides img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 62%;
+  opacity: 0; transition: opacity 1.6s ease;
+}
+.hero__slides img.is-active { opacity: 1; animation: kenburns 7.5s ease-out both; }
+@keyframes kenburns { from { transform: scale(1.14) translate(1.5%, 1%); } to { transform: scale(1.02) translate(0, 0); } }
+.hero__dots { position: absolute; z-index: 2; right: 16px; bottom: 14px; display: flex; gap: 6px; }
+.hero__dots i { width: 14px; height: 2px; border-radius: 2px; background: rgba(242, 234, 227, .45); transition: width .5s var(--ease), background-color .5s; }
+.hero__dots i.is-on { width: 28px; background: var(--cream); }
 .hero__photo::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(200deg, rgba(5, 44, 51, 0) 40%, rgba(5, 44, 51, .38));
@@ -279,6 +289,72 @@ a { color: inherit; }
   }
   .badge-globe { width: 132px; top: 0; left: auto; right: calc(min(100% - var(--cw) * .2, 440px) - 66px); }
 }
+
+/* Галерея «где пригодится карта» */
+.uses { padding: clamp(52px, 10vw, 104px) 0 clamp(56px, 10vw, 104px); }
+.uses__title { margin-top: 18px; font-family: var(--f-head); line-height: 1.02; letter-spacing: -.01em; font-size: clamp(28px, 7.6vw, 54px); }
+.uses__strong { display: block; font-weight: 800; color: var(--wine); text-transform: uppercase; }
+.uses__light { display: block; font-weight: 400; color: var(--petrol); }
+.uses__track {
+  counter-reset: use;
+  display: flex; gap: 14px;
+  margin-top: clamp(24px, 5vw, 40px);
+  padding: 0 var(--gutter) 6px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter);
+  scrollbar-width: none;
+}
+.uses__track::-webkit-scrollbar { display: none; }
+.use { counter-increment: use; flex: 0 0 min(78%, 320px); scroll-snap-align: start; }
+.use__img { display: block; aspect-ratio: 4 / 5; overflow: hidden; border-radius: var(--plate-lg); background: var(--sand); position: relative; }
+.use__img img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.14); transition: transform 1.2s var(--ease); will-change: transform; }
+.use__img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(200deg, rgba(5, 44, 51, 0) 50%, rgba(5, 44, 51, .35)); }
+.use figcaption { margin-top: 16px; display: grid; gap: 6px; }
+.use b { font-family: var(--f-head); font-weight: 800; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; color: var(--wine); display: flex; align-items: baseline; gap: 10px; }
+.use b::before { content: "0" counter(use); font-weight: 600; font-size: 12px; color: var(--red); letter-spacing: .1em; }
+.use span { font-size: 14px; color: var(--ink2); max-width: 26em; }
+.uses__foot { margin-top: clamp(28px, 6vw, 44px); }
+.uses__foot .btn { width: 100%; justify-content: space-between; }
+@media (min-width: 760px) {
+  .uses__track { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; overflow: visible; max-width: 1160px; margin-inline: auto; }
+  .use:nth-child(2) { margin-top: 56px; }
+  .uses__foot .btn { width: auto; }
+}
+
+/* Фото-полоса: фото в винном тоне + бордовая плашка (как обложки TOP RIDERS) */
+.band { position: relative; overflow: hidden; isolation: isolate; min-height: clamp(520px, 120vw, 640px); background: var(--wine-deep); display: flex; flex-direction: column; justify-content: space-between; }
+.band__img { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
+.band__img img { width: 100%; height: 100%; object-fit: cover; object-position: 72% 50%; transform: scale(1.14); filter: grayscale(.45) contrast(1.05); }
+.band::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(105, 19, 29, .55), rgba(76, 13, 21, .72)); mix-blend-mode: multiply; }
+.band::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, rgba(76, 13, 21, .55), transparent 40%); }
+.band__plate {
+  background: var(--wine); color: var(--cream);
+  width: min(92%, 640px);
+  padding: clamp(28px, 6vw, 56px) var(--gutter) clamp(30px, 6vw, 52px);
+  border-radius: 0 0 64px 0;
+}
+@media (min-width: 900px) { .band__plate { padding-left: max(40px, calc((100vw - 1160px) / 2 + 40px)); width: min(60%, 820px); } }
+.band__kicker { font-family: var(--f-head); font-weight: 600; font-size: 10px; letter-spacing: .32em; text-transform: uppercase; color: rgba(242, 234, 227, .7); }
+.band__title { margin-top: 18px; font-family: var(--f-head); line-height: 1.02; letter-spacing: -.01em; font-size: clamp(28px, 7.4vw, 56px); }
+.band__strong { display: block; font-weight: 800; text-transform: uppercase; }
+.band__light { display: block; font-weight: 400; color: #E9B9BE; }
+.band__foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding-block: 0 clamp(24px, 5vw, 44px); position: relative; }
+.band__foot::before { content: ""; position: absolute; left: var(--gutter); right: var(--gutter); top: -18px; height: 1px; background: rgba(242, 234, 227, .35); }
+.band__city { font-family: var(--f-hand); font-weight: 600; font-size: clamp(22px, 5vw, 30px); color: var(--cream); transform: rotate(-3deg); }
+/* Почтовая марка */
+.stamp {
+  width: 96px; padding: 7px; border-radius: 14px;
+  background: rgba(76, 13, 21, .75); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  display: grid; gap: 4px; color: var(--cream);
+  outline: 1.5px dashed rgba(242, 234, 227, .6); outline-offset: -6px;
+  transform: rotate(4deg);
+}
+.stamp__top, .stamp__bottom { display: flex; justify-content: space-between; padding: 4px 6px 0; font-family: var(--f-head); font-size: 8px; font-weight: 800; letter-spacing: .14em; }
+.stamp__bottom { justify-content: center; padding: 0 0 5px; font-weight: 600; letter-spacing: .24em; }
+.stamp__mark { width: 52px; margin: 0 auto; color: var(--cream); }
+
+/* Появление при прокрутке */
+.sr { opacity: 0; transform: translateY(26px); transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: calc(var(--i, 0) * 130ms); }
+.sr.is-in { opacity: 1; transform: none; }
 
 /* =========================================================
    КАРТА (CSS 3D): три исполнения — бордо, петроль, крем
@@ -533,6 +609,13 @@ a { color: inherit; }
     var(--petrol-deep);
   color: var(--cream);
 }
+.loading { position: relative; overflow: hidden; isolation: isolate; }
+.loading__bg {
+  position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%;
+  object-fit: cover; object-position: 60% 50%;
+  opacity: .32; mix-blend-mode: luminosity;
+  animation: kenburns 9s ease-out both;
+}
 .loading__wrap { display: grid; justify-items: center; gap: 30px; text-align: center; }
 .shuffle { position: relative; width: 100%; height: 250px; }
 .shuffle__card {
@@ -586,6 +669,8 @@ a { color: inherit; }
   transition: border-color .35s, box-shadow .35s var(--ease), transform .35s var(--ease);
 }
 .res-card:hover { border-color: var(--muted); }
+.screen.is-enter .res-card { animation: resIn 1s var(--ease) backwards; animation-delay: calc(var(--i, 0) * 150ms + 250ms); }
+@keyframes resIn { from { opacity: 0; transform: perspective(1000px) translateY(40px) rotateY(-18deg); } to { opacity: 1; transform: none; } }
 .res-card.is-selected { border-color: var(--petrol); box-shadow: 0 0 0 1px var(--petrol), 0 28px 44px -32px rgba(5, 44, 51, .8); }
 .res-card:focus-visible { outline-offset: 4px; }
 
@@ -713,6 +798,14 @@ a { color: inherit; }
   color: var(--cream);
   border-radius: 0 44px 0 0;
 }
+.cta__photo {
+  position: relative; z-index: -1;
+  margin: calc(clamp(32px, 7vw, 56px) * -1) calc(var(--gutter) * -1) 26px;
+  height: clamp(200px, 34vw, 320px); overflow: hidden;
+}
+.cta__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 82% 55%; }
+.cta__photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 61, 70, 0) 35%, var(--petrol) 98%); }
+@media (min-width: 900px) { .cta__photo { margin-inline: -56px; } }
 .cta__globe {
   position: absolute; z-index: -1; right: -60px; bottom: -40px;
   width: 300px; color: var(--cream); opacity: .06;
@@ -763,7 +856,15 @@ a { color: inherit; }
 }
 @media (min-width: 900px) {
   .cta { margin-inline: 0; border-radius: var(--plate-lg); padding-inline: 56px; }
-  .cta__globe { width: 420px; right: -40px; bottom: -70px; }
+  .cta__photo {
+  position: relative; z-index: -1;
+  margin: calc(clamp(32px, 7vw, 56px) * -1) calc(var(--gutter) * -1) 26px;
+  height: clamp(200px, 34vw, 320px); overflow: hidden;
+}
+.cta__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 82% 55%; }
+.cta__photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 61, 70, 0) 35%, var(--petrol) 98%); }
+@media (min-width: 900px) { .cta__photo { margin-inline: -56px; } }
+.cta__globe { width: 420px; right: -40px; bottom: -70px; }
 }
 
 .noscript { padding: 20px var(--gutter); text-align: center; }
@@ -784,6 +885,11 @@ a { color: inherit; }
   .hero__photo { animation: fadeIn .8s ease both !important; }
   .screen.is-enter .res-card__rec span,
   .screen.is-enter .res-card__rec path { animation: none !important; }
+  .sr { transform: none; transition: opacity .5s ease; }
+  .hero__slides img.is-active, .screen.is-enter .res-card, .loading__bg { animation: none !important; }
+  .band__img img { transform: none; }
+  .stamp { transform: none; }
+  .use__img img { transform: none; transition: none; }
   .opt::before { clip-path: none; opacity: 0; transition: opacity .3s; }
   .opt.is-on::before { clip-path: none; opacity: 1; }
   .btn::before { transition: none; }

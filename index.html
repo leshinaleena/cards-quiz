@@ -46,9 +46,7 @@
 
         <div class="hero__visual" id="heroVisual">
           <div class="badge-globe js-globe-badge" aria-hidden="true"></div>
-          <figure class="hero__photo" id="heroPhoto" hidden>
-            <img alt="" width="1200" height="1500" decoding="async" fetchpriority="high">
-          </figure>
+          <figure class="hero__photo" id="heroPhoto" hidden><span class="hero__slides" id="heroSlides"></span><span class="hero__dots" id="heroDots" aria-hidden="true"></span></figure>
           <div class="hero__cardwrap" aria-hidden="true">
           <svg class="orbit orbit--back" viewBox="0 0 400 260">
             <g transform="rotate(-12 200 130)">
@@ -69,7 +67,7 @@
         </div>
 
         <div class="hero__actions reveal" style="--d:4">
-          <button class="btn btn--primary btn--lg" id="startBtn" type="button" disabled>
+          <button class="btn btn--primary btn--lg js-start" id="startBtn" type="button" disabled>
             <span data-t="heroCta">Подобрать карту</span>
             <span class="btn__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
           </button>
@@ -80,8 +78,43 @@
       </div>
       <div class="marquee" aria-hidden="true">
         <div class="marquee__track">
-          <span>Париж <i>48°51′N</i></span><span>Токио <i>35°41′N</i></span><span>Нью-Йорк <i>40°42′N</i></span><span>Дубай <i>25°12′N</i></span><span>Стамбул <i>41°00′N</i></span><span>Бали <i>8°20′S</i></span><span>Барселона <i>41°23′N</i></span><span>Сеул <i>37°33′N</i></span>
-          <span>Париж <i>48°51′N</i></span><span>Токио <i>35°41′N</i></span><span>Нью-Йорк <i>40°42′N</i></span><span>Дубай <i>25°12′N</i></span><span>Стамбул <i>41°00′N</i></span><span>Бали <i>8°20′S</i></span><span>Барселона <i>41°23′N</i></span><span>Сеул <i>37°33′N</i></span>
+          <span>Лос-Анджелес <i>34°03′N</i></span><span>Нью-Йорк <i>40°42′N</i></span><span>Сан-Франциско <i>37°46′N</i></span><span>Париж <i>48°51′N</i></span><span>Майами <i>25°46′N</i></span><span>Токио <i>35°41′N</i></span><span>Лас-Вегас <i>36°10′N</i></span><span>Дубай <i>25°12′N</i></span><span>Чикаго <i>41°52′N</i></span><span>Бали <i>8°20′S</i></span><span>Лос-Анджелес <i>34°03′N</i></span><span>Нью-Йорк <i>40°42′N</i></span><span>Сан-Франциско <i>37°46′N</i></span><span>Париж <i>48°51′N</i></span><span>Майами <i>25°46′N</i></span><span>Токио <i>35°41′N</i></span><span>Лас-Вегас <i>36°10′N</i></span><span>Дубай <i>25°12′N</i></span><span>Чикаго <i>41°52′N</i></span><span>Бали <i>8°20′S</i></span>
+        </div>
+      </div>
+
+      <div class="band" id="band" hidden>
+        <span class="band__img"><img id="bandImg" alt="" loading="lazy" decoding="async" data-parallax></span>
+        <div class="band__plate sr">
+          <p class="band__kicker">TOP RIDERS · Travel</p>
+          <p class="band__title">
+            <span class="band__strong" data-t-band="titleStrong">Путешествуйте уверенно —</span>
+            <span class="band__light" data-t-band="titleLight">мы всё уже просчитали</span>
+          </p>
+        </div>
+        <div class="wrap band__foot">
+          <span class="band__city" data-t-band="city">Washington, D.C.</span>
+          <span class="stamp sr" aria-hidden="true">
+            <span class="stamp__top"><b>USA</b><b>✈</b></span>
+            <span class="stamp__mark js-globe"></span>
+            <span class="stamp__bottom">AIR MAIL</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="uses" id="uses" hidden>
+        <div class="wrap">
+          <p class="eyebrow sr" data-t-uses="eyebrow">Где пригодится карта</p>
+          <h2 class="uses__title sr">
+            <span class="uses__strong" data-t-uses="titleStrong">От аэропорта</span>
+            <span class="uses__light" data-t-uses="titleLight">до отеля</span>
+          </h2>
+        </div>
+        <div class="uses__track" id="usesTrack"></div>
+        <div class="wrap uses__foot">
+          <button class="btn btn--primary btn--lg sr js-start" type="button" disabled>
+            <span data-t-uses="cta">Подобрать карту</span>
+            <span class="btn__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+          </button>
         </div>
       </div>
     </section>
@@ -123,6 +156,7 @@
 
     <!-- 3. Подсчёт -->
     <section class="screen loading" data-screen="loading" hidden>
+      <img class="loading__bg" id="loadingBg" alt="" decoding="async" hidden>
       <div class="wrap loading__wrap">
         <div class="shuffle" id="shuffle" aria-hidden="true"></div>
         <p class="loading__text" role="status"><span data-t="loading">Подбираем варианты под Ваши ответы</span><span class="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></p>
@@ -157,6 +191,7 @@
         </div>
 
         <div class="cta reveal" style="--d:4">
+          <div class="cta__photo" id="ctaPhoto" hidden aria-hidden="true"><img alt="" decoding="async"></div>
           <div class="cta__globe js-globe" aria-hidden="true"></div>
           <h3 class="cta__title" data-t="ctaTitle">Обсудим детали?</h3>
           <p class="cta__text" data-t="ctaText"></p>

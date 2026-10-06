@@ -62,6 +62,7 @@ function cardState() {
 
 /* ---------- Квиз ---------- */
 function startQuiz() {
+  preloadLater();
   track(cfg.analytics?.goals?.start);
   state.step = 0;
   state.answers = {};
@@ -89,9 +90,11 @@ function renderStep(dir = 1) {
   $('#qHint').textContent = q.type === 'multi' ? (q.hint || t('multiHint')) : (q.hint || '');
   $('#qHint').hidden = !$('#qHint').textContent;
 
+  // Фото у вариантов показываем, только если они есть у всех вариантов вопроса
+  const withPhotos = q.options.every((o) => o.photo && photoOk[o.photo]);
   $('#opts').innerHTML = q.options.map((o) => `
     <button type="button" class="opt${chosen.includes(o.id) ? ' is-on' : ''}" data-id="${esc(o.id)}" aria-pressed="${chosen.includes(o.id)}">
-      ${o.photo && photoOk[o.photo] !== false ? `<span class="opt__photo"><img src="${esc(o.photo)}" alt="" loading="lazy" decoding="async" onerror="this.parentNode.remove()"></span>` : ''}
+      ${withPhotos ? `<span class="opt__photo"><img src="${esc(o.photo)}" alt="" loading="lazy" decoding="async" onerror="this.parentNode.remove()"></span>` : ''}
       <span class="opt__label">${esc(o.label)}</span>
       <span class="opt__check">${icons.check}</span>
     </button>`).join('');
@@ -317,7 +320,7 @@ function renderResults() {
     const facts = [['Срок', c.term], ['Стоимость', c.price]]
       .map(([k, v]) => `<li><span>${k}</span><b>${esc(isEmpty(v) ? t('unknown') : v)}</b></li>`).join('');
     return `
-      <article class="res-card" role="radio" aria-checked="false" tabindex="-1" data-i="${i}"
+      <article class="res-card" role="radio" aria-checked="false" tabindex="-1" data-i="${i}" style="--i:${i}"
         aria-label="${esc(label)}${c.tag ? `, ${esc(c.tag)}` : ''}${i === 0 && !it.alternative ? `, ${esc(t('recommend'))}` : ''}">
         ${badge}
         <div class="tc tc--static res-card__visual"><div class="tc__float"><div class="tc__tilt"><div class="tc__spin">
@@ -509,15 +512,42 @@ function probe(src) {
 
 function setupPhotos() {
   const ph = cfg.photos || {};
-  probe(ph.hero).then((ok) => {
-    if (!ok) return;
-    const fig = $('#heroPhoto');
-    const img = fig.querySelector('img');
-    img.src = ph.hero;
-    img.alt = ph.heroAlt || '';
-    fig.hidden = false;
-    $('#heroVisual').classList.add('has-photo');
-  });
+
+  // Слайдшоу на первом экране: первый кадр сразу, остальные подгружаются в фоне
+  const slides = [].concat(ph.hero || []);
+  (async () => {
+    let n = 0;
+    for (const src of slides) {
+      if (n) await wait(1500);
+      if (!(await probe(src))) continue;
+      const img = document.createElement('img');
+      img.src = src; img.alt = n ? '' : (ph.heroAlt || ''); img.decoding = 'async';
+      if (!n) img.className = 'is-active';
+      $('#heroSlides').appendChild(img);
+      n += 1;
+      if (n === 1) { $('#heroPhoto').hidden = false; $('#heroVisual').classList.add('has-photo'); }
+      if (n > 1) startSlideshow();
+    }
+  })();
+
+  // Фото ниже по странице грузятся лениво; если файла нет, блок не показывается
+  const lazyPhoto = (img, src, box) => {
+    if (!src) return;
+    img.onload = () => { box.hidden = false; };
+    img.onerror = () => { box.hidden = true; };
+    img.src = src;
+  };
+  $$('[data-t-band]').forEach((el) => { const v = cfg.band?.[el.dataset.tBand]; if (v) el.textContent = v; });
+  $('#band').hidden = !ph.band;
+  lazyPhoto($('#bandImg'), ph.band, $('#band'));
+  // Фото экранов подбора и результата грузим при старте квиза (в скрытых экранах lazy не сработает)
+  preloadLater = () => {
+    if (preloadLater.done) return;
+    preloadLater.done = true;
+    lazyPhoto($('#ctaPhoto img'), ph.cta, $('#ctaPhoto'));
+    lazyPhoto($('#loadingBg'), ph.loading, $('#loadingBg'));
+  };
+
   probe(ph.manager).then((ok) => {
     if (!ok) return;
     const box = $('#ctaManager');
@@ -528,8 +558,67 @@ function setupPhotos() {
     $('#managerRole').textContent = ph.managerRole || '';
     box.hidden = false;
   });
+
+  // Галерея «где пригодится карта»
+  const uses = cfg.uses;
+  if (uses?.items?.length) {
+    $$('[data-t-uses]').forEach((el) => { const v = uses[el.dataset.tUses]; if (v) el.textContent = v; });
+    $('#usesTrack').innerHTML = uses.items.map((it, i) => `
+      <figure class="use sr" style="--i:${i}">
+        <span class="use__img"><img src="${esc(it.photo)}" alt="" loading="lazy" decoding="async" data-parallax onerror="this.closest('.use').remove()"></span>
+        <figcaption><b>${esc(it.title)}</b><span>${esc(it.text)}</span></figcaption>
+      </figure>`).join('');
+    $('#uses').hidden = false;
+  }
+
   // Миниатюры в вопросах подгружаем заранее, чтобы не мигали
   cfg.questions.forEach((q) => q.options.forEach((o) => o.photo && probe(o.photo)));
+}
+
+let preloadLater = () => {};
+let slideTimer = null;
+function startSlideshow() {
+  const imgs = $$('#heroSlides img');
+  const act = Math.max(0, imgs.findIndex((im) => im.classList.contains('is-active')));
+  $('#heroDots').innerHTML = imgs.map((_, i) => `<i class="${i === act ? 'is-on' : ''}"></i>`).join('');
+  if (slideTimer) return;
+  slideTimer = setInterval(() => {
+    if (document.hidden || document.body.dataset.screen !== 'hero') return;
+    const list = $$('#heroSlides img');
+    const cur = Math.max(0, list.findIndex((im) => im.classList.contains('is-active')));
+    const next = (cur + 1) % list.length;
+    list[cur].classList.remove('is-active');
+    list[next].classList.add('is-active');
+    $$('#heroDots i').forEach((d, i) => d.classList.toggle('is-on', i === next));
+  }, 5200);
+}
+
+/* ---------- Появление при прокрутке и параллакс ---------- */
+let revealIO = null;
+function observeReveal() {
+  const els = $$('.sr:not(.is-in)');
+  if (reduced || !('IntersectionObserver' in window)) { els.forEach((el) => el.classList.add('is-in')); return; }
+  revealIO ||= new IntersectionObserver((entries) => {
+    entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); revealIO.unobserve(en.target); } });
+  }, { threshold: 0.18, rootMargin: '0px 0px -6% 0px' });
+  els.forEach((el) => revealIO.observe(el));
+}
+
+function startParallax() {
+  if (reduced) return;
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const vh = window.innerHeight;
+    $$('[data-parallax]').forEach((img) => {
+      const r = img.parentNode.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > vh) return;
+      const k = (r.top + r.height / 2 - vh / 2) / vh; // -1..1
+      img.style.transform = `translateY(${(k * -7).toFixed(2)}%) scale(1.14)`;
+    });
+  };
+  window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  update();
 }
 
 /* ---------- Инициализация ---------- */
@@ -568,9 +657,9 @@ async function init() {
   setupPhotos();
   initAnalytics(cfg.analytics);
 
-  const start = $('#startBtn');
-  start.disabled = false;
-  start.addEventListener('click', startQuiz);
+  $$('.js-start').forEach((b) => { b.disabled = false; b.addEventListener('click', startQuiz); });
+  observeReveal();
+  startParallax();
   $('#opts').addEventListener('click', onOption);
   $('#nextBtn').addEventListener('click', onNext);
   $('#backBtn').addEventListener('click', onBack);
