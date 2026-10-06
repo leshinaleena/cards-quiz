@@ -9,9 +9,10 @@ const pattern = `<svg class="tc__pattern" viewBox="0 0 320 200" preserveAspectRa
     ${Array.from({ length: 9 }, (_, i) => `<ellipse cx="300" cy="210" rx="${70 + i * 26}" ry="${46 + i * 19}"/>`).join('')}
   </g></svg>`;
 
-export function cardFaceHTML({ letter = '', edge = DEFAULT_EDGE, labels = '' } = {}) {
+// tone: wine | petrol | sand — три фирменных исполнения карты
+export function cardFaceHTML({ letter = '', edge = DEFAULT_EDGE, labels = '', tone = 'wine' } = {}) {
   return `
-    <div class="tc__face tc__front" style="--edge-a:${edge[0]};--edge-b:${edge[1]}">
+    <div class="tc__face tc__front" data-tone="${tone}" style="--edge-a:${edge[0]};--edge-b:${edge[1]}">
       ${pattern}
       <div class="tc__top">
         <span class="tc__brand">TOP RIDERS</span>
@@ -36,7 +37,7 @@ export function cardFaceHTML({ letter = '', edge = DEFAULT_EDGE, labels = '' } =
 export class TravelCard {
   constructor({ reduced }) {
     this.reduced = reduced;
-    this.state = { edge: DEFAULT_EDGE, labels: [], icons: [] };
+    this.state = { edge: DEFAULT_EDGE, labels: [], icons: [], tone: 'wine' };
     this.target = { rx: 0, ry: 0 };
     this.cur = { rx: 0, ry: 0 };
 
@@ -48,7 +49,7 @@ export class TravelCard {
         <div class="tc__tilt">
           <div class="tc__spin">
             ${cardFaceHTML()}
-            <div class="tc__face tc__back">
+            <div class="tc__face tc__back" data-tone="wine">
               <span class="tc__stripe"></span>
               <span class="tc__sign"></span>
               <span class="tc__backtext">TOP RIDERS · TRAVEL</span>
@@ -62,6 +63,7 @@ export class TravelCard {
     this.spinEl = el.querySelector('.tc__spin');
     this.iconsEl = el.querySelector('.tc__icons');
     this.labelsEl = el.querySelector('.tc__labels');
+    this.back = el.querySelector('.tc__back');
 
     if (!reduced) this.#startTilt();
   }
@@ -158,6 +160,8 @@ export class TravelCard {
 
   #render(state) {
     const edge = state.edge || DEFAULT_EDGE;
+    this.front.dataset.tone = state.tone || 'wine';
+    this.back.dataset.tone = state.tone || 'wine';
     this.front.style.setProperty('--edge-a', edge[0]);
     this.front.style.setProperty('--edge-b', edge[1]);
 

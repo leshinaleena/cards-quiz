@@ -50,3 +50,23 @@ export const logoSVG = () => { const id = `trTop${++uid}`; return `<svg viewBox=
   <path d="M0 0h112a24 24 0 0 1 24 24v46H24A24 24 0 0 1 0 46z" fill="currentColor" mask="url(#${id})"/>
   <text x="146" y="52" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="50" letter-spacing="-1" fill="currentColor">RIDERS</text>
 </svg>`; };
+
+// Знак-глобус в духе фирменного: сетка координат + траектория самолёта (цвет = currentColor)
+export const planeSolid = '<svg viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M0-11c1.1 0 1.8 1 1.8 2.4V-3l9 5.2v2.3L1.8 1.6v5.2l2.6 2v1.9L0 9.6l-4.4 1.1V8.8l2.6-2V1.6l-9 2.9V2.2l9-5.2v-5.6C-1.8-10-1.1-11 0-11z"/></svg>';
+
+export const globeSVG = () => `<svg viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true" focusable="false">
+  <ellipse cx="54" cy="56" rx="34" ry="30" stroke-width="7"/>
+  <ellipse cx="54" cy="56" rx="13" ry="30" stroke-width="5"/>
+  <path d="M22 45h64M20 56h68M22 67h64" stroke-width="5"/>
+  <path d="M10 46C10 20 52 4 86 10c10 2 16 6 19 10" stroke-width="7"/>
+  <circle cx="106" cy="21" r="5" fill="currentColor" stroke="none"/>
+  <g transform="translate(92 74) rotate(58) scale(1.35)"><path fill="currentColor" stroke="none" d="M0-11c1.1 0 1.8 1 1.8 2.4V-3l9 5.2v2.3L1.8 1.6v5.2l2.6 2v1.9L0 9.6l-4.4 1.1V8.8l2.6-2V1.6l-9 2.9V2.2l9-5.2v-5.6C-1.8-10-1.1-11 0-11z"/></g>
+</svg>`;
+
+// Круглый бейдж с вращающейся надписью и глобусом в центре
+export const globeBadgeSVG = (text) => { const id = `badge${++uid}`; return `<svg viewBox="0 0 160 160" aria-hidden="true" focusable="false">
+  <defs><path id="${id}" d="M80 80m-62 0a62 62 0 1 1 124 0a62 62 0 1 1-124 0"/></defs>
+  <circle cx="80" cy="80" r="78" class="badge-globe__bg"/>
+  <g class="badge-globe__ring"><text font-family="Montserrat, Arial, sans-serif" font-weight="600" font-size="11" fill="currentColor"><textPath href="#${id}" textLength="388" lengthAdjust="spacing">${text}</textPath></text></g>
+  <g transform="translate(44 52) scale(.6)" class="badge-globe__mark" fill="none" stroke="currentColor" stroke-linecap="round">${globeSVG().replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g>
+</svg>`; };

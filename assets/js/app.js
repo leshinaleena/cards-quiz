@@ -1,4 +1,4 @@
-import { icons, logoSVG } from './icons.js';
+import { icons, logoSVG, globeSVG, globeBadgeSVG, planeSolid } from './icons.js';
 import { TravelCard, cardFaceHTML } from './card.js';
 import { pickCards, isEmpty } from './scoring.js';
 import { initAnalytics, track, getUtm } from './analytics.js';
@@ -10,12 +10,13 @@ const pad = (n) => String(n).padStart(2, '0');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-const EDGES = [
-  ['#F6DFA9', '#B9806A'],
-  ['#F1CDB3', '#C48B6E'],
-  ['#F4D3D6', '#C17F89'],
-  ['#EFE0C0', '#B9976A'],
-  ['#F3D3BE', '#B98670'],
+// Три фирменных исполнения карты (гайд: бордо, петроль, крем) и их кант
+const TONES = [
+  { tone: 'wine', edge: ['#F3D9AE', '#B9806A'] },
+  { tone: 'petrol', edge: ['#E9CF9F', '#A9845A'] },
+  { tone: 'sand', edge: ['#AB2328', '#69131D'] },
+  { tone: 'wine', edge: ['#F1CDB3', '#C48B6E'] },
+  { tone: 'petrol', edge: ['#F3D3BE', '#B98670'] },
 ];
 
 let cfg;
@@ -45,12 +46,13 @@ function showScreen(name) {
 
 /* ---------- Состояние карты из ответов ---------- */
 function cardState() {
-  const s = { edge: null, labels: [], icons: [] };
+  const s = { edge: null, labels: [], icons: [], tone: 'wine' };
   for (const q of cfg.questions) {
     for (const id of state.answers[q.id] || []) {
       const c = q.options.find((o) => o.id === id)?.card;
       if (!c) continue;
       if (c.edge) s.edge = c.edge;
+      if (c.tone) s.tone = c.tone;
       if (c.label) s.labels.push(c.label);
       if (c.icon && !s.icons.includes(c.icon)) s.icons.push(c.icon);
     }
@@ -77,7 +79,12 @@ function renderStep(dir = 1) {
   $('#stepNow').textContent = pad(state.step + 1);
   $('#stepTotal').textContent = pad(total);
   $('#stepSr').textContent = `Вопрос ${state.step + 1} из ${total}`;
-  $('#progressBar').style.transform = `scaleX(${(state.step + 1) / total})`;
+  const route = $('#route');
+  if ($('#routeStops').children.length !== total) {
+    $('#routeStops').innerHTML = Array.from({ length: total }, () => '<i></i>').join('');
+  }
+  route.style.setProperty('--p', total > 1 ? state.step / (total - 1) : 1);
+  $$('#routeStops i').forEach((d, i) => d.classList.toggle('is-done', i <= state.step));
   $('#qTitle').textContent = q.title;
   $('#qHint').textContent = q.type === 'multi' ? (q.hint || t('multiHint')) : (q.hint || '');
   $('#qHint').hidden = !$('#qHint').textContent;
@@ -195,7 +202,7 @@ async function shuffle(keep) {
   const cards = Array.from({ length: N }, (_, i) => {
     const el = document.createElement('div');
     el.className = 'tc tc--static shuffle__card';
-    el.innerHTML = `<div class="tc__float"><div class="tc__tilt"><div class="tc__spin">${cardFaceHTML({ edge: EDGES[i] })}</div></div></div>`;
+    el.innerHTML = `<div class="tc__float"><div class="tc__tilt"><div class="tc__spin">${cardFaceHTML(TONES[i])}</div></div></div>`;
     el.style.zIndex = i;
     stage.appendChild(el);
     return el;
@@ -314,7 +321,7 @@ function renderResults() {
         aria-label="${esc(label)}${c.tag ? `, ${esc(c.tag)}` : ''}${i === 0 && !it.alternative ? `, ${esc(t('recommend'))}` : ''}">
         ${badge}
         <div class="tc tc--static res-card__visual"><div class="tc__float"><div class="tc__tilt"><div class="tc__spin">
-          ${cardFaceHTML({ letter, edge: EDGES[i] })}
+          ${cardFaceHTML({ letter, ...TONES[i] })}
         </div></div></div></div>
         <h3 class="res-card__title">${esc(label)}</h3>
         ${c.tag ? `<p class="res-card__tag">${esc(c.tag)}</p>` : ''}
@@ -543,6 +550,9 @@ function fillStatic() {
 async function init() {
   if (reduced) document.documentElement.classList.add('reduced');
   $$('.js-logo').forEach((el) => { el.innerHTML = logoSVG(); });
+  $$('.js-globe').forEach((el) => { el.innerHTML = globeSVG(); });
+  $$('.js-globe-badge').forEach((el) => { el.innerHTML = globeBadgeSVG('ПОДБОР КАРТЫ · 6 ВОПРОСОВ · 1 МИНУТА · '); });
+  $('.route__plane').innerHTML = planeSolid;
 
   card = new TravelCard({ reduced });
   card.moveTo($('#slotHero'), { animate: false });

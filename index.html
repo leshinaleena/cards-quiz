@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Подбор карты для путешествий · TOP RIDERS</title>
   <meta name="description" content="Ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта зарубежной карты для путешествий.">
-  <meta name="theme-color" content="#F7EEE8">
+  <meta name="theme-color" content="#F2EAE3">
   <meta property="og:title" content="Карта для путешествий под Ваши задачи · TOP RIDERS">
   <meta property="og:description" content="Ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта.">
   <meta property="og:type" content="website">
@@ -21,7 +21,10 @@
 
   <header class="site-header">
     <div class="wrap site-header__in">
-      <a class="logo js-logo" id="logoLink" href="https://topriders.ru" target="_blank" rel="noopener" aria-label="TOP RIDERS"></a>
+      <a class="brandmark" id="logoLink" href="https://topriders.ru" target="_blank" rel="noopener" aria-label="TOP RIDERS">
+        <span class="logo js-logo"></span>
+        <span class="brandmark__tag">Искусство планировать путешествия</span>
+      </a>
       <a class="site-header__phone js-phone" href="tel:+79259908289">
         <span class="js-phone-text">+7 925 990 8289</span>
       </a>
@@ -42,6 +45,7 @@
         </div>
 
         <div class="hero__visual" id="heroVisual">
+          <div class="badge-globe js-globe-badge" aria-hidden="true"></div>
           <figure class="hero__photo" id="heroPhoto" hidden>
             <img alt="" width="1200" height="1500" decoding="async" fetchpriority="high">
           </figure>
@@ -67,11 +71,17 @@
         <div class="hero__actions reveal" style="--d:4">
           <button class="btn btn--primary btn--lg" id="startBtn" type="button" disabled>
             <span data-t="heroCta">Подобрать карту</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            <span class="btn__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
           </button>
           <p class="config-error" id="configError" hidden>
             Не удалось загрузить config.json. Откройте сайт через веб-сервер (см. README), а не как файл с диска.
           </p>
+        </div>
+      </div>
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee__track">
+          <span>Париж <i>48°51′N</i></span><span>Токио <i>35°41′N</i></span><span>Нью-Йорк <i>40°42′N</i></span><span>Дубай <i>25°12′N</i></span><span>Стамбул <i>41°00′N</i></span><span>Бали <i>8°20′S</i></span><span>Барселона <i>41°23′N</i></span><span>Сеул <i>37°33′N</i></span>
+          <span>Париж <i>48°51′N</i></span><span>Токио <i>35°41′N</i></span><span>Нью-Йорк <i>40°42′N</i></span><span>Дубай <i>25°12′N</i></span><span>Стамбул <i>41°00′N</i></span><span>Бали <i>8°20′S</i></span><span>Барселона <i>41°23′N</i></span><span>Сеул <i>37°33′N</i></span>
         </div>
       </div>
     </section>
@@ -83,7 +93,11 @@
           <div class="quiz__meta">
             <p class="quiz__step" aria-hidden="true"><span class="quiz__now" id="stepNow">01</span><span class="quiz__total"> / <span id="stepTotal">06</span></span></p>
             <p class="sr-only" id="stepSr" aria-live="polite"></p>
-            <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+            <div class="route" id="route" aria-hidden="true">
+              <span class="route__line"><span class="route__fill"></span></span>
+              <span class="route__stops" id="routeStops"></span>
+              <span class="route__plane"></span>
+            </div>
           </div>
           <div class="card-slot card-slot--corner" id="slotCorner"></div>
         </div>
@@ -101,7 +115,7 @@
           </button>
           <button class="btn btn--primary" id="nextBtn" type="button" hidden>
             <span data-t="next">Далее</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            <span class="btn__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
           </button>
         </div>
       </div>
@@ -143,6 +157,7 @@
         </div>
 
         <div class="cta reveal" style="--d:4">
+          <div class="cta__globe js-globe" aria-hidden="true"></div>
           <h3 class="cta__title" data-t="ctaTitle">Обсудим детали?</h3>
           <p class="cta__text" data-t="ctaText"></p>
           <div class="cta__manager" id="ctaManager" hidden>
@@ -153,7 +168,7 @@
           <div class="cta__row">
             <a class="btn btn--primary btn--xl js-tg" href="https://t.me/TopRiders_Travel" target="_blank" rel="noopener">
               <span data-t="ctaButton">Связаться с менеджером</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5 3.5 10.6l6.4 2.3 2.3 6.6 8.3-16z"/><path d="m9.9 12.9 4.6-4.6"/></svg>
+              <span class="btn__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5 3.5 10.6l6.4 2.3 2.3 6.6 8.3-16z"/><path d="m9.9 12.9 4.6-4.6"/></svg></span>
             </a>
             <a class="cta__phone js-phone" href="tel:+79259908289">
               <span class="cta__phone-label" data-t="ctaPhoneLabel">или позвоните</span>
@@ -175,7 +190,7 @@
   </main>
 
   <footer class="site-footer">
-    <div class="wrap"><p data-t="footer">TOP RIDERS · подбор зарубежных карт для путешествий</p></div>
+    <div class="wrap site-footer__in"><span class="site-footer__globe js-globe" aria-hidden="true"></span><p data-t="footer">TOP RIDERS · подбор зарубежных карт для путешествий</p></div>
   </footer>
 
   <noscript><p class="noscript">Для подбора карты включите JavaScript или напишите нам: <a href="https://t.me/TopRiders_Travel">t.me/TopRiders_Travel</a></p></noscript>
