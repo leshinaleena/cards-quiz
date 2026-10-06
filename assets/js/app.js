@@ -1,7 +1,7 @@
-import { icons, logoSVG, planeSolid, destinations } from './icons.js?v=20261006';
-import { TravelCard, cardFaceHTML } from './card.js?v=20261006';
-import { pickCards, isEmpty } from './scoring.js?v=20261006';
-import { initAnalytics, track, getUtm } from './analytics.js?v=20261006';
+import { icons, logoSVG, planeSolid, destinations } from './icons.js?v=20261006b';
+import { TravelCard, cardFaceHTML } from './card.js?v=20261006b';
+import { pickCards, isEmpty } from './scoring.js?v=20261006b';
+import { initAnalytics, track, getUtm } from './analytics.js?v=20261006b';
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = (s, r = document) => r.querySelector(s);
@@ -26,7 +26,7 @@ const state = { step: 0, answers: {}, result: null, selected: 0, busy: false };
 
 /* ---------- Загрузка конфига ---------- */
 async function loadConfig() {
-  const res = await fetch('config.json?v=20261006', { cache: 'no-cache' });
+  const res = await fetch('config.json?v=20261006b', { cache: 'no-cache' });
   if (!res.ok) throw new Error(`config.json: ${res.status}`);
   return res.json();
 }
@@ -501,7 +501,7 @@ function leadPayload(form) {
   const res = state.result;
   if (res?.status === 'ok') {
     const it = res.items[state.selected];
-    data['Вариант (код)'] = `«${it.card.tag}» — ${it.card.name || ''} (код ${it.card.id})`;
+    data['Вариант (код)'] = `${refCode()} · «${it.card.tag}» — ${it.card.name || ''}`;
     data['Фишка варианта'] = it.card.tag || '';
     data['Также предложены'] = res.items.filter((_, i) => i !== state.selected).map((x) => x.card.id).join(', ');
   } else {
@@ -580,6 +580,13 @@ function taskText() {
     .join(' ');
 }
 
+// «TR-13-03-08»: первым идёт выбранный вариант, дальше остальные показанные
+function refCode() {
+  const res = state.result;
+  const ids = [res.items[state.selected], ...res.items.filter((_, i) => i !== state.selected)].map((x) => x.card.id);
+  return `TR-${ids.join('-')}`;
+}
+
 function buildSummary() {
   const c = cfg.clipboard || {};
   const res = state.result;
@@ -589,6 +596,8 @@ function buildSummary() {
     lines.push(c.greeting.replace('{card}', it.card.name || it.card.tag), '', taskText());
     const others = res.items.filter((_, i) => i !== state.selected).map((x) => `«${x.card.name || x.card.tag}»`);
     if (others.length) lines.push('', c.othersTitle.replace('{list}', joinAnd(others)));
+    // Подсказка менеджеру: коды карт (выбранная первой), расшифровка есть только у менеджера
+    if (c.refLine) lines.push('', c.refLine.replace('{ref}', refCode()));
   } else {
     lines.push(c.noneGreeting, '', taskText());
   }

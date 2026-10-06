@@ -108,7 +108,8 @@
     "greeting": "Здравствуйте! На сайте TOP RIDERS мне подобрали карту «{card}». Хочу узнать подробности и оформить.",
     "othersTitle": "Ещё мне показали {list} — их тоже интересно сравнить.",
     "noneGreeting": "Здравствуйте! На сайте TOP RIDERS готовый вариант для меня не нашёлся. Помогите, пожалуйста, подобрать карту.",
-    "utmTitle": "Метка рассылки"
+    "utmTitle": "Метка рассылки",
+    "refLine": "Номер подбора: {ref}"
   },
   "scoring": {
     "minScore": 1,
@@ -672,7 +673,7 @@
       "foreignPhone": false,
       "passportRF": false,
       "foreignPassport": "complex",
-      "name": "Кредитная VISA, Кыргызстан"
+      "name": "Кредитная VISA"
     },
     {
       "id": "03",
@@ -722,7 +723,7 @@
       "foreignPhone": false,
       "passportRF": true,
       "foreignPassport": "yes",
-      "name": "VISA или Mastercard банка СНГ"
+      "name": "VISA или Mastercard с входящим SWIFT"
     },
     {
       "id": "04",
@@ -776,7 +777,7 @@
       "foreignPhone": false,
       "passportRF": true,
       "foreignPassport": "complex",
-      "name": "VISA или Mastercard с кредитным БИН, Кыргызстан"
+      "name": "VISA или Mastercard с кредитным БИН"
     },
     {
       "id": "05",
@@ -823,7 +824,7 @@
       "foreignPhone": false,
       "passportRF": true,
       "foreignPassport": "yes",
-      "name": "VISA или Mastercard с переводами Visa Direct, Кыргызстан"
+      "name": "VISA или Mastercard с переводами Visa Direct"
     },
     {
       "id": "06",
@@ -874,7 +875,7 @@
       "foreignPhone": false,
       "passportRF": true,
       "foreignPassport": "complex",
-      "name": "Премиальная VISA без доверенности, Кыргызстан"
+      "name": "Премиальная VISA без доверенности"
     },
     {
       "id": "07",
@@ -921,7 +922,7 @@
       "foreignPhone": false,
       "passportRF": false,
       "foreignPassport": "no",
-      "name": "Неименная VISA, Таджикистан"
+      "name": "Неименная VISA с выводом на карты МИР"
     },
     {
       "id": "08",
@@ -971,7 +972,7 @@
       "foreignPhone": false,
       "passportRF": false,
       "foreignPassport": "yes",
-      "name": "Мультивалютная карта банка Грузии"
+      "name": "Мультивалютная карта на пять валют"
     },
     {
       "id": "09",
@@ -1119,7 +1120,7 @@
       "foreignPhone": false,
       "passportRF": null,
       "foreignPassport": "yes",
-      "name": "Пластиковая Mastercard, Армения"
+      "name": "Пластиковая Mastercard с Apple Pay"
     },
     {
       "id": "12",
@@ -1166,7 +1167,7 @@
       "foreignPhone": false,
       "passportRF": null,
       "foreignPassport": "yes",
-      "name": "Виртуальная Mastercard, Армения"
+      "name": "Виртуальная Mastercard"
     },
     {
       "id": "13",
@@ -1216,7 +1217,7 @@
       "foreignPhone": false,
       "passportRF": false,
       "foreignPassport": "yes",
-      "name": "Мультивалютная виртуальная VISA, Казахстан"
+      "name": "Мультивалютная виртуальная VISA"
     },
     {
       "id": "14",
@@ -1266,7 +1267,7 @@
       "foreignPhone": false,
       "passportRF": false,
       "foreignPassport": "yes",
-      "name": "VISA с входящим и исходящим SWIFT, Армения"
+      "name": "VISA с входящим и исходящим SWIFT"
     },
     {
       "id": "15",
@@ -1319,7 +1320,7 @@
       "foreignPhone": false,
       "passportRF": false,
       "foreignPassport": "complex",
-      "name": "VISA с выпуском за 5 рабочих дней, Таджикистан"
+      "name": "VISA с выпуском за 5 рабочих дней"
     },
     {
       "id": "16",
@@ -1366,7 +1367,7 @@
       "foreignPhone": false,
       "passportRF": false,
       "foreignPassport": "yes",
-      "name": "Неименная VISA банка СНГ"
+      "name": "Неименная VISA с недорогим обслуживанием"
     },
     {
       "id": "17",
