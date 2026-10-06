@@ -392,7 +392,15 @@ function renderWhy() {
   if (reasons.length) rows.push(`<li><b>${esc(t('why'))}</b><span>${reasons.map(esc).join(' · ')}</span></li>`);
   adv.forEach((a) => rows.push(`<li><b>${esc(a.split(':')[0])}</b>${a.includes(':') ? `<span>${esc(a.split(':').slice(1).join(':').trim())}</span>` : ''}</li>`));
   // Сильные стороны карты из конфига (факты со страниц продукта), всего не больше 4 пунктов
-  (it.card.strengths || []).filter((x) => !adv.some((a) => a.includes(x)))
+  // Не повторяем уже сказанное: срок/цену из преимуществ и Apple Pay из совпадений
+  const said = [...reasons, ...adv].join(' ').toLowerCase();
+  const dup = (x) => {
+    const l = x.toLowerCase();
+    return adv.some((a) => a.includes(x))
+      || (it.card.term && l.includes(it.card.term.toLowerCase()) && said.includes(it.card.term.toLowerCase()))
+      || (l.includes('apple pay') && said.includes('apple pay'));
+  };
+  (it.card.strengths || []).filter((x) => !dup(x))
     .slice(0, Math.max(0, 4 - rows.length)).forEach((x) => rows.push(`<li><b>${esc(x)}</b></li>`));
   if (!rows.length) rows.push(`<li><b>${esc(t('whyFallback'))}</b></li>`);
   $('#whyList').innerHTML = rows.join('');
@@ -498,24 +506,35 @@ function buildSummary() {
   return lines.join('\n');
 }
 
-function copyText(text) {
+// Копирование, надёжное и для iOS Safari: сначала Clipboard API (вызов в рамках тапа),
+// затем запасной путь через редактируемое поле с явным выделением (так требует iOS).
+function legacyCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.contentEditable = 'true';
+  ta.readOnly = false;
+  ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;border:0;padding:0';
+  document.body.appendChild(ta);
   let ok = false;
   try {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.setAttribute('readonly', '');
-    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none';
-    document.body.appendChild(ta);
-    ta.select();
+    const range = document.createRange();
+    range.selectNodeContents(ta);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
     ta.setSelectionRange(0, text.length);
     ok = document.execCommand('copy');
-    ta.remove();
-  } catch (_) { /* старые браузеры */ }
-  if (navigator.clipboard?.writeText) {
-    const p = navigator.clipboard.writeText(text).then(() => true, () => ok);
-    return ok ? Promise.resolve(true) : p;
+    sel.removeAllRanges();
+  } catch (_) { ok = false; }
+  ta.remove();
+  return ok;
+}
+
+function copyText(text) {
+  if (navigator.clipboard?.writeText && window.isSecureContext) {
+    return navigator.clipboard.writeText(text).then(() => true, () => legacyCopy(text));
   }
-  return Promise.resolve(ok);
+  return Promise.resolve(legacyCopy(text));
 }
 
 function onContact(e) {
@@ -525,6 +544,12 @@ function onContact(e) {
   const hint = box.querySelector('.js-hint');
   copyText(text).then((ok) => {
     hint.querySelector('.js-hint-text').textContent = ok ? t('ctaCopied') : t('ctaCopyFailed');
+    // Если браузер не дал скопировать — показываем текст, чтобы его можно было выделить вручную
+    let manual = hint.querySelector('.cta__manual');
+    if (!ok) {
+      if (!manual) { manual = document.createElement('textarea'); manual.className = 'cta__manual'; manual.readOnly = true; manual.rows = 6; hint.appendChild(manual); }
+      manual.value = text;
+    } else if (manual) manual.remove();
     hint.hidden = false;
     hint.classList.remove('is-shown');
     void hint.offsetWidth;

@@ -647,3 +647,7 @@ a { color: inherit; }
 @media (max-width: 639px) { .how__foot .btn { width: 100%; } }
 /* На белом фоне блик в 3D-слое даёт светлую рамку вокруг тасуемых карт */
 .shuffle__card .tc__glare { display: none; }
+
+/* Ручное копирование, если браузер запретил доступ к буферу */
+.cta__hint { display: grid !important; grid-template-columns: 20px 1fr; column-gap: 10px; }
+.cta__manual { grid-column: 1 / -1; margin-top: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--ink); font: 13px/1.45 var(--f-body); resize: vertical; }
