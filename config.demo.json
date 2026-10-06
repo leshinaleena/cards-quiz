@@ -1,0 +1,37 @@
+{
+  "_readme": "Демо-данные только для предпросмотра: открываются по ссылке ?demo=1 и заменяют блок cards из config.json. На рабочем сайте не используются. Значения вымышленные.",
+  "cards": [
+    {
+      "id": "A", "label": "Вариант A", "tag": "Самый быстрый", "active": true, "priority": 2,
+      "applePay": false, "googlePay": true, "booking": false, "onlinePayments": true,
+      "currencies": ["USD"], "remote": true,
+      "term": "от 1 дня", "termDays": 3, "price": "от 25 000 ₽", "priceValue": 25000,
+      "regions": ["Европа", "Азия", "США и Канада"],
+      "weights": { "purpose": { "travel": 1, "services": 3, "transfers": 0, "all": 1 } }
+    },
+    {
+      "id": "B", "label": "Вариант B", "tag": "Оптимальный", "active": true, "priority": 3,
+      "applePay": true, "googlePay": true, "booking": true, "onlinePayments": true,
+      "currencies": ["USD", "EUR"], "remote": true,
+      "term": "около 2 недель", "termDays": 14, "price": "от 18 000 ₽", "priceValue": 18000,
+      "regions": ["Европа", "Азия"],
+      "weights": { "purpose": { "travel": 3, "services": 2, "transfers": 1, "all": 2 } }
+    },
+    {
+      "id": "C", "label": "Вариант C", "tag": "Максимум возможностей", "active": true, "priority": 1,
+      "applePay": true, "googlePay": true, "booking": true, "onlinePayments": true,
+      "currencies": ["USD", "EUR", "GBP"], "remote": false,
+      "term": "1–2 месяца", "termDays": 60, "price": "от 21 000 ₽", "priceValue": 21000,
+      "regions": ["Европа", "Азия", "США и Канада"],
+      "weights": { "purpose": { "travel": 2, "services": 1, "transfers": 3, "all": 3 } }
+    },
+    {
+      "id": "D", "label": "Вариант D", "tag": "Для переводов", "active": true, "priority": 0,
+      "applePay": false, "googlePay": false, "booking": false, "onlinePayments": true,
+      "currencies": ["USD", "EUR"], "remote": true,
+      "term": "3–4 недели", "termDays": 28, "price": "от 15 000 ₽", "priceValue": 15000,
+      "regions": ["Азия"],
+      "weights": { "purpose": { "travel": 0, "services": 1, "transfers": 3, "all": 1 } }
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+  "_readme": "Конфиг квиза TOP RIDERS. Меняйте тексты, вопросы и карты здесь, код трогать не нужно. null или \"___\" означает «не заполнено»: такой параметр не даёт баллов и показывается в таблице как «уточняется». Подробности в README.md.",
+
+  "brand": {
+    "name": "TOP RIDERS",
+    "telegramManager": "https://t.me/TopRiders_Travel",
+    "phone": "+7 925 990 8289",
+    "phoneHref": "tel:+79259908289",
+    "channel": "https://t.me/topriders_usa",
+    "channelLabel": "Telegram-канал TOP RIDERS",
+    "site": "https://topriders.ru",
+    "siteLabel": "topriders.ru"
+  },
+
+  "analytics": {
+    "metrikaId": "",
+    "goals": {
+      "start": "quiz_start",
+      "step": "quiz_step",
+      "result": "quiz_result",
+      "nonstandard": "quiz_nonstandard",
+      "contact": "contact_manager",
+      "phone": "contact_phone"
+    }
+  },
+
+  "texts": {
+    "heroEyebrow": "Подбор зарубежной карты",
+    "heroTitleStrong": "Карта для путешествий",
+    "heroTitleLight": "под Ваши задачи",
+    "heroSubtitle": "Ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта. Это займёт меньше минуты.",
+    "heroCta": "Подобрать карту",
+    "back": "Назад",
+    "next": "Далее",
+    "multiHint": "Можно выбрать несколько",
+    "loading": "Подбираем варианты под Ваши ответы",
+    "resultEyebrow": "Результат подбора",
+    "resultTitle": "Вам подходят эти варианты",
+    "resultSubtitle": "Нажмите на вариант, чтобы обсудить с менеджером именно его.",
+    "recommend": "рекомендуем",
+    "alternative": "Ближайшая альтернатива",
+    "selected": "Выбран",
+    "select": "Выбрать",
+    "compareTitle": "Сравнение вариантов",
+    "compareDiff": "отличается",
+    "unknown": "уточняется",
+    "disclaimer": "Точные условия зависят от банка и подтверждаются менеджером.",
+    "nonstandardTitle": "Ваша задача нестандартная",
+    "nonstandardText": "Менеджер подберёт решение лично. Напишите нам, и мы обсудим варианты под Ваши ответы.",
+    "ctaTitle": "Обсудим детали?",
+    "ctaText": "Менеджер ответит в Telegram и подтвердит актуальные условия.",
+    "ctaButton": "Связаться с менеджером",
+    "ctaCopied": "Ваши ответы скопированы, вставьте их в чат, чтобы менеджер сразу понял задачу",
+    "ctaCopyFailed": "Не получилось скопировать автоматически. Просто опишите задачу в чате, менеджер поможет.",
+    "ctaPhoneLabel": "или позвоните",
+    "restart": "Пройти заново",
+    "footer": "TOP RIDERS · подбор зарубежных карт для путешествий"
+  },
+
+  "clipboard": {
+    "greeting": "Здравствуйте! Я прошёл(а) подбор карты на сайте TOP RIDERS.",
+    "variantTitle": "Выбранный вариант",
+    "variantNone": "Автоматически подходящий вариант не найден, нужен индивидуальный подбор",
+    "answersTitle": "Мои ответы",
+    "utmTitle": "Источник"
+  },
+
+  "scoring": {
+    "minScore": 1,
+    "maxResults": 3,
+    "relabelResults": true
+  },
+
+  "questions": [
+    {
+      "id": "purpose",
+      "title": "Для чего Вам карта?",
+      "short": "Для чего карта",
+      "type": "single",
+      "options": [
+        { "id": "travel",    "label": "Путешествия",                              "card": { "edge": ["#F1CDB3", "#C48B6E"] } },
+        { "id": "services",  "label": "Оплата зарубежных сервисов и подписок",    "card": { "edge": ["#EFE0C0", "#B9976A"], "icon": "apps" } },
+        { "id": "transfers", "label": "Получение переводов из-за рубежа",         "card": { "edge": ["#F4D3D6", "#C17F89"] } },
+        { "id": "all",       "label": "Всё сразу",                                "card": { "edge": ["#F6DFA9", "#B9806A"] } }
+      ]
+    },
+    {
+      "id": "region",
+      "title": "В какие страны планируете поездки?",
+      "short": "Страны поездок",
+      "type": "single",
+      "options": [
+        { "id": "europe", "label": "Европа",           "points": 2, "match": { "field": "regions", "includes": "Европа" },        "card": { "label": "EUROPE" } },
+        { "id": "asia",   "label": "Азия",             "points": 2, "match": { "field": "regions", "includes": "Азия" },          "card": { "label": "ASIA" } },
+        { "id": "usa",    "label": "США и Канада",     "points": 2, "match": { "field": "regions", "includes": "США и Канада" },  "card": { "label": "USA · CANADA" } },
+        { "id": "mixed",  "label": "Разные страны",    "points": 2, "match": { "field": "regions", "minLength": 2 },             "card": { "label": "WORLDWIDE" } }
+      ]
+    },
+    {
+      "id": "features",
+      "title": "Что для Вас важно?",
+      "short": "Важно",
+      "type": "multi",
+      "options": [
+        { "id": "pay",     "label": "Apple Pay и Google Pay", "points": 2, "match": { "any": [ { "field": "applePay", "equals": true }, { "field": "googlePay", "equals": true } ] }, "card": { "icon": "pay" } },
+        { "id": "booking", "label": "Бронь авто и отелей",    "points": 2, "match": { "field": "booking", "equals": true },        "card": { "icon": "booking" } },
+        { "id": "apps",    "label": "Оплата в приложениях",   "points": 2, "match": { "field": "onlinePayments", "equals": true }, "card": { "icon": "apps" } },
+        { "id": "multi",   "label": "Мультивалютный счёт",    "points": 2, "match": { "field": "currencies", "minLength": 2 },     "card": { "icon": "currency" } }
+      ]
+    },
+    {
+      "id": "format",
+      "title": "Как Вам удобнее оформить?",
+      "short": "Формат оформления",
+      "type": "single",
+      "options": [
+        { "id": "remote", "label": "Полностью дистанционно",          "points": 2, "required": true, "match": { "field": "remote", "equals": true }, "card": { "label": "REMOTE", "icon": "remote" } },
+        { "id": "visit",  "label": "Готов(а) съездить в страну банка", "points": 1, "card": { "label": "IN PERSON", "icon": "plane" } },
+        { "id": "any",    "label": "Не важно" }
+      ]
+    },
+    {
+      "id": "budget",
+      "title": "Какой бюджет на оформление комфортен?",
+      "short": "Бюджет",
+      "type": "single",
+      "options": [
+        { "id": "low",  "label": "До 20 000 ₽",        "points": 2, "match": { "field": "priceValue", "lte": 20000 } },
+        { "id": "mid",  "label": "20 000 – 35 000 ₽",  "points": 2, "match": { "field": "priceValue", "lte": 35000 } },
+        { "id": "high", "label": "Более 35 000 ₽",     "points": 1, "match": { "field": "priceValue", "gte": 0 } },
+        { "id": "any",  "label": "Пока не знаю" }
+      ]
+    },
+    {
+      "id": "urgency",
+      "title": "Как срочно нужна карта?",
+      "short": "Срочность",
+      "type": "single",
+      "options": [
+        { "id": "asap",  "label": "Как можно скорее",  "points": 2, "match": { "field": "termDays", "lte": 14 }, "card": { "label": "EXPRESS", "icon": "fast" } },
+        { "id": "month", "label": "В течение месяца",  "points": 1, "match": { "field": "termDays", "lte": 31 } },
+        { "id": "later", "label": "Не спешу" }
+      ]
+    }
+  ],
+
+  "compare": [
+    { "label": "Apple Pay / Google Pay", "type": "flags", "fields": { "applePay": "Apple Pay", "googlePay": "Google Pay" } },
+    { "label": "Бронь авто и отелей",     "type": "bool",  "field": "booking" },
+    { "label": "Валюты счёта",            "type": "list",  "field": "currencies" },
+    { "label": "Формат оформления",       "type": "bool",  "field": "remote", "yes": "Дистанционно", "no": "Визит в страну банка" },
+    { "label": "Ориентировочный срок",    "type": "text",  "field": "term" },
+    { "label": "Стоимость",               "type": "text",  "field": "price" }
+  ],
+
+  "cards": [
+    {
+      "id": "A",
+      "label": "Вариант A",
+      "tag": "Самый быстрый",
+      "active": true,
+      "priority": 0,
+      "applePay": null,
+      "googlePay": null,
+      "booking": null,
+      "onlinePayments": null,
+      "currencies": [],
+      "remote": null,
+      "term": "___",
+      "termDays": null,
+      "price": "___",
+      "priceValue": null,
+      "regions": [],
+      "weights": { "purpose": { "travel": 0, "services": 0, "transfers": 0, "all": 0 } }
+    },
+    {
+      "id": "B",
+      "label": "Вариант B",
+      "tag": "Оптимальный",
+      "active": true,
+      "priority": 0,
+      "applePay": null,
+      "googlePay": null,
+      "booking": null,
+      "onlinePayments": null,
+      "currencies": [],
+      "remote": null,
+      "term": "___",
+      "termDays": null,
+      "price": "___",
+      "priceValue": null,
+      "regions": [],
+      "weights": { "purpose": { "travel": 0, "services": 0, "transfers": 0, "all": 0 } }
+    },
+    {
+      "id": "C",
+      "label": "Вариант C",
+      "tag": "Максимум возможностей",
+      "active": true,
+      "priority": 0,
+      "applePay": null,
+      "googlePay": null,
+      "booking": null,
+      "onlinePayments": null,
+      "currencies": [],
+      "remote": null,
+      "term": "___",
+      "termDays": null,
+      "price": "___",
+      "priceValue": null,
+      "regions": [],
+      "weights": { "purpose": { "travel": 0, "services": 0, "transfers": 0, "all": 0 } }
+    }
+  ]
+}
