@@ -1,4 +1,4 @@
-import { icons, chipSVG } from './icons.js';
+import { icons, chipSVG } from './icons.js?v=20261006';
 
 const DEFAULT_EDGE = ['#F3D3BE', '#B98670'];
 const ICON_ORDER = ['pay', 'booking', 'apps', 'currency', 'remote', 'plane', 'fast'];

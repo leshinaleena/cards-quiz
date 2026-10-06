@@ -1,7 +1,7 @@
-import { icons, logoSVG, planeSolid, destinations } from './icons.js';
-import { TravelCard, cardFaceHTML } from './card.js';
-import { pickCards, isEmpty } from './scoring.js';
-import { initAnalytics, track, getUtm } from './analytics.js';
+import { icons, logoSVG, planeSolid, destinations } from './icons.js?v=20261006';
+import { TravelCard, cardFaceHTML } from './card.js?v=20261006';
+import { pickCards, isEmpty } from './scoring.js?v=20261006';
+import { initAnalytics, track, getUtm } from './analytics.js?v=20261006';
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = (s, r = document) => r.querySelector(s);
@@ -26,7 +26,7 @@ const state = { step: 0, answers: {}, result: null, selected: 0, busy: false };
 
 /* ---------- Загрузка конфига ---------- */
 async function loadConfig() {
-  const res = await fetch('config.json', { cache: 'no-cache' });
+  const res = await fetch('config.json?v=20261006', { cache: 'no-cache' });
   if (!res.ok) throw new Error(`config.json: ${res.status}`);
   return res.json();
 }
@@ -594,7 +594,8 @@ function buildSummary() {
   }
   const u = Object.values(utm).filter(Boolean);
   if (u.length) lines.push('', `${c.utmTitle}: ${u.join(' / ')}`);
-  return lines.join('\n');
+  // Незаполненные подстановки никогда не уходят клиенту в виде «{card}»
+  return lines.join('\n').replace(/«?\{\w+\}»?\s?/g, '').replace(/\n{3,}/g, '\n\n').trim();
 }
 
 // Ссылка в Telegram с готовым текстом: t.me/<username>?text=… открывает чат с менеджером,

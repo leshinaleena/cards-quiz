@@ -27,6 +27,8 @@ tests/smoke.mjs          автопроверка: проходит квиз н�
 - Локально: `python3 -m http.server 8080` → http://localhost:8080
 - GitHub Pages: Settings → Pages → Build and deployment → Source: «Deploy from a branch» → ветка `claude/top-riders-card-quiz-ppjbz1`, папка `/ (root)` → Save. Через 1–2 минуты сайт будет по адресу https://leshinaleena.github.io/cards-quiz/
 - Любой другой статический хостинг: загрузите папку целиком, сборка не нужна.
+- После правок в `assets/js` или `assets/css` поменяйте метку `?v=…` во всех ссылках (`index.html`, импорты в `app.js` и `card.js`, загрузка `config.json`), иначе браузер может взять старый скрипт из кэша вместе с новым конфигом:
+  `grep -rl '?v=20261006' index.html assets/js | xargs sed -i 's/?v=20261006/?v=НОВАЯ_МЕТКА/g'`
 
 Полезные параметры ссылки:
 - `?debug` — писать отправляемые цели Метрики в консоль браузера.
