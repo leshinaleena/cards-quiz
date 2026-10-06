@@ -27,14 +27,7 @@ const state = { step: 0, answers: {}, result: null, selected: 0, busy: false };
 async function loadConfig() {
   const res = await fetch('config.json', { cache: 'no-cache' });
   if (!res.ok) throw new Error(`config.json: ${res.status}`);
-  const conf = await res.json();
-  if (new URLSearchParams(location.search).has('demo')) {
-    try {
-      const demo = await (await fetch('config.demo.json', { cache: 'no-cache' })).json();
-      if (Array.isArray(demo.cards)) conf.cards = demo.cards;
-    } catch (_) { /* демо необязательно */ }
-  }
-  return conf;
+  return res.json();
 }
 
 const t = (key) => cfg?.texts?.[key] ?? '';
@@ -91,6 +84,7 @@ function renderStep(dir = 1) {
 
   $('#opts').innerHTML = q.options.map((o) => `
     <button type="button" class="opt${chosen.includes(o.id) ? ' is-on' : ''}" data-id="${esc(o.id)}" aria-pressed="${chosen.includes(o.id)}">
+      ${o.photo && photoOk[o.photo] !== false ? `<span class="opt__photo"><img src="${esc(o.photo)}" alt="" loading="lazy" decoding="async" onerror="this.parentNode.remove()"></span>` : ''}
       <span class="opt__label">${esc(o.label)}</span>
       <span class="opt__check">${icons.check}</span>
     </button>`).join('');
@@ -493,6 +487,44 @@ function restart() {
   track(cfg.analytics?.goals?.start, { restart: true });
 }
 
+/* ---------- Фото ---------- */
+// Фото необязательны: если файла нет, блок не показывается
+const photoOk = {};
+function probe(src) {
+  return new Promise((resolve) => {
+    if (!src) return resolve(false);
+    const img = new Image();
+    img.onload = () => { photoOk[src] = true; resolve(true); };
+    img.onerror = () => { photoOk[src] = false; resolve(false); };
+    img.src = src;
+  });
+}
+
+function setupPhotos() {
+  const ph = cfg.photos || {};
+  probe(ph.hero).then((ok) => {
+    if (!ok) return;
+    const fig = $('#heroPhoto');
+    const img = fig.querySelector('img');
+    img.src = ph.hero;
+    img.alt = ph.heroAlt || '';
+    fig.hidden = false;
+    $('#heroVisual').classList.add('has-photo');
+  });
+  probe(ph.manager).then((ok) => {
+    if (!ok) return;
+    const box = $('#ctaManager');
+    box.querySelector('img').src = ph.manager;
+    box.querySelector('img').alt = ph.managerName || '';
+    $('#managerName').textContent = ph.managerName || '';
+    $('#managerName').hidden = !ph.managerName;
+    $('#managerRole').textContent = ph.managerRole || '';
+    box.hidden = false;
+  });
+  // Миниатюры в вопросах подгружаем заранее, чтобы не мигали
+  cfg.questions.forEach((q) => q.options.forEach((o) => o.photo && probe(o.photo)));
+}
+
 /* ---------- Инициализация ---------- */
 function fillStatic() {
   $$('[data-t]').forEach((el) => { const v = t(el.dataset.t); if (v) el.textContent = v; });
@@ -523,6 +555,7 @@ async function init() {
     return;
   }
   fillStatic();
+  setupPhotos();
   initAnalytics(cfg.analytics);
 
   const start = $('#startBtn');

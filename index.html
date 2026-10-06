@@ -41,7 +41,11 @@
           <p class="hero__sub reveal" style="--d:3" data-t="heroSubtitle">Ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта. Это займёт меньше минуты.</p>
         </div>
 
-        <div class="hero__visual" aria-hidden="true">
+        <div class="hero__visual" id="heroVisual">
+          <figure class="hero__photo" id="heroPhoto" hidden>
+            <img alt="" width="1200" height="1500" decoding="async" fetchpriority="high">
+          </figure>
+          <div class="hero__cardwrap" aria-hidden="true">
           <svg class="orbit orbit--back" viewBox="0 0 400 260">
             <g transform="rotate(-12 200 130)">
               <ellipse class="orbit__line orbit__line--rose" cx="200" cy="130" rx="178" ry="96" pathLength="1"/>
@@ -57,6 +61,7 @@
               <path class="orbit__line orbit__line--front" d="M4 130a196 70 0 0 0 392 0" pathLength="1"/>
             </g>
           </svg>
+          </div>
         </div>
 
         <div class="hero__actions reveal" style="--d:4">
@@ -140,6 +145,10 @@
         <div class="cta reveal" style="--d:4">
           <h3 class="cta__title" data-t="ctaTitle">Обсудим детали?</h3>
           <p class="cta__text" data-t="ctaText"></p>
+          <div class="cta__manager" id="ctaManager" hidden>
+            <img alt="" width="128" height="128" loading="lazy" decoding="async">
+            <p><b id="managerName"></b><span id="managerRole"></span></p>
+          </div>
           <p class="cta__choice" id="ctaChoice" hidden></p>
           <div class="cta__row">
             <a class="btn btn--primary btn--xl js-tg" href="https://t.me/TopRiders_Travel" target="_blank" rel="noopener">

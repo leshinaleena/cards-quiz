@@ -1,6 +1,5 @@
 {
-  "_readme": "Конфиг квиза TOP RIDERS. Меняйте тексты, вопросы и карты здесь, код трогать не нужно. null или \"___\" означает «не заполнено»: такой параметр не даёт баллов и показывается в таблице как «уточняется». Подробности в README.md.",
-
+  "_readme": "Конфиг квиза TOP RIDERS. Меняйте тексты, вопросы и карты здесь, код трогать не нужно. null или \"___\" означает «не заполнено»: такой параметр не даёт баллов и показывается в таблице как «уточняется». Подробности в README.md. Коды карт (01–10) расшифрованы у менеджера; названия банков в этот файл не пишем: он публично доступен на сайте.",
   "brand": {
     "name": "TOP RIDERS",
     "telegramManager": "https://t.me/TopRiders_Travel",
@@ -11,7 +10,14 @@
     "site": "https://topriders.ru",
     "siteLabel": "topriders.ru"
   },
-
+  "photos": {
+    "_readme": "Фото кладутся в папку assets/photos/ с этими именами. Если файла нет, блок просто не показывается.",
+    "hero": "assets/photos/hero.jpg",
+    "heroAlt": "Путешествие с картой TOP RIDERS",
+    "manager": "assets/photos/manager.jpg",
+    "managerName": "",
+    "managerRole": "Менеджер TOP RIDERS, отвечает в Telegram"
+  },
   "analytics": {
     "metrikaId": "",
     "goals": {
@@ -23,7 +29,6 @@
       "phone": "contact_phone"
     }
   },
-
   "texts": {
     "heroEyebrow": "Подбор зарубежной карты",
     "heroTitleStrong": "Карта для путешествий",
@@ -56,7 +61,6 @@
     "restart": "Пройти заново",
     "footer": "TOP RIDERS · подбор зарубежных карт для путешествий"
   },
-
   "clipboard": {
     "greeting": "Здравствуйте! Я прошёл(а) подбор карты на сайте TOP RIDERS.",
     "variantTitle": "Выбранный вариант",
@@ -64,13 +68,11 @@
     "answersTitle": "Мои ответы",
     "utmTitle": "Источник"
   },
-
   "scoring": {
     "minScore": 1,
     "maxResults": 3,
     "relabelResults": true
   },
-
   "questions": [
     {
       "id": "purpose",
@@ -78,10 +80,47 @@
       "short": "Для чего карта",
       "type": "single",
       "options": [
-        { "id": "travel",    "label": "Путешествия",                              "card": { "edge": ["#F1CDB3", "#C48B6E"] } },
-        { "id": "services",  "label": "Оплата зарубежных сервисов и подписок",    "card": { "edge": ["#EFE0C0", "#B9976A"], "icon": "apps" } },
-        { "id": "transfers", "label": "Получение переводов из-за рубежа",         "card": { "edge": ["#F4D3D6", "#C17F89"] } },
-        { "id": "all",       "label": "Всё сразу",                                "card": { "edge": ["#F6DFA9", "#B9806A"] } }
+        {
+          "id": "travel",
+          "label": "Путешествия",
+          "card": {
+            "edge": [
+              "#F1CDB3",
+              "#C48B6E"
+            ]
+          }
+        },
+        {
+          "id": "services",
+          "label": "Оплата зарубежных сервисов и подписок",
+          "card": {
+            "edge": [
+              "#EFE0C0",
+              "#B9976A"
+            ],
+            "icon": "apps"
+          }
+        },
+        {
+          "id": "transfers",
+          "label": "Получение переводов из-за рубежа",
+          "card": {
+            "edge": [
+              "#F4D3D6",
+              "#C17F89"
+            ]
+          }
+        },
+        {
+          "id": "all",
+          "label": "Всё сразу",
+          "card": {
+            "edge": [
+              "#F6DFA9",
+              "#B9806A"
+            ]
+          }
+        }
       ]
     },
     {
@@ -90,10 +129,58 @@
       "short": "Страны поездок",
       "type": "single",
       "options": [
-        { "id": "europe", "label": "Европа",           "points": 2, "match": { "field": "regions", "includes": "Европа" },        "card": { "label": "EUROPE" } },
-        { "id": "asia",   "label": "Азия",             "points": 2, "match": { "field": "regions", "includes": "Азия" },          "card": { "label": "ASIA" } },
-        { "id": "usa",    "label": "США и Канада",     "points": 2, "match": { "field": "regions", "includes": "США и Канада" },  "card": { "label": "USA · CANADA" } },
-        { "id": "mixed",  "label": "Разные страны",    "points": 2, "match": { "field": "regions", "minLength": 2 },             "card": { "label": "WORLDWIDE" } }
+        {
+          "id": "europe",
+          "label": "Европа",
+          "points": 2,
+          "match": {
+            "field": "regions",
+            "includes": "Европа"
+          },
+          "card": {
+            "label": "EUROPE"
+          },
+          "photo": "assets/photos/europe.jpg"
+        },
+        {
+          "id": "asia",
+          "label": "Азия",
+          "points": 2,
+          "match": {
+            "field": "regions",
+            "includes": "Азия"
+          },
+          "card": {
+            "label": "ASIA"
+          },
+          "photo": "assets/photos/asia.jpg"
+        },
+        {
+          "id": "usa",
+          "label": "США и Канада",
+          "points": 2,
+          "match": {
+            "field": "regions",
+            "includes": "США и Канада"
+          },
+          "card": {
+            "label": "USA · CANADA"
+          },
+          "photo": "assets/photos/usa.jpg"
+        },
+        {
+          "id": "mixed",
+          "label": "Разные страны",
+          "points": 2,
+          "match": {
+            "field": "regions",
+            "minLength": 2
+          },
+          "card": {
+            "label": "WORLDWIDE"
+          },
+          "photo": "assets/photos/world.jpg"
+        }
       ]
     },
     {
@@ -102,10 +189,63 @@
       "short": "Важно",
       "type": "multi",
       "options": [
-        { "id": "pay",     "label": "Apple Pay и Google Pay", "points": 2, "match": { "any": [ { "field": "applePay", "equals": true }, { "field": "googlePay", "equals": true } ] }, "card": { "icon": "pay" } },
-        { "id": "booking", "label": "Бронь авто и отелей",    "points": 2, "match": { "field": "booking", "equals": true },        "card": { "icon": "booking" } },
-        { "id": "apps",    "label": "Оплата в приложениях",   "points": 2, "match": { "field": "onlinePayments", "equals": true }, "card": { "icon": "apps" } },
-        { "id": "multi",   "label": "Мультивалютный счёт",    "points": 2, "match": { "field": "currencies", "minLength": 2 },     "card": { "icon": "currency" } }
+        {
+          "id": "pay",
+          "label": "Apple Pay и Google Pay",
+          "points": 2,
+          "match": {
+            "any": [
+              {
+                "field": "applePay",
+                "equals": true
+              },
+              {
+                "field": "googlePay",
+                "equals": true
+              }
+            ]
+          },
+          "card": {
+            "icon": "pay"
+          },
+          "required": true
+        },
+        {
+          "id": "booking",
+          "label": "Бронь авто и отелей",
+          "points": 2,
+          "match": {
+            "field": "booking",
+            "equals": true
+          },
+          "card": {
+            "icon": "booking"
+          }
+        },
+        {
+          "id": "apps",
+          "label": "Оплата в приложениях",
+          "points": 2,
+          "match": {
+            "field": "onlinePayments",
+            "equals": true
+          },
+          "card": {
+            "icon": "apps"
+          }
+        },
+        {
+          "id": "multi",
+          "label": "Мультивалютный счёт",
+          "points": 2,
+          "match": {
+            "field": "multiCurrency",
+            "equals": true
+          },
+          "card": {
+            "icon": "currency"
+          }
+        }
       ]
     },
     {
@@ -114,9 +254,33 @@
       "short": "Формат оформления",
       "type": "single",
       "options": [
-        { "id": "remote", "label": "Полностью дистанционно",          "points": 2, "required": true, "match": { "field": "remote", "equals": true }, "card": { "label": "REMOTE", "icon": "remote" } },
-        { "id": "visit",  "label": "Готов(а) съездить в страну банка", "points": 1, "card": { "label": "IN PERSON", "icon": "plane" } },
-        { "id": "any",    "label": "Не важно" }
+        {
+          "id": "remote",
+          "label": "Полностью дистанционно",
+          "points": 2,
+          "required": true,
+          "match": {
+            "field": "remote",
+            "equals": true
+          },
+          "card": {
+            "label": "REMOTE",
+            "icon": "remote"
+          }
+        },
+        {
+          "id": "visit",
+          "label": "Готов(а) съездить в страну банка",
+          "points": 1,
+          "card": {
+            "label": "IN PERSON",
+            "icon": "plane"
+          }
+        },
+        {
+          "id": "any",
+          "label": "Не важно"
+        }
       ]
     },
     {
@@ -125,10 +289,39 @@
       "short": "Бюджет",
       "type": "single",
       "options": [
-        { "id": "low",  "label": "До 20 000 ₽",        "points": 2, "match": { "field": "priceValue", "lte": 20000 } },
-        { "id": "mid",  "label": "20 000 – 35 000 ₽",  "points": 2, "match": { "field": "priceValue", "lte": 35000 } },
-        { "id": "high", "label": "Более 35 000 ₽",     "points": 1, "match": { "field": "priceValue", "gte": 0 } },
-        { "id": "any",  "label": "Пока не знаю" }
+        {
+          "id": "low",
+          "label": "До 25 000 ₽",
+          "points": 2,
+          "match": {
+            "field": "priceValue",
+            "lte": 25000
+          },
+          "penalty": 3
+        },
+        {
+          "id": "mid",
+          "label": "25 000 – 35 000 ₽",
+          "points": 2,
+          "match": {
+            "field": "priceValue",
+            "lte": 35000
+          },
+          "penalty": 3
+        },
+        {
+          "id": "high",
+          "label": "Более 35 000 ₽",
+          "points": 1,
+          "match": {
+            "field": "priceValue",
+            "gte": 0
+          }
+        },
+        {
+          "id": "any",
+          "label": "Пока не знаю"
+        }
       ]
     },
     {
@@ -137,79 +330,449 @@
       "short": "Срочность",
       "type": "single",
       "options": [
-        { "id": "asap",  "label": "Как можно скорее",  "points": 2, "match": { "field": "termDays", "lte": 14 }, "card": { "label": "EXPRESS", "icon": "fast" } },
-        { "id": "month", "label": "В течение месяца",  "points": 1, "match": { "field": "termDays", "lte": 31 } },
-        { "id": "later", "label": "Не спешу" }
+        {
+          "id": "asap",
+          "label": "Как можно скорее",
+          "points": 2,
+          "match": {
+            "field": "termDays",
+            "lte": 14
+          },
+          "card": {
+            "label": "EXPRESS",
+            "icon": "fast"
+          },
+          "penalty": 2
+        },
+        {
+          "id": "month",
+          "label": "В течение месяца",
+          "points": 1,
+          "match": {
+            "field": "termDays",
+            "lte": 31
+          },
+          "penalty": 1
+        },
+        {
+          "id": "later",
+          "label": "Не спешу"
+        }
       ]
     }
   ],
-
   "compare": [
-    { "label": "Apple Pay / Google Pay", "type": "flags", "fields": { "applePay": "Apple Pay", "googlePay": "Google Pay" } },
-    { "label": "Бронь авто и отелей",     "type": "bool",  "field": "booking" },
-    { "label": "Валюты счёта",            "type": "list",  "field": "currencies" },
-    { "label": "Формат оформления",       "type": "bool",  "field": "remote", "yes": "Дистанционно", "no": "Визит в страну банка" },
-    { "label": "Ориентировочный срок",    "type": "text",  "field": "term" },
-    { "label": "Стоимость",               "type": "text",  "field": "price" }
+    {
+      "label": "Apple Pay / Google Pay",
+      "type": "flags",
+      "fields": {
+        "applePay": "Apple Pay",
+        "googlePay": "Google Pay"
+      }
+    },
+    {
+      "label": "Бронь авто и отелей",
+      "type": "bool",
+      "field": "booking"
+    },
+    {
+      "label": "Валюты счёта",
+      "type": "list",
+      "field": "currencies"
+    },
+    {
+      "label": "Входящие переводы",
+      "type": "text",
+      "field": "transfersIn"
+    },
+    {
+      "label": "Формат оформления",
+      "type": "text",
+      "field": "format"
+    },
+    {
+      "label": "Ориентировочный срок",
+      "type": "text",
+      "field": "term"
+    },
+    {
+      "label": "Стоимость под ключ",
+      "type": "text",
+      "field": "price"
+    }
   ],
-
   "cards": [
     {
-      "id": "A",
-      "label": "Вариант A",
-      "tag": "Самый быстрый",
+      "id": "01",
+      "label": "Вариант",
+      "tag": "Для онлайн-покупок",
       "active": true,
       "priority": 0,
-      "applePay": null,
-      "googlePay": null,
-      "booking": null,
-      "onlinePayments": null,
-      "currencies": [],
-      "remote": null,
-      "term": "___",
-      "termDays": null,
-      "price": "___",
-      "priceValue": null,
-      "regions": [],
-      "weights": { "purpose": { "travel": 0, "services": 0, "transfers": 0, "all": 0 } }
+      "applePay": true,
+      "googlePay": true,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": false,
+      "currencies": [
+        "USD или EUR"
+      ],
+      "remote": true,
+      "format": "Дистанционно, видеозвонок с банком",
+      "term": "1–1,5 недели",
+      "termDays": 10,
+      "price": "24 900 ₽",
+      "priceValue": 24900,
+      "transfersIn": "Нет",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 0,
+          "services": 3,
+          "transfers": 0,
+          "all": 0
+        }
+      }
     },
     {
-      "id": "B",
-      "label": "Вариант B",
-      "tag": "Оптимальный",
+      "id": "02",
+      "label": "Вариант",
+      "tag": "Apple Pay и P2P-переводы",
       "active": true,
       "priority": 0,
-      "applePay": null,
-      "googlePay": null,
-      "booking": null,
-      "onlinePayments": null,
-      "currencies": [],
-      "remote": null,
-      "term": "___",
-      "termDays": null,
-      "price": "___",
-      "priceValue": null,
-      "regions": [],
-      "weights": { "purpose": { "travel": 0, "services": 0, "transfers": 0, "all": 0 } }
+      "applePay": true,
+      "googlePay": true,
+      "booking": true,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счета: AMD, RUB"
+      ],
+      "remote": true,
+      "format": "Дистанционно, без доверенности",
+      "term": "около 3 недель",
+      "termDays": 21,
+      "price": "30 900 ₽",
+      "priceValue": 30900,
+      "transfersIn": "Нет, есть P2P на Mastercard",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 2,
+          "services": 2,
+          "transfers": 0,
+          "all": 1
+        }
+      }
     },
     {
-      "id": "C",
-      "label": "Вариант C",
-      "tag": "Максимум возможностей",
+      "id": "03",
+      "label": "Вариант",
+      "tag": "Пять валют на одной карте",
       "active": true,
       "priority": 0,
-      "applePay": null,
-      "googlePay": null,
-      "booking": null,
-      "onlinePayments": null,
-      "currencies": [],
-      "remote": null,
-      "term": "___",
-      "termDays": null,
-      "price": "___",
-      "priceValue": null,
-      "regions": [],
-      "weights": { "purpose": { "travel": 0, "services": 0, "transfers": 0, "all": 0 } }
+      "applePay": true,
+      "googlePay": true,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "GEL",
+        "USD",
+        "EUR",
+        "GBP",
+        "RUB"
+      ],
+      "remote": true,
+      "format": "Дистанционно, верификация с банком",
+      "term": "2–3 месяца",
+      "termDays": 90,
+      "price": "20 900 ₽",
+      "priceValue": 20900,
+      "transfersIn": "Входящий SWIFT",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 2,
+          "services": 1,
+          "transfers": 2,
+          "all": 3
+        }
+      }
+    },
+    {
+      "id": "04",
+      "label": "Вариант",
+      "tag": "Переводы за рубеж",
+      "active": true,
+      "priority": 0,
+      "applePay": false,
+      "googlePay": true,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счета: RUB, KGS"
+      ],
+      "remote": true,
+      "format": "Дистанционно, нужна нотариальная доверенность",
+      "term": "до 3 недель",
+      "termDays": 21,
+      "price": "19 900 ₽",
+      "priceValue": 19900,
+      "transfersIn": "Входящий SWIFT (AED, RUB, CNY)",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 1,
+          "services": 1,
+          "transfers": 2,
+          "all": 2
+        }
+      }
+    },
+    {
+      "id": "05",
+      "label": "Вариант",
+      "tag": "Для брони авто и отелей",
+      "active": true,
+      "priority": 2,
+      "applePay": true,
+      "googlePay": true,
+      "booking": true,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счета: RUB, CNY, AED и др."
+      ],
+      "remote": true,
+      "format": "Дистанционно, нужна нотариальная доверенность",
+      "term": "до 3 недель",
+      "termDays": 21,
+      "price": "32 900 ₽",
+      "priceValue": 32900,
+      "transfersIn": "Входящий SWIFT",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 3,
+          "services": 1,
+          "transfers": 2,
+          "all": 2
+        }
+      }
+    },
+    {
+      "id": "06",
+      "label": "Вариант",
+      "tag": "Максимум переводов",
+      "active": true,
+      "priority": 1,
+      "applePay": true,
+      "googlePay": true,
+      "booking": true,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счета: AMD, RUB и др."
+      ],
+      "remote": true,
+      "format": "Дистанционно, нужна справка 2-НДФЛ",
+      "term": "1–2 недели",
+      "termDays": 14,
+      "price": "40 900 ₽",
+      "priceValue": 40900,
+      "transfersIn": "Входящий SWIFT в 10 валютах",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 2,
+          "services": 1,
+          "transfers": 3,
+          "all": 2
+        },
+        "region": {
+          "asia": 2
+        }
+      }
+    },
+    {
+      "id": "07",
+      "label": "Вариант",
+      "tag": "Без доверенности",
+      "active": true,
+      "priority": 0,
+      "applePay": false,
+      "googlePay": true,
+      "booking": true,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счета: RUB, KGS"
+      ],
+      "remote": true,
+      "format": "Дистанционно, без доверенности",
+      "term": "3–4 недели",
+      "termDays": 28,
+      "price": "24 900 ₽",
+      "priceValue": 24900,
+      "transfersIn": "SWIFT только в рублях",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 2,
+          "services": 1,
+          "transfers": 1,
+          "all": 1
+        }
+      }
+    },
+    {
+      "id": "08",
+      "label": "Вариант",
+      "tag": "Выгодный старт",
+      "active": true,
+      "priority": 0,
+      "applePay": false,
+      "googlePay": false,
+      "booking": true,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счёт: RUB"
+      ],
+      "remote": true,
+      "format": "Дистанционно, нужна доверенность",
+      "term": "1–2 недели",
+      "termDays": 14,
+      "price": "19 900 ₽",
+      "priceValue": 19900,
+      "transfersIn": "Visa Direct и P2P",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 1,
+          "services": 1,
+          "transfers": 1,
+          "all": 1
+        },
+        "region": {
+          "asia": 2
+        }
+      }
+    },
+    {
+      "id": "09",
+      "label": "Вариант",
+      "tag": "Без документов",
+      "active": true,
+      "priority": 0,
+      "applePay": false,
+      "googlePay": true,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": false,
+      "currencies": [
+        "USD"
+      ],
+      "remote": true,
+      "format": "Без документов и верификации",
+      "term": "виртуальная сразу, пластиковая ~2 недели",
+      "termDays": 1,
+      "price": "30 900 ₽",
+      "priceValue": 30900,
+      "transfersIn": "Нет, пополнение через USDT",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 1,
+          "services": 3,
+          "transfers": 0,
+          "all": 0
+        },
+        "region": {
+          "asia": 2
+        }
+      }
+    },
+    {
+      "id": "10",
+      "label": "Вариант",
+      "tag": "Быстрый выпуск",
+      "active": true,
+      "priority": 0,
+      "applePay": false,
+      "googlePay": false,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": false,
+      "currencies": [
+        "USD или EUR"
+      ],
+      "remote": true,
+      "format": "Дистанционно, сканы паспортов",
+      "term": "5 рабочих дней",
+      "termDays": 7,
+      "price": "39 900 ₽",
+      "priceValue": 39900,
+      "transfersIn": "Входящий SWIFT и Visa Direct",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 1,
+          "services": 1,
+          "transfers": 2,
+          "all": 1
+        },
+        "region": {
+          "asia": 2
+        }
+      }
     }
   ]
 }

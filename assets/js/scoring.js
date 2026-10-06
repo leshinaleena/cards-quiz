@@ -2,6 +2,7 @@
 //   option.match    — условие по параметру карты (см. evalMatch)
 //   option.points   — сколько баллов даёт совпадение (по умолчанию 1)
 //   option.required — при явном несовпадении карта исключается
+//   option.penalty  — сколько баллов отнять при явном несовпадении
 //   card.weights[questionId][optionId] — ручные баллы карты за конкретный ответ
 
 const PLACEHOLDER = /^_+$/;
@@ -50,6 +51,7 @@ export function scoreCard(card, answers, questions) {
       if (typeof w === 'number') score += w;
       const ok = evalMatch(card, opt.match);
       if (ok === true) score += opt.points ?? 1;
+      if (ok === false && opt.penalty) score -= opt.penalty;
       if (ok === false && opt.required) excluded = true;
     }
   }
