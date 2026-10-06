@@ -56,8 +56,8 @@
     "ctaTitle": "Обсудим",
     "ctaText": "Менеджер ответит в Telegram и подтвердит актуальные условия.",
     "ctaButton": "Связаться с менеджером",
-    "ctaCopied": "Сообщение с Вашим вариантом уже в поле ввода Telegram — просто нажмите «Отправить». Если его там нет, вставьте: мы его скопировали.",
-    "ctaCopyFailed": "Не получилось скопировать автоматически. Выделите текст ниже и отправьте его менеджеру в чате.",
+    "ctaCopied": "Открыли чат с менеджером — сообщение уже набрано, просто нажмите «Отправить».",
+    "ctaCopyFailed": "Если поле в Telegram пустое, скопируйте текст ниже и отправьте менеджеру.",
     "ctaPhoneLabel": "или позвоните",
     "restart": "Пройти заново",
     "footer": "TOP RIDERS · подбор зарубежных карт для путешествий",
@@ -105,10 +105,11 @@
     "whyLead": "Или оставьте заявку — перезвоним ↓︎"
   },
   "clipboard": {
-    "greeting": "Здравствуйте! Я прошёл(а) подбор карты на сайте TOP RIDERS.",
-    "variantTitle": "Выбранный вариант",
-    "variantNone": "Автоматически подходящий вариант не найден, нужен индивидуальный подбор",
-    "answersTitle": "Мои ответы",
+    "greeting": "Здравствуйте! Прошёл(а) подбор на сайте TOP RIDERS, мне подходит:",
+    "importantTitle": "Немного о задаче:",
+    "othersTitle": "Также предложили:",
+    "question": "Подскажите, пожалуйста, подойдёт ли мне эта карта и как её оформить?",
+    "noneGreeting": "Здравствуйте! Прошёл(а) подбор карты на сайте TOP RIDERS, но готового варианта не нашлось — помогите, пожалуйста, подобрать карту лично.",
     "utmTitle": "Источник"
   },
   "scoring": {
@@ -133,7 +134,8 @@
             ],
             "tone": "wine"
           },
-          "reason": "для путешествий"
+          "reason": "для путешествий",
+          "msgText": "карта нужна для путешествий"
         },
         {
           "id": "services",
@@ -146,7 +148,8 @@
             "icon": "apps",
             "tone": "ink"
           },
-          "reason": "для зарубежных сервисов"
+          "reason": "для зарубежных сервисов",
+          "msgText": "карта нужна для оплаты зарубежных сервисов и подписок"
         },
         {
           "id": "transfers",
@@ -158,7 +161,8 @@
             ],
             "tone": "pearl"
           },
-          "reason": "принимает переводы из-за рубежа"
+          "reason": "принимает переводы из-за рубежа",
+          "msgText": "нужно получать переводы из-за рубежа"
         },
         {
           "id": "all",
@@ -170,9 +174,11 @@
             ],
             "tone": "wine"
           },
-          "reason": "универсальный вариант"
+          "reason": "универсальный вариант",
+          "msgText": "нужна и для поездок, и для переводов, и для подписок"
         }
-      ]
+      ],
+      "msg": "{a}"
     },
     {
       "id": "region",
@@ -192,7 +198,8 @@
             "label": "EUROPE"
           },
           "reason": "поездки в Европу",
-          "art": "europe"
+          "art": "europe",
+          "msgText": "еду в Европу"
         },
         {
           "id": "asia",
@@ -206,7 +213,8 @@
             "label": "ASIA"
           },
           "reason": "поездки в Азию",
-          "art": "asia"
+          "art": "asia",
+          "msgText": "еду в Азию"
         },
         {
           "id": "usa",
@@ -220,7 +228,8 @@
             "label": "USA · CANADA"
           },
           "reason": "поездки в США и Канаду",
-          "art": "usa"
+          "art": "usa",
+          "msgText": "еду в США или Канаду"
         },
         {
           "id": "mixed",
@@ -234,9 +243,11 @@
             "label": "WORLDWIDE"
           },
           "reason": "поездки по разным странам",
-          "art": "mixed"
+          "art": "mixed",
+          "msgText": "езжу в разные страны"
         }
-      ]
+      ],
+      "msg": "{a}"
     },
     {
       "id": "features",
@@ -264,7 +275,8 @@
             "icon": "pay"
           },
           "required": true,
-          "reason": "Apple Pay / Google Pay"
+          "reason": "Apple Pay / Google Pay",
+          "msgText": "Apple Pay / Google Pay"
         },
         {
           "id": "booking",
@@ -277,7 +289,8 @@
           "card": {
             "icon": "booking"
           },
-          "reason": "бронь авто и отелей"
+          "reason": "бронь авто и отелей",
+          "msgText": "бронь авто и отелей"
         },
         {
           "id": "apps",
@@ -290,7 +303,8 @@
           "card": {
             "icon": "apps"
           },
-          "reason": "оплата в приложениях"
+          "reason": "оплата в приложениях",
+          "msgText": "оплата в приложениях"
         },
         {
           "id": "multi",
@@ -303,9 +317,11 @@
           "card": {
             "icon": "currency"
           },
-          "reason": "мультивалютный счёт"
+          "reason": "мультивалютный счёт",
+          "msgText": "мультивалютный счёт"
         }
-      ]
+      ],
+      "msg": "важно: {a}"
     },
     {
       "id": "passport",
@@ -318,7 +334,8 @@
           "label": "Паспорт РФ и загранпаспорт",
           "card": {
             "label": "PASSPORT"
-          }
+          },
+          "msgText": "есть паспорт РФ и загранпаспорт"
         },
         {
           "id": "rf",
@@ -332,7 +349,8 @@
           "reason": "можно оформить без загранпаспорта",
           "card": {
             "label": "RF ID"
-          }
+          },
+          "msgText": "есть только паспорт РФ"
         },
         {
           "id": "other",
@@ -354,9 +372,11 @@
           "reason": "оформляется на паспорт другой страны",
           "card": {
             "label": "INTL"
-          }
+          },
+          "msgText": "паспорт другой страны"
         }
-      ]
+      ],
+      "msg": "{a}"
     },
     {
       "id": "hard",
@@ -374,7 +394,8 @@
             "field": "notary",
             "equals": false
           },
-          "reason": "без нотариальной доверенности"
+          "reason": "без нотариальной доверенности",
+          "msgText": "без нотариальной доверенности"
         },
         {
           "id": "income",
@@ -385,7 +406,8 @@
             "field": "incomeDocs",
             "equals": false
           },
-          "reason": "без справок о доходах"
+          "reason": "без справок о доходах",
+          "msgText": "без справок о доходах"
         },
         {
           "id": "video",
@@ -396,7 +418,8 @@
             "field": "videoSelfie",
             "equals": false
           },
-          "reason": "без видеозвонка и селфи"
+          "reason": "без видеозвонка и селфи",
+          "msgText": "без видеозвонка и селфи"
         },
         {
           "id": "phone",
@@ -407,14 +430,17 @@
             "field": "foreignPhone",
             "equals": false
           },
-          "reason": "без иностранного номера"
+          "reason": "без иностранного номера",
+          "msgText": "без иностранной сим-карты"
         },
         {
           "id": "none",
           "label": "Ничего, готов(а) ко всему",
-          "exclusive": true
+          "exclusive": true,
+          "msgSkip": true
         }
-      ]
+      ],
+      "msg": "желательно {a}"
     },
     {
       "id": "budget",
@@ -431,7 +457,8 @@
             "lte": 20000
           },
           "penalty": 3,
-          "reason": "в рамках бюджета"
+          "reason": "в рамках бюджета",
+          "msgText": "бюджет до 20 000 ₽"
         },
         {
           "id": "mid",
@@ -442,7 +469,8 @@
             "lte": 30000
           },
           "penalty": 3,
-          "reason": "в рамках бюджета"
+          "reason": "в рамках бюджета",
+          "msgText": "бюджет 20–30 тыс. ₽"
         },
         {
           "id": "high",
@@ -452,13 +480,16 @@
             "field": "priceValue",
             "gte": 0
           },
-          "reason": "в рамках бюджета"
+          "reason": "в рамках бюджета",
+          "msgText": "бюджет от 30 000 ₽"
         },
         {
           "id": "any",
-          "label": "Пока не знаю"
+          "label": "Пока не знаю",
+          "msgText": "бюджет пока не определён"
         }
-      ]
+      ],
+      "msg": "{a}"
     },
     {
       "id": "urgency",
@@ -479,7 +510,8 @@
             "icon": "fast"
           },
           "penalty": 2,
-          "reason": "быстрый выпуск"
+          "reason": "быстрый выпуск",
+          "msgText": "карта нужна как можно скорее"
         },
         {
           "id": "month",
@@ -490,13 +522,16 @@
             "lte": 31
           },
           "penalty": 1,
-          "reason": "выпуск в течение месяца"
+          "reason": "выпуск в течение месяца",
+          "msgText": "нужна в течение месяца"
         },
         {
           "id": "later",
-          "label": "Не спешу"
+          "label": "Не спешу",
+          "msgText": "не спешу"
         }
-      ]
+      ],
+      "msg": "{a}"
     }
   ],
   "compare": [
@@ -584,7 +619,8 @@
       "videoSelfie": true,
       "foreignPhone": false,
       "passportRF": false,
-      "foreignPassport": "yes"
+      "foreignPassport": "yes",
+      "name": "Виртуальная VISA для онлайн-покупок"
     },
     {
       "id": "02",
@@ -637,7 +673,8 @@
       "videoSelfie": false,
       "foreignPhone": false,
       "passportRF": false,
-      "foreignPassport": "complex"
+      "foreignPassport": "complex",
+      "name": "Кредитная VISA, Кыргызстан"
     },
     {
       "id": "03",
@@ -686,7 +723,8 @@
       "videoSelfie": true,
       "foreignPhone": false,
       "passportRF": true,
-      "foreignPassport": "yes"
+      "foreignPassport": "yes",
+      "name": "VISA или Mastercard банка СНГ"
     },
     {
       "id": "04",
@@ -739,7 +777,8 @@
       "videoSelfie": false,
       "foreignPhone": false,
       "passportRF": true,
-      "foreignPassport": "complex"
+      "foreignPassport": "complex",
+      "name": "VISA или Mastercard с кредитным БИН, Кыргызстан"
     },
     {
       "id": "05",
@@ -785,7 +824,8 @@
       "videoSelfie": false,
       "foreignPhone": false,
       "passportRF": true,
-      "foreignPassport": "yes"
+      "foreignPassport": "yes",
+      "name": "VISA или Mastercard с переводами Visa Direct, Кыргызстан"
     },
     {
       "id": "06",
@@ -835,7 +875,8 @@
       "videoSelfie": false,
       "foreignPhone": false,
       "passportRF": true,
-      "foreignPassport": "complex"
+      "foreignPassport": "complex",
+      "name": "Премиальная VISA без доверенности, Кыргызстан"
     },
     {
       "id": "07",
@@ -881,7 +922,8 @@
       "videoSelfie": false,
       "foreignPhone": false,
       "passportRF": false,
-      "foreignPassport": "no"
+      "foreignPassport": "no",
+      "name": "Неименная VISA, Таджикистан"
     },
     {
       "id": "08",
@@ -930,7 +972,8 @@
       "videoSelfie": false,
       "foreignPhone": false,
       "passportRF": false,
-      "foreignPassport": "yes"
+      "foreignPassport": "yes",
+      "name": "Мультивалютная карта банка Грузии"
     },
     {
       "id": "09",
@@ -978,7 +1021,8 @@
       "passportRF": true,
       "foreignPassport": "yes",
       "demote": 20,
-      "crypto": true
+      "crypto": true,
+      "name": "Виртуальная карта с пополнением в USDT"
     },
     {
       "id": "10",
@@ -1028,7 +1072,8 @@
       "passportRF": true,
       "foreignPassport": "yes",
       "demote": 20,
-      "crypto": true
+      "crypto": true,
+      "name": "Крипто-карта VISA"
     },
     {
       "id": "11",
@@ -1075,7 +1120,8 @@
       "videoSelfie": true,
       "foreignPhone": false,
       "passportRF": null,
-      "foreignPassport": "yes"
+      "foreignPassport": "yes",
+      "name": "Пластиковая Mastercard, Армения"
     },
     {
       "id": "12",
@@ -1121,7 +1167,8 @@
       "videoSelfie": true,
       "foreignPhone": false,
       "passportRF": null,
-      "foreignPassport": "yes"
+      "foreignPassport": "yes",
+      "name": "Виртуальная Mastercard, Армения"
     },
     {
       "id": "13",
@@ -1170,7 +1217,8 @@
       "videoSelfie": true,
       "foreignPhone": false,
       "passportRF": false,
-      "foreignPassport": "yes"
+      "foreignPassport": "yes",
+      "name": "Мультивалютная виртуальная VISA, Казахстан"
     },
     {
       "id": "14",
@@ -1219,7 +1267,8 @@
       "videoSelfie": false,
       "foreignPhone": false,
       "passportRF": false,
-      "foreignPassport": "yes"
+      "foreignPassport": "yes",
+      "name": "VISA с входящим и исходящим SWIFT, Армения"
     },
     {
       "id": "15",
@@ -1271,7 +1320,8 @@
       "videoSelfie": false,
       "foreignPhone": false,
       "passportRF": false,
-      "foreignPassport": "complex"
+      "foreignPassport": "complex",
+      "name": "VISA с выпуском за 5 рабочих дней, Таджикистан"
     },
     {
       "id": "16",
@@ -1317,7 +1367,8 @@
       "videoSelfie": false,
       "foreignPhone": false,
       "passportRF": false,
-      "foreignPassport": "yes"
+      "foreignPassport": "yes",
+      "name": "Неименная VISA банка СНГ"
     },
     {
       "id": "17",
@@ -1367,7 +1418,8 @@
       "passportRF": false,
       "foreignPassport": "yes",
       "demote": 20,
-      "crypto": true
+      "crypto": true,
+      "name": "Mastercard с высокими лимитами"
     }
   ],
   "leads": {

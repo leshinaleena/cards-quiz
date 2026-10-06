@@ -501,7 +501,7 @@ function leadPayload(form) {
   const res = state.result;
   if (res?.status === 'ok') {
     const it = res.items[state.selected];
-    data['Вариант (код)'] = `${displayInfo(it, state.selected).label} (код ${it.card.id})`;
+    data['Вариант (код)'] = `«${it.card.tag}» — ${it.card.name || ''} (код ${it.card.id})`;
     data['Фишка варианта'] = it.card.tag || '';
     data['Также предложены'] = res.items.filter((_, i) => i !== state.selected).map((x) => x.card.id).join(', ');
   } else {
@@ -556,28 +556,40 @@ function setupLead() {
 }
 
 /* ---------- Связь с менеджером ---------- */
+// Сообщение менеджеру от лица клиента: понятное название карты, задача клиента и вопрос
+function answerLines() {
+  const out = [];
+  for (const q of cfg.questions) {
+    const opts = (state.answers[q.id] || []).map((id) => q.options.find((o) => o.id === id)).filter((o) => o && !o.msgSkip);
+    if (!opts.length) continue;
+    const parts = opts.map((o) => o.msgText || o.label);
+    const a = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} и ${parts.at(-1)}` : parts[0];
+    out.push(`— ${(q.msg || '{a}').replace('{a}', a)}`);
+  }
+  return out;
+}
+
+function cardLine(card) {
+  const facts = [card.price, !isEmpty(card.term) && `оформление ${card.term}`].filter(Boolean).join(', ');
+  return `${card.name || card.tag}${facts ? ` — ${facts}` : ''}`;
+}
+
 function buildSummary() {
   const c = cfg.clipboard || {};
-  const lines = [c.greeting, ''];
   const res = state.result;
+  const lines = [];
   if (res?.status === 'ok') {
     const it = res.items[state.selected];
-    const { label } = displayInfo(it, state.selected);
-    lines.push(`${c.variantTitle}: ${label}${it.card.tag ? ` — ${it.card.tag}` : ''} (код ${it.card.id})`);
-    const reasons = [...new Set(it.reasons || [])].slice(0, 3);
-    if (reasons.length) lines.push(`Подходит, потому что: ${reasons.join(', ')}`);
-    const others = res.items.map((x, i) => (i === state.selected ? null : `${displayInfo(x, i).label} (код ${x.card.id})`)).filter(Boolean);
-    if (others.length) lines.push(`Также предложены: ${others.join(', ')}`);
+    lines.push(c.greeting, cardLine(it.card));
+    lines.push('', c.importantTitle, ...answerLines());
+    const others = res.items.filter((_, i) => i !== state.selected).map((x) => x.card.name || x.card.tag);
+    if (others.length) lines.push('', `${c.othersTitle} ${others.join('; ')}.`);
+    lines.push('', c.question);
   } else {
-    lines.push(`${c.variantTitle}: ${c.variantNone}`);
+    lines.push(c.noneGreeting, '', c.importantTitle, ...answerLines());
   }
-  lines.push('', `${c.answersTitle}:`);
-  for (const q of cfg.questions) {
-    const ans = (state.answers[q.id] || []).map((id) => q.options.find((o) => o.id === id)?.label).filter(Boolean);
-    if (ans.length) lines.push(`• ${q.short || q.title}: ${ans.join(', ')}`);
-  }
-  const u = Object.entries(utm);
-  if (u.length) lines.push('', `${c.utmTitle}: ${u.map(([k, v]) => `${k}=${v}`).join(', ')}`);
+  const u = Object.values(utm).filter(Boolean);
+  if (u.length) lines.push('', `${c.utmTitle}: ${u.join(' / ')}`);
   return lines.join('\n');
 }
 

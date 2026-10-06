@@ -46,7 +46,7 @@ for (const { name, ...opts } of profiles) {
   await page.locator('.why .js-tg, .cta .js-tg').first().click();
   await page.waitForTimeout(400);
   const clip = await page.evaluate(() => navigator.clipboard.readText()).catch(() => '');
-  check(clip.includes('Мои ответы') && clip.includes('utm_source=smoke'), 'текст для менеджера скопирован вместе с UTM');
+  check(clip.includes('TOP RIDERS') && clip.includes('— ') && clip.includes('smoke'), 'текст для менеджера скопирован вместе с UTM');
   check(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'нет горизонтального скролла');
   check(['quiz_start', 'quiz_step_1', 'quiz_result', 'contact_manager'].every((g) => goals.includes(g)), 'цели Метрики срабатывают');
   check(errors.length === 0, `нет ошибок JS${errors.length ? ': ' + errors.join('; ') : ''}`);
