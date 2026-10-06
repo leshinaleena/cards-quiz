@@ -71,22 +71,61 @@ export const globeBadgeSVG = (text) => { const id = `badge${++uid}`; return `<sv
   <g transform="translate(44 52) scale(.6)" class="badge-globe__mark" fill="none" stroke="currentColor" stroke-linecap="round">${globeSVG().replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g>
 </svg>`; };
 
-// Линейные иллюстрации направлений для вопроса «В какие страны» (stroke = currentColor)
-const art = (body) => `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
+// Иллюстрации направлений: силуэты в фирменных цветах на закатном небе (64×64)
+const scene = (id, body) => `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <defs><linearGradient id="sky-${id}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#F8E1DF"/><stop offset=".62" stop-color="#FCEEE8"/><stop offset="1" stop-color="#FFF8F3"/>
+  </linearGradient></defs>
+  <rect width="64" height="64" fill="url(#sky-${id})"/>${body}</svg>`;
+const WINE = '#69131D', ROSE = '#D9A3A8', SOFT = '#ECC9CB', GOLD = '#E3B97E';
 export const destinations = {
-  // Эйфелева башня
-  europe: art(`<path d="M24 3v5"/><path d="M22.4 8h3.2"/><path d="M23 8c-.6 8-2.6 15-5.6 22M25 8c.6 8 2.6 15 5.6 22"/>
-    <path d="M19.6 20.5h8.8"/><path d="M17.4 30h13.2"/><path d="M17.4 30 13 44M30.6 30 35 44"/>
-    <path d="M18.6 44c1.6-5.4 3.4-8 5.4-8s3.8 2.6 5.4 8"/><path d="M20.3 24.5l7.4-4M27.7 24.5l-7.4-4M18.6 36l10.8-6M29.4 36l-10.8-6"/><path d="M9 44h30"/>`),
-  // Ворота-тории и солнце
-  asia: art(`<circle cx="35" cy="12" r="4.5"/><path d="M5 14.5c12 3 26 3 38 0"/><path d="M8 13.4 7 11.2M40 13.4l1-2.2"/>
-    <path d="M10 21h28"/><path d="M14 16.3V44M34 16.3V44"/><path d="M24 17v4"/><path d="M11 44h6M31 44h6"/><path d="M4 44h40" opacity=".5"/>`),
-  // Статуя Свободы
-  usa: art(`<path d="M27.6 4.5c-1.2 1.4-1.2 2.8 0 4 1.2-1.2 1.2-2.6 0-4z"/><path d="M26.2 8.6h2.8l-.6 2.2h-1.6z"/><path d="M27.4 10.8 25 18"/>
-    <circle cx="21.6" cy="15.6" r="2.6"/><path d="M18.6 13.6l-1.8-1.6M20 12.2l-.8-2.2M22 11.8l.2-2.3M23.8 12.4l1.2-1.9"/>
-    <path d="M19.2 18.6c-1.4 5-2 11-2.4 17.4h10.4c-.4-6.4-1-12.4-2.4-17.4"/><path d="M19.4 22.6l-3.2 4.2 2 1.4"/>
-    <path d="M14 36h16v8H14z"/><path d="M11 44h22"/><path d="M17 40h10"/>`),
-  // Глобус с маршрутом
-  mixed: art(`<circle cx="22" cy="26" r="15"/><ellipse cx="22" cy="26" rx="6.4" ry="15"/><path d="M7.6 21h28.8M7.6 31h28.8"/>
-    <path d="M6 12c8-9 26-10 36 0" stroke-dasharray="2 3"/><path d="m42.6 8.6-.2 4.6-4.4-1"/>`),
+  // Париж: Эйфелева башня над крышами
+  europe: scene('eu', `
+    <circle cx="47" cy="20" r="7" fill="${GOLD}" opacity=".85"/>
+    <path fill="${SOFT}" d="M0 50h7v-6l4-3 4 3v-5h6v4l3-2 3 2v7h12v-5l3-3 3 3v-6h6v4l3-2 3 2v10H0z"/>
+    <g fill="${WINE}">
+      <path d="M31.3 4h1.4v5h-1.4z"/>
+      <path d="M30.4 9h3.2l1.7 14.5h-6.6z"/>
+      <path d="M27.4 23.5h9.2v2h-9.2z"/>
+      <path d="M28.2 25.5h7.6l2.8 13h-13.2z"/>
+      <path d="M24.4 38.5h15.2v2.2H24.4z"/>
+      <path d="M24.8 40.7h14.4L44 58h-6.3c-1-5.2-3.2-8.2-5.7-8.2s-4.7 3-5.7 8.2H20z"/>
+    </g>
+    <path fill="#F3E1E0" d="M0 58h64v6H0z"/>`),
+  // Япония: Фудзи и тории
+  asia: scene('as', `
+    <circle cx="16" cy="18" r="7.5" fill="#C9434A" opacity=".85"/>
+    <path fill="${ROSE}" d="M-2 58 25 29c4.2-3.2 9.8-3.2 14 0l27 29z"/>
+    <path fill="#FFF8F3" d="M25 29c4.2-3.2 9.8-3.2 14 0l5 5.4-3.6-1.6-3.2 2.2-2.9-2.2-3.3 2.4-3.3-2.4-2.9 2.2-3.2-2.2-3.6 1.6z"/>
+    <g fill="${WINE}">
+      <path d="M33 37.2c9 1.6 19 1.6 28 0l-.6 3c-9 1.4-17.8 1.4-26.8 0z"/>
+      <path d="M36 44h22v2H36z"/>
+      <path d="M38.4 39.6h2.6V58h-2.6zM53 39.6h2.6V58H53z"/>
+      <path d="M46 40.4h2v3.6h-2z"/>
+    </g>
+    <path fill="#F3E1E0" d="M0 58h64v6H0z"/>`),
+  // Нью-Йорк: Статуя Свободы на фоне небоскрёбов
+  usa: scene('us', `
+    <path fill="${SOFT}" d="M0 58V40h5v-6h5v10h4V30h2v-3h2v3h2v28zM44 58V36h4v-8h2v-4h2v4h2v8h3v-6h5v28z"/>
+    <path fill="${GOLD}" d="M39.8 3c-2 2.4-2 4.3 0 5.8 2-1.5 2-3.4 0-5.8z"/>
+    <g fill="${WINE}">
+      <path d="M38 9h3.8l-.9 3.2h-2z"/>
+      <path d="M38.4 12.2l1.8.5-3.4 12-2.2-.7z"/>
+      <circle cx="31.6" cy="20.4" r="3.1"/>
+      <path d="M27.6 18.6l-2.8-1.6 3 .4zM29 16.4l-1-2.8 1.8 2.4zM31.6 15.6v-3l.9 3zM34.2 16.4l1.4-2.6-.6 2.9zM35.6 18.6l2.8-1.3-2.5 1.9z"/>
+      <path d="M28.4 23.8h6.4c1.1 5.4 1.7 11.6 1.8 18.4H26.6c.1-6.8.7-13 1.8-18.4z"/>
+      <path d="M28.6 27l-3.6 5.2 2 1.4 3.2-4.6z"/>
+      <path d="M25.6 42.2h12l1.8 3.8H23.8z"/>
+      <path d="M24.2 46h14.8v12H24.2z"/>
+    </g>
+    <path fill="#F3E1E0" d="M0 58h64v6H0z"/>`),
+  // Весь мир: глобус и самолёт на орбите
+  mixed: scene('wo', `
+    <circle cx="32" cy="35" r="17" fill="${WINE}"/>
+    <g fill="none" stroke="#E9B9BE" stroke-width="1.1" opacity=".75">
+      <ellipse cx="32" cy="35" rx="7.4" ry="17"/><path d="M15.6 29h32.8M15.6 41h32.8M32 18v34"/>
+    </g>
+    <path fill="none" stroke="${WINE}" stroke-width="1.3" stroke-dasharray="2.2 2.6" stroke-linecap="round" d="M6 40c-2-12 14-24 30-25s26 6 22 16"/>
+    <g transform="translate(51 13) rotate(38) scale(.42)" fill="${GOLD}"><path d="M0-11c1.1 0 1.8 1 1.8 2.4V-3l9 5.2v2.3L1.8 1.6v5.2l2.6 2v1.9L0 9.6l-4.4 1.1V8.8l2.6-2V1.6l-9 2.9V2.2l9-5.2v-5.6C-1.8-10-1.1-11 0-11z"/></g>
+    <path fill="#F3E1E0" d="M0 58h64v6H0z" opacity=".6"/>`),
 };

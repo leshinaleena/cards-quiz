@@ -568,6 +568,8 @@ function setupPhotos() {
     fig.hidden = false;
     $('#heroVisual').classList.add('has-photo');
   });
+  // Фото-подложка в блоке связи с менеджером
+  if (ph.cta) { const bg = $('#ctaBg'); bg.onload = () => { bg.hidden = false; }; bg.src = ph.cta; }
   probe(ph.manager).then((ok) => {
     if (!ok) return;
     const box = $('#ctaManager');
