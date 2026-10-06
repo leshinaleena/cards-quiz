@@ -26,8 +26,10 @@ for (const { name, ...opts } of profiles) {
   const tap = (sel) => (opts.hasTouch ? page.tap(sel) : page.click(sel));
   await tap('#startBtn');
 
-  for (let step = 0; step < 6; step += 1) {
+  // Проходим квиз до конца при любом числе вопросов
+  for (let step = 0; step < 20 && await page.isVisible('[data-screen="quiz"]'); step += 1) {
     await page.waitForTimeout(700);
+    if (!(await page.isVisible('[data-screen="quiz"]'))) break;
     const multi = await page.isVisible('#nextBtn');
     await page.locator('#opts .opt').first().click();
     if (multi) { await page.waitForTimeout(150); await page.click('#nextBtn'); }
@@ -46,7 +48,7 @@ for (const { name, ...opts } of profiles) {
   const clip = await page.evaluate(() => navigator.clipboard.readText()).catch(() => '');
   check(clip.includes('Мои ответы') && clip.includes('utm_source=smoke'), 'текст для менеджера скопирован вместе с UTM');
   check(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'нет горизонтального скролла');
-  check(['quiz_start', 'quiz_step_6', 'contact_manager'].every((g) => goals.includes(g)), 'цели Метрики срабатывают');
+  check(['quiz_start', 'quiz_step_1', 'quiz_result', 'contact_manager'].every((g) => goals.includes(g)), 'цели Метрики срабатывают');
   check(errors.length === 0, `нет ошибок JS${errors.length ? ': ' + errors.join('; ') : ''}`);
   await ctx.close();
 }

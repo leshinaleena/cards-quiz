@@ -34,7 +34,7 @@
     "heroEyebrow": "Подбор зарубежной карты",
     "heroTitleStrong": "Карта для поездок",
     "heroTitleLight": "за границу",
-    "heroSubtitle": "Ответьте на 6 вопросов — подберём 2–3 подходящих варианта и объясним, почему они Вам подходят.",
+    "heroSubtitle": "Ответьте на 7 вопросов — подберём 2–3 подходящих варианта и объясним, почему они Вам подходят.",
     "heroCta": "Подобрать карту",
     "back": "Назад",
     "next": "Далее",
@@ -65,8 +65,8 @@
     "howTitleAccent": "работает",
     "howSteps": [
       {
-        "title": "Ответьте на 6 вопросов",
-        "text": "Цель поездки, страны, важные функции, формат оформления, бюджет и сроки."
+        "title": "Ответьте на 7 вопросов",
+        "text": "Цель поездки, страны, важные функции, документы, бюджет и сроки."
       },
       {
         "title": "Сравните варианты",
@@ -293,38 +293,111 @@
       ]
     },
     {
-      "id": "format",
-      "title": "Как Вам удобнее оформить?",
-      "short": "Формат оформления",
+      "id": "passport",
+      "title": "Какой паспорт у Вас есть?",
+      "short": "Паспорт",
       "type": "single",
       "options": [
         {
-          "id": "remote",
-          "label": "Полностью дистанционно",
-          "points": 2,
-          "required": true,
-          "match": {
-            "field": "remote",
-            "equals": true
-          },
+          "id": "both",
+          "label": "Паспорт РФ и загранпаспорт",
           "card": {
-            "label": "REMOTE",
-            "icon": "remote"
-          },
-          "reason": "оформление дистанционно"
-        },
-        {
-          "id": "visit",
-          "label": "Готов(а) съездить в страну банка",
-          "points": 1,
-          "card": {
-            "label": "IN PERSON",
-            "icon": "plane"
+            "label": "PASSPORT"
           }
         },
         {
-          "id": "any",
-          "label": "Не важно"
+          "id": "rf",
+          "label": "Только паспорт РФ",
+          "required": true,
+          "match": {
+            "field": "passportRF",
+            "equals": true
+          },
+          "points": 1,
+          "reason": "можно оформить без загранпаспорта",
+          "card": {
+            "label": "RF ID"
+          }
+        },
+        {
+          "id": "other",
+          "label": "Паспорт другой страны",
+          "required": true,
+          "match": {
+            "any": [
+              {
+                "field": "foreignPassport",
+                "equals": "yes"
+              },
+              {
+                "field": "foreignPassport",
+                "equals": "complex"
+              }
+            ]
+          },
+          "points": 1,
+          "reason": "оформляется на паспорт другой страны",
+          "card": {
+            "label": "INTL"
+          }
+        }
+      ]
+    },
+    {
+      "id": "hard",
+      "title": "Что из этого для Вас сложно?",
+      "short": "Сложно",
+      "type": "multi",
+      "hint": "Можно выбрать несколько — исключим такие варианты",
+      "options": [
+        {
+          "id": "notary",
+          "label": "Оформлять нотариальную доверенность",
+          "required": true,
+          "points": 1,
+          "match": {
+            "field": "notary",
+            "equals": false
+          },
+          "reason": "без нотариальной доверенности"
+        },
+        {
+          "id": "income",
+          "label": "Подтверждать доход (2-НДФЛ, документы о доходах)",
+          "required": true,
+          "points": 1,
+          "match": {
+            "field": "incomeDocs",
+            "equals": false
+          },
+          "reason": "без справок о доходах"
+        },
+        {
+          "id": "video",
+          "label": "Видеозвонок с банком или селфи с паспортом",
+          "required": true,
+          "points": 1,
+          "match": {
+            "field": "videoSelfie",
+            "equals": false
+          },
+          "reason": "без видеозвонка и селфи"
+        },
+        {
+          "id": "phone",
+          "label": "Покупать иностранную сим-карту",
+          "required": true,
+          "points": 1,
+          "match": {
+            "field": "foreignPhone",
+            "equals": false
+          },
+          "reason": "без иностранного номера"
+        },
+        {
+          "id": "none",
+          "label": "Ничего, готов(а) ко всему",
+          "exclusive": true
         }
       ]
     },
@@ -490,7 +563,13 @@
           "transfers": 0,
           "all": 0
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": true,
+      "foreignPhone": false,
+      "passportRF": false,
+      "foreignPassport": "yes"
     },
     {
       "id": "02",
@@ -533,8 +612,17 @@
         },
         "region": {
           "asia": 2
+        },
+        "passport": {
+          "other": -2
         }
-      }
+      },
+      "notary": true,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": false,
+      "foreignPassport": "complex"
     },
     {
       "id": "03",
@@ -577,7 +665,13 @@
         "region": {
           "asia": 2
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": true,
+      "foreignPhone": false,
+      "passportRF": true,
+      "foreignPassport": "yes"
     },
     {
       "id": "04",
@@ -620,8 +714,17 @@
         },
         "region": {
           "asia": 1
+        },
+        "passport": {
+          "other": -2
         }
-      }
+      },
+      "notary": true,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": true,
+      "foreignPassport": "complex"
     },
     {
       "id": "05",
@@ -661,7 +764,13 @@
           "transfers": 2,
           "all": 1
         }
-      }
+      },
+      "notary": true,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": true,
+      "foreignPassport": "yes"
     },
     {
       "id": "06",
@@ -701,8 +810,17 @@
           "services": 1,
           "transfers": 1,
           "all": 1
+        },
+        "passport": {
+          "other": -2
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": true,
+      "foreignPassport": "complex"
     },
     {
       "id": "07",
@@ -742,7 +860,13 @@
           "transfers": 2,
           "all": 1
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": false,
+      "foreignPassport": "no"
     },
     {
       "id": "08",
@@ -785,7 +909,13 @@
           "transfers": 2,
           "all": 3
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": true,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": false,
+      "foreignPassport": "yes"
     },
     {
       "id": "09",
@@ -825,7 +955,13 @@
           "transfers": 0,
           "all": 1
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": true,
+      "passportRF": true,
+      "foreignPassport": "yes"
     },
     {
       "id": "10",
@@ -867,7 +1003,13 @@
         "region": {
           "asia": 2
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": true,
+      "foreignPassport": "yes"
     },
     {
       "id": "11",
@@ -908,7 +1050,13 @@
           "transfers": 1,
           "all": 2
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": true,
+      "foreignPhone": false,
+      "passportRF": null,
+      "foreignPassport": "yes"
     },
     {
       "id": "12",
@@ -948,7 +1096,13 @@
           "transfers": 0,
           "all": 1
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": true,
+      "foreignPhone": false,
+      "passportRF": null,
+      "foreignPassport": "yes"
     },
     {
       "id": "13",
@@ -991,7 +1145,13 @@
           "transfers": 0,
           "all": 2
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": true,
+      "foreignPhone": false,
+      "passportRF": false,
+      "foreignPassport": "yes"
     },
     {
       "id": "14",
@@ -1034,7 +1194,13 @@
         "region": {
           "asia": 2
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": true,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": false,
+      "foreignPassport": "yes"
     },
     {
       "id": "15",
@@ -1076,8 +1242,17 @@
         },
         "region": {
           "asia": 2
+        },
+        "passport": {
+          "other": -2
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": false,
+      "foreignPassport": "complex"
     },
     {
       "id": "16",
@@ -1117,7 +1292,13 @@
           "transfers": 1,
           "all": 1
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": false,
+      "passportRF": false,
+      "foreignPassport": "yes"
     },
     {
       "id": "17",
@@ -1159,7 +1340,13 @@
         "region": {
           "asia": 2
         }
-      }
+      },
+      "notary": false,
+      "incomeDocs": false,
+      "videoSelfie": false,
+      "foreignPhone": true,
+      "passportRF": false,
+      "foreignPassport": "yes"
     }
   ]
 }

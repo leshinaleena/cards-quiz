@@ -156,9 +156,17 @@ function onOption(e) {
   if (q.type === 'multi') {
     const set = new Set(state.answers[q.id] || []);
     set.has(id) ? set.delete(id) : set.add(id);
+    // Вариант с exclusive (например «Ничего из этого») снимает остальные и наоборот
+    const opt = q.options.find((o) => o.id === id);
+    if (set.has(id)) {
+      q.options.forEach((o) => { if (o.id !== id && (opt.exclusive || o.exclusive)) set.delete(o.id); });
+    }
     state.answers[q.id] = [...set];
-    btn.classList.toggle('is-on', set.has(id));
-    btn.setAttribute('aria-pressed', set.has(id));
+    $$('#opts .opt').forEach((b) => {
+      const on = set.has(b.dataset.id);
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', on);
+    });
     $('#nextBtn').disabled = !set.size;
     card.apply(cardState());
     card.nod();
