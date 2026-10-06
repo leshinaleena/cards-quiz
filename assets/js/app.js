@@ -556,22 +556,28 @@ function setupLead() {
 }
 
 /* ---------- Связь с менеджером ---------- */
-// Сообщение менеджеру от лица клиента: понятное название карты, задача клиента и вопрос
-function answerLines() {
-  const out = [];
-  for (const q of cfg.questions) {
-    const opts = (state.answers[q.id] || []).map((id) => q.options.find((o) => o.id === id)).filter((o) => o && !o.msgSkip);
-    if (!opts.length) continue;
-    const parts = opts.map((o) => o.msgText || o.label);
-    const a = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} и ${parts.at(-1)}` : parts[0];
-    out.push(`— ${(q.msg || '{a}').replace('{a}', a)}`);
-  }
-  return out;
+// Сообщение менеджеру от лица клиента: живые фразы без анкетной разметки и «(а)»
+const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+const joinAnd = (parts) => (parts.length > 1 ? `${parts.slice(0, -1).join(', ')} и ${parts.at(-1)}` : parts[0]);
+
+function answerPhrase(qid) {
+  const q = cfg.questions.find((x) => x.id === qid);
+  if (!q) return '';
+  const opts = (state.answers[q.id] || []).map((id) => q.options.find((o) => o.id === id)).filter((o) => o && !o.msgSkip);
+  if (!opts.length) return '';
+  return (q.msg || '{a}').replace('{a}', joinAnd(opts.map((o) => o.msgText || o.label)));
 }
 
-function cardLine(card) {
-  const facts = [card.price, !isEmpty(card.term) && `оформление ${card.term}`].filter(Boolean).join(', ');
-  return `${card.name || card.tag}${facts ? ` — ${facts}` : ''}`;
+// Задача клиента связным текстом: пары ответов объединяем в одно предложение
+function taskText() {
+  const groups = [['purpose', 'region'], ['features'], ['passport', 'hard'], ['budget', 'urgency']];
+  const known = new Set(groups.flat());
+  cfg.questions.forEach((q) => { if (!known.has(q.id)) groups.push([q.id]); });
+  return groups
+    .map((g) => g.map(answerPhrase).filter(Boolean))
+    .filter((p) => p.length)
+    .map((p) => `${cap(p.join(', '))}.`)
+    .join(' ');
 }
 
 function buildSummary() {
@@ -580,13 +586,11 @@ function buildSummary() {
   const lines = [];
   if (res?.status === 'ok') {
     const it = res.items[state.selected];
-    lines.push(c.greeting, cardLine(it.card));
-    lines.push('', c.importantTitle, ...answerLines());
-    const others = res.items.filter((_, i) => i !== state.selected).map((x) => x.card.name || x.card.tag);
-    if (others.length) lines.push('', `${c.othersTitle} ${others.join('; ')}.`);
-    lines.push('', c.question);
+    lines.push(c.greeting.replace('{card}', it.card.name || it.card.tag), '', taskText());
+    const others = res.items.filter((_, i) => i !== state.selected).map((x) => `«${x.card.name || x.card.tag}»`);
+    if (others.length) lines.push('', c.othersTitle.replace('{list}', joinAnd(others)));
   } else {
-    lines.push(c.noneGreeting, '', c.importantTitle, ...answerLines());
+    lines.push(c.noneGreeting, '', taskText());
   }
   const u = Object.values(utm).filter(Boolean);
   if (u.length) lines.push('', `${c.utmTitle}: ${u.join(' / ')}`);
