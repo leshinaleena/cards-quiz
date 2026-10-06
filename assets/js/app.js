@@ -568,6 +568,8 @@ function setupPhotos() {
     fig.hidden = false;
     $('#heroVisual').classList.add('has-photo');
   });
+  // Фото в блоке «Как это работает»: оплата картой в поездке
+  if (ph.how) { const img = $('#howPhoto img'); img.alt = t('howAlt'); img.onload = () => { $('#howPhoto').hidden = false; observeReveal(); }; img.src = ph.how; }
   // Фото-подложка в блоке связи с менеджером
   if (ph.cta) { const bg = $('#ctaBg'); bg.onload = () => { bg.hidden = false; }; bg.src = ph.cta; }
   probe(ph.manager).then((ok) => {

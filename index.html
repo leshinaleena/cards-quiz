@@ -45,9 +45,7 @@
             <button class="btn btn--primary js-start" id="startBtn" type="button" disabled>
               <span data-t="heroCta">Подобрать карту</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
             </button>
-            <a class="text-link" href="#how"><span data-t="heroHow">Как это работает</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m6 13 6 6 6-6"/></svg></a>
           </div>
-          <p class="hero__note reveal" style="--d:5" data-t="heroNote">Меньше минуты · менеджер подтвердит условия в Telegram</p>
           <p class="config-error" id="configError" hidden>
             Не удалось загрузить config.json. Откройте сайт через веб-сервер (см. README), а не как файл с диска.
           </p>
@@ -70,6 +68,7 @@
       <div class="how" id="how">
         <div class="wrap">
           <h2 class="h2 sr"><span data-t="howTitle">Как это</span> <em class="serif" data-t="howTitleAccent">работает</em></h2>
+          <figure class="how__photo sr" id="howPhoto" hidden><img alt="" decoding="async" data-parallax></figure>
           <div class="steps" id="howSteps">
             <svg class="steps__route" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true">
               <path d="M40 90C220 10 360 10 500 60s300 60 460-20" pathLength="1"/>

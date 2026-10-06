@@ -142,48 +142,57 @@ a { color: inherit; }
 /* =========================================================
    1. HERO: заголовок → польза → кнопка → карта
    ========================================================= */
-.hero { padding-bottom: 0; }
-.hero__grid { display: grid; gap: 44px; padding-top: clamp(12px, 4vw, 40px); }
+.hero { padding-bottom: 0; padding-top: 4px; }
+.hero__grid { display: grid; gap: 30px; padding-top: clamp(8px, 3vw, 40px); }
 .hero__line { display: block; overflow: hidden; padding-bottom: .1em; margin-bottom: -.06em; }
 .hero__line > * { display: inline-block; }
 .hero.is-enter .hero__line > * { animation: lineUp 1.1s var(--ease) both; }
 .hero.is-enter .hero__line:nth-child(2) > * { animation-delay: .14s; }
 @keyframes lineUp { from { transform: translateY(110%); } to { transform: none; } }
-.hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: 34px; }
-.hero__note { margin-top: 18px; font-size: 13px; color: var(--muted); }
+.hero .lead { margin-top: 16px; }
+.hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: 26px; }
 .config-error { margin-top: 12px; font-size: 14px; color: var(--red); }
 
-.hero__visual { --cw: min(66vw, 280px); position: relative; }
+/* Визуал: фото аэропорта + карта, которая выходит за край кадра */
+.hero__visual { --cw: min(46vw, 184px); position: relative; }
 .hero__cardwrap { position: relative; display: grid; place-items: center; padding-block: calc(var(--cw) * .14); }
 .card-slot--hero { position: relative; z-index: 2; }
 .card-slot--hero .tc { --w: var(--cw); }
+.card-slot--hero .tc__front { box-shadow: 0 1.2em 2em -1.2em rgba(40, 10, 15, .45), inset 0 0 0 1px color-mix(in srgb, var(--edge-a) 35%, transparent); }
 .hero.is-enter .card-slot--hero { animation: cardIn 1.4s var(--ease) .3s both; }
 @keyframes cardIn { from { opacity: 0; transform: translateY(28px) scale(.94); } to { opacity: 1; transform: none; } }
 
-/* Атмосферный фрагмент: фото — контекст, карта — главный объект */
-.hero__photo { position: relative; width: 86%; margin-left: auto; aspect-ratio: 4 / 3; border-radius: var(--r-lg); overflow: hidden; background: var(--blush); animation: photoIn 1.4s var(--ease) backwards; }
-.hero__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; }
+.hero__photo { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: var(--r-lg); overflow: hidden; background: var(--blush); animation: photoIn 1.4s var(--ease) backwards; }
+.hero__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; }
 @keyframes photoIn { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
-.hero__visual.has-photo .hero__cardwrap { --cw: min(58vw, 240px); width: fit-content; margin-top: calc(var(--cw) * -.5); padding-block: 0 calc(var(--cw) * .1); }
+.hero__visual.has-photo { padding-bottom: calc(var(--cw) * .32); }
+.hero__visual.has-photo .hero__cardwrap { position: absolute; left: calc(var(--gutter) * -.4); bottom: 0; padding: 0; }
 
 .orbit { position: absolute; left: 50%; top: 50%; width: calc(var(--cw) * 1.45); transform: translate(-50%, -50%); overflow: visible; pointer-events: none; }
 .orbit--back { z-index: 1; }
 .orbit--front { z-index: 3; }
 .orbit__line { fill: none; stroke: var(--wine); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 0; opacity: .55; }
+.hero__visual.has-photo .orbit__line { stroke: #fff; opacity: .7; }
 .hero.is-enter .orbit__line { animation: draw 2.2s var(--ease) .5s both; }
 .hero.is-enter .orbit__line--front { animation-delay: 1.2s; animation-duration: 1.4s; }
 @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
 @media (min-width: 960px) {
-  .hero__grid { grid-template-columns: 1.1fr 1fr; align-items: center; gap: 72px; min-height: calc(100svh - var(--header-h) - 120px); }
-  .hero__visual { --cw: min(26vw, 340px); }
-  .hero__visual.has-photo { padding-left: calc(var(--cw) * .25); }
-  .hero__visual.has-photo .hero__photo { width: 100%; aspect-ratio: 4 / 5; }
-  .hero__visual.has-photo .hero__cardwrap { --cw: min(22vw, 290px); position: absolute; left: 0; bottom: 7%; margin: 0; padding: 0; }
+  .hero__grid { grid-template-columns: 1.1fr 1fr; align-items: center; gap: 72px; min-height: calc(100svh - var(--header-h) - 80px); padding-bottom: 24px; }
+  .hero .lead { margin-top: 22px; }
+  .hero__actions { margin-top: 34px; }
+  .hero__visual { --cw: min(19vw, 250px); }
+  .hero__visual.has-photo { padding: 0 0 0 calc(var(--cw) * .35); }
+  .hero__visual.has-photo .hero__photo { aspect-ratio: 4 / 5; }
+  .hero__visual.has-photo .hero__cardwrap { left: 0; bottom: 8%; }
 }
 
 /* Как это работает */
-.how { margin-top: clamp(56px, 10vw, 112px); padding-block: clamp(56px, 9vw, 104px); border-top: 1px solid var(--line); }
+.how { margin-top: clamp(40px, 8vw, 88px); padding-block: clamp(48px, 9vw, 96px); background: var(--blush); }
+.how .step { background: #fff; }
+.how__photo { margin-top: clamp(24px, 5vw, 40px); border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 4 / 3; background: var(--blush-2); }
+.how__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 62%; transform: scale(1.14); }
+@media (min-width: 860px) { .how__photo { aspect-ratio: 21 / 8; } }
 .how .h2 { margin-top: 0; }
 .steps { position: relative; display: grid; gap: 14px; margin-top: clamp(32px, 6vw, 56px); counter-reset: step; }
 .steps__route { display: none; }
