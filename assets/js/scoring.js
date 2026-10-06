@@ -4,6 +4,7 @@
 //   option.required — при явном несовпадении карта исключается
 //   option.penalty  — сколько баллов отнять при явном несовпадении
 //   card.weights[questionId][optionId] — ручные баллы карты за конкретный ответ
+//   option.reason   — короткая фраза для строки «Подходит Вам, потому что…»
 
 const PLACEHOLDER = /^_+$/;
 
@@ -43,6 +44,7 @@ export function evalMatch(card, rule) {
 export function scoreCard(card, answers, questions) {
   let score = 0;
   let excluded = false;
+  const reasons = [];
   for (const q of questions) {
     for (const optId of answers[q.id] || []) {
       const opt = q.options.find((o) => o.id === optId);
@@ -51,11 +53,13 @@ export function scoreCard(card, answers, questions) {
       if (typeof w === 'number') score += w;
       const ok = evalMatch(card, opt.match);
       if (ok === true) score += opt.points ?? 1;
+      // Причины «почему подходит» для экрана результата
+      if (opt.reason && (ok === true || (!opt.match && typeof w === 'number' && w >= 2))) reasons.push(opt.reason);
       if (ok === false && opt.penalty) score -= opt.penalty;
       if (ok === false && opt.required) excluded = true;
     }
   }
-  return { score, excluded };
+  return { score, excluded, reasons };
 }
 
 // Возвращает { status: 'ok' | 'none', items: [{ card, score, alternative? }] }

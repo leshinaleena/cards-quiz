@@ -1,4 +1,4 @@
-import { icons, logoSVG, globeSVG, globeBadgeSVG, planeSolid } from './icons.js';
+import { icons, logoSVG, planeSolid } from './icons.js';
 import { TravelCard, cardFaceHTML } from './card.js';
 import { pickCards, isEmpty } from './scoring.js';
 import { initAnalytics, track, getUtm } from './analytics.js';
@@ -313,20 +313,24 @@ function renderResults() {
     const badge = it.alternative
       ? `<span class="res-card__alt">${esc(t('alternative'))}</span>`
       : i === 0
-        ? `<span class="res-card__rec" aria-hidden="true"><span>${esc(t('recommend'))}</span>
-             <svg viewBox="0 0 60 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 8c14-6 34 0 40 18"/><path d="m37 22 7 5 4-8"/></svg></span>`
+        ? `<span class="res-card__best" aria-hidden="true">${icons.check}${esc(t('best'))}</span>`
         : '';
+    // «Подходит Вам, потому что…» — из ответов клиента, без повторов, максимум 3
+    const reasons = [...new Set(it.reasons || [])].slice(0, 3);
+    const why = reasons.length
+      ? `<p class="res-card__why"><span>${esc(t('why'))}:</span> ${reasons.map(esc).join(' · ')}</p>` : '';
     const facts = [['Срок', c.term], ['Стоимость', c.price]]
       .map(([k, v]) => `<li><span>${k}</span><b>${esc(isEmpty(v) ? t('unknown') : v)}</b></li>`).join('');
     return `
       <article class="res-card" role="radio" aria-checked="false" tabindex="-1" data-i="${i}" style="--i:${i}"
-        aria-label="${esc(label)}${c.tag ? `, ${esc(c.tag)}` : ''}${i === 0 && !it.alternative ? `, ${esc(t('recommend'))}` : ''}">
+        aria-label="${esc(label)}${c.tag ? `, ${esc(c.tag)}` : ''}${i === 0 && !it.alternative ? `, ${esc(t('best'))}` : ''}">
         ${badge}
         <div class="tc tc--static res-card__visual"><div class="tc__float"><div class="tc__tilt"><div class="tc__spin">
           ${cardFaceHTML({ letter, ...TONES[i] })}
         </div></div></div></div>
         <h3 class="res-card__title">${esc(label)}</h3>
         ${c.tag ? `<p class="res-card__tag">${esc(c.tag)}</p>` : ''}
+        ${why}
         <ul class="res-card__facts">${facts}</ul>
         <span class="res-card__pick"><span class="res-card__radio">${icons.check}</span><span class="res-card__pick-text"></span></span>
       </article>`;
@@ -436,6 +440,8 @@ function buildSummary() {
     const it = res.items[state.selected];
     const { label } = displayInfo(it, state.selected);
     lines.push(`${c.variantTitle}: ${label}${it.card.tag ? ` — ${it.card.tag}` : ''} (код ${it.card.id})`);
+    const reasons = [...new Set(it.reasons || [])].slice(0, 3);
+    if (reasons.length) lines.push(`${t('why')}: ${reasons.join(', ')}`);
     const others = res.items.map((x, i) => (i === state.selected ? null : `${displayInfo(x, i).label} (код ${x.card.id})`)).filter(Boolean);
     if (others.length) lines.push(`Также предложены: ${others.join(', ')}`);
   } else {
@@ -511,12 +517,15 @@ function probe(src) {
 
 function setupPhotos() {
   const ph = cfg.photos || {};
-  // Фото-цитата: грузится лениво, без файла блок не показывается
-  if (ph.quote) {
-    const img = $('#quoteImg');
-    img.onload = () => { $('#quote').hidden = false; observeReveal(); };
-    img.src = ph.quote;
-  }
+  // Атмосферное фото на первом экране: появляется, только если файл есть
+  probe(ph.hero).then((ok) => {
+    if (!ok) return;
+    const fig = $('#heroPhoto');
+    fig.querySelector('img').src = ph.hero;
+    fig.querySelector('img').alt = t('heroAlt');
+    fig.hidden = false;
+    $('#heroVisual').classList.add('has-photo');
+  });
   probe(ph.manager).then((ok) => {
     if (!ok) return;
     const box = $('#ctaManager');
@@ -531,19 +540,14 @@ function setupPhotos() {
   cfg.questions.forEach((q) => q.options.forEach((o) => o.photo && probe(o.photo)));
 }
 
-// Списки из конфига: теги, цифры, шаги, бегущая строка
+// Шаги блока «Как это работает» из конфига
 function renderLists() {
-  const tx = cfg.texts || {};
-  $('#heroTags').innerHTML = (tx.heroTags || []).map((x) => `<li>${esc(x)}</li>`).join('');
-  $('#heroStats').innerHTML = (tx.stats || []).map((x) => `<div><dt>${esc(x.value)}</dt><dd>${esc(x.label)}</dd></div>`).join('');
-  $('#howSteps').insertAdjacentHTML('beforeend', (tx.howSteps || []).map((x, i) => `
+  $('#howSteps').insertAdjacentHTML('beforeend', (t('howSteps') || []).map((x, i) => `
     <article class="step sr" style="--i:${i}">
       <span class="step__num">${pad(i + 1)}</span>
       <h3 class="step__title">${esc(x.title)}</h3>
       <p class="step__text">${esc(x.text)}</p>
     </article>`).join(''));
-  const cities = (tx.marquee || []).map((x) => `<span>${esc(x)}</span>`).join('');
-  $('#marquee').innerHTML = cities + cities;
 }
 
 /* ---------- Появление при прокрутке и параллакс ---------- */
@@ -602,9 +606,7 @@ function fillStatic() {
 async function init() {
   if (reduced) document.documentElement.classList.add('reduced');
   $$('.js-logo').forEach((el) => { el.innerHTML = logoSVG(); });
-  $$('.js-globe').forEach((el) => { el.innerHTML = globeSVG(); });
-  $$('.js-globe-badge').forEach((el) => { el.innerHTML = globeBadgeSVG('ПОДБОР КАРТЫ · 6 ВОПРОСОВ · 1 МИНУТА · '); });
-  $('.route__plane').innerHTML = planeSolid;
+  $('.route__plane').innerHTML = planeSolid;  // самолёт на маршруте квиза
 
   card = new TravelCard({ reduced });
   card.moveTo($('#slotHero'), { animate: false });

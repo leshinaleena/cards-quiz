@@ -12,7 +12,7 @@
   },
   "photos": {
     "_readme": "Фото в assets/photos/. Если файла нет, блок не показывается. Миниатюры стран задаются у вариантов вопроса region (поле photo).",
-    "quote": "assets/photos/band.jpg",
+    "hero": "assets/photos/hero.jpg",
     "manager": "assets/photos/manager.jpg",
     "managerName": "",
     "managerRole": "Менеджер TOP RIDERS, отвечает в Telegram"
@@ -30,9 +30,9 @@
   },
   "texts": {
     "heroEyebrow": "Подбор зарубежной карты",
-    "heroTitleStrong": "Карта для путешествий",
-    "heroTitleLight": "под Ваши задачи",
-    "heroSubtitle": "Ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта. Это займёт меньше минуты.",
+    "heroTitleStrong": "Платите за границей",
+    "heroTitleLight": "без лишних вопросов",
+    "heroSubtitle": "Подберём карту под Вашу поездку: ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта.",
     "heroCta": "Подобрать карту",
     "back": "Назад",
     "next": "Далее",
@@ -41,7 +41,6 @@
     "resultEyebrow": "Результат подбора",
     "resultTitle": "Вам подходят",
     "resultSubtitle": "Нажмите на вариант, чтобы обсудить с менеджером именно его.",
-    "recommend": "рекомендуем",
     "alternative": "Ближайшая альтернатива",
     "selected": "Выбран",
     "select": "Выбрать",
@@ -60,28 +59,6 @@
     "restart": "Пройти заново",
     "footer": "TOP RIDERS · подбор зарубежных карт для путешествий",
     "heroHow": "Как это работает",
-    "heroTags": [
-      "6 вопросов",
-      "меньше минуты",
-      "2–3 варианта",
-      "менеджер в Telegram"
-    ],
-    "statsLabel": "Что Вы получите",
-    "stats": [
-      {
-        "value": "2–3",
-        "label": "подходящих варианта под Ваши ответы"
-      },
-      {
-        "value": "6",
-        "label": "вопросов, на всё меньше минуты"
-      },
-      {
-        "value": "1",
-        "label": "менеджер подтвердит условия в Telegram"
-      }
-    ],
-    "howLabel": "Три шага",
     "howTitle": "Как это",
     "howTitleAccent": "работает",
     "howSteps": [
@@ -98,27 +75,14 @@
         "text": "Ответы скопируются сами, менеджер сразу поймёт задачу и подтвердит условия."
       }
     ],
-    "marquee": [
-      "Лос-Анджелес",
-      "Нью-Йорк",
-      "Сан-Франциско",
-      "Париж",
-      "Майами",
-      "Токио",
-      "Лас-Вегас",
-      "Дубай",
-      "Чикаго",
-      "Бали"
-    ],
-    "quoteLabel": "TOP RIDERS · Travel",
-    "quoteStrong": "Путешествуйте уверенно —",
-    "quoteAccent": "мы всё уже просчитали",
     "resultTitleAccent": "эти варианты",
-    "compareLabel": "Параметры",
     "compareTitleAccent": "вариантов",
     "nonstandardTitleAccent": "нестандартная",
-    "ctaLabel": "Следующий шаг",
-    "ctaTitleAccent": "детали?"
+    "ctaTitleAccent": "детали?",
+    "heroNote": "Меньше минуты · менеджер подтвердит условия в Telegram",
+    "best": "Лучшее соответствие",
+    "why": "Подходит Вам, потому что",
+    "heroAlt": "Столик кафе с кофе и обложкой паспорта у окна на старую европейскую улицу"
   },
   "clipboard": {
     "greeting": "Здравствуйте! Я прошёл(а) подбор карты на сайте TOP RIDERS.",
@@ -148,7 +112,8 @@
               "#B9806A"
             ],
             "tone": "wine"
-          }
+          },
+          "reason": "для путешествий"
         },
         {
           "id": "services",
@@ -160,7 +125,8 @@
             ],
             "icon": "apps",
             "tone": "ink"
-          }
+          },
+          "reason": "для зарубежных сервисов"
         },
         {
           "id": "transfers",
@@ -171,7 +137,8 @@
               "#69131D"
             ],
             "tone": "pearl"
-          }
+          },
+          "reason": "принимает переводы из-за рубежа"
         },
         {
           "id": "all",
@@ -182,7 +149,8 @@
               "#C9A06E"
             ],
             "tone": "wine"
-          }
+          },
+          "reason": "универсальный вариант"
         }
       ]
     },
@@ -203,7 +171,8 @@
           "card": {
             "label": "EUROPE"
           },
-          "photo": "assets/photos/europe.jpg"
+          "photo": "assets/photos/europe.jpg",
+          "reason": "поездки в Европу"
         },
         {
           "id": "asia",
@@ -216,7 +185,8 @@
           "card": {
             "label": "ASIA"
           },
-          "photo": "assets/photos/asia.jpg"
+          "photo": "assets/photos/asia.jpg",
+          "reason": "поездки в Азию"
         },
         {
           "id": "usa",
@@ -229,7 +199,8 @@
           "card": {
             "label": "USA · CANADA"
           },
-          "photo": "assets/photos/usa.jpg"
+          "photo": "assets/photos/usa.jpg",
+          "reason": "поездки в США и Канаду"
         },
         {
           "id": "mixed",
@@ -242,7 +213,8 @@
           "card": {
             "label": "WORLDWIDE"
           },
-          "photo": "assets/photos/world.jpg"
+          "photo": "assets/photos/world.jpg",
+          "reason": "поездки по разным странам"
         }
       ]
     },
@@ -271,7 +243,8 @@
           "card": {
             "icon": "pay"
           },
-          "required": true
+          "required": true,
+          "reason": "Apple Pay / Google Pay"
         },
         {
           "id": "booking",
@@ -283,7 +256,8 @@
           },
           "card": {
             "icon": "booking"
-          }
+          },
+          "reason": "бронь авто и отелей"
         },
         {
           "id": "apps",
@@ -295,7 +269,8 @@
           },
           "card": {
             "icon": "apps"
-          }
+          },
+          "reason": "оплата в приложениях"
         },
         {
           "id": "multi",
@@ -307,7 +282,8 @@
           },
           "card": {
             "icon": "currency"
-          }
+          },
+          "reason": "мультивалютный счёт"
         }
       ]
     },
@@ -329,7 +305,8 @@
           "card": {
             "label": "REMOTE",
             "icon": "remote"
-          }
+          },
+          "reason": "оформление дистанционно"
         },
         {
           "id": "visit",
@@ -360,7 +337,8 @@
             "field": "priceValue",
             "lte": 25000
           },
-          "penalty": 3
+          "penalty": 3,
+          "reason": "в рамках бюджета"
         },
         {
           "id": "mid",
@@ -370,7 +348,8 @@
             "field": "priceValue",
             "lte": 35000
           },
-          "penalty": 3
+          "penalty": 3,
+          "reason": "в рамках бюджета"
         },
         {
           "id": "high",
@@ -379,7 +358,8 @@
           "match": {
             "field": "priceValue",
             "gte": 0
-          }
+          },
+          "reason": "в рамках бюджета"
         },
         {
           "id": "any",
@@ -405,7 +385,8 @@
             "label": "EXPRESS",
             "icon": "fast"
           },
-          "penalty": 2
+          "penalty": 2,
+          "reason": "быстрый выпуск"
         },
         {
           "id": "month",
@@ -415,7 +396,8 @@
             "field": "termDays",
             "lte": 31
           },
-          "penalty": 1
+          "penalty": 1,
+          "reason": "выпуск в течение месяца"
         },
         {
           "id": "later",
