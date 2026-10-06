@@ -1,5 +1,5 @@
 {
-  "_readme": "Конфиг квиза TOP RIDERS. Меняйте тексты, вопросы и карты здесь, код трогать не нужно. null или \"___\" означает «не заполнено»: такой параметр не даёт баллов и показывается в таблице как «уточняется». Подробности в README.md. Коды карт (01–10) расшифрованы у менеджера; названия банков в этот файл не пишем: он публично доступен на сайте.",
+  "_readme": "Конфиг квиза TOP RIDERS. Меняйте тексты, вопросы и карты здесь, код трогать не нужно. null или \"___\" означает «не заполнено»: такой параметр не даёт баллов и показывается в таблице как «уточняется». Подробности в README.md. Коды карт (01–17) расшифрованы у менеджера; названия банков в этот файл не пишем: он публично доступен на сайте. Источник данных: таблица «Описание банков» (РРЦ).",
   "brand": {
     "name": "TOP RIDERS",
     "telegramManager": "https://t.me/TopRiders_Travel",
@@ -336,29 +336,29 @@
       "options": [
         {
           "id": "low",
-          "label": "До 25 000 ₽",
+          "label": "До 20 000 ₽",
           "points": 2,
           "match": {
             "field": "priceValue",
-            "lte": 25000
+            "lte": 20000
           },
           "penalty": 3,
           "reason": "в рамках бюджета"
         },
         {
           "id": "mid",
-          "label": "25 000 – 35 000 ₽",
+          "label": "20 000 – 30 000 ₽",
           "points": 2,
           "match": {
             "field": "priceValue",
-            "lte": 35000
+            "lte": 30000
           },
           "penalty": 3,
           "reason": "в рамках бюджета"
         },
         {
           "id": "high",
-          "label": "Более 35 000 ₽",
+          "label": "Более 30 000 ₽",
           "points": 1,
           "match": {
             "field": "priceValue",
@@ -455,28 +455,33 @@
     {
       "id": "01",
       "label": "Вариант",
-      "tag": "Для онлайн-покупок",
+      "tag": "Самый доступный",
       "active": true,
       "priority": 0,
-      "applePay": true,
-      "googlePay": true,
+      "applePay": false,
+      "googlePay": false,
       "booking": false,
       "onlinePayments": true,
-      "multiCurrency": false,
+      "multiCurrency": true,
       "currencies": [
-        "USD или EUR"
+        "USD или EUR",
+        "доп. счета в 14 валютах"
       ],
       "remote": true,
-      "format": "Дистанционно, видеозвонок с банком",
-      "term": "1–1,5 недели",
-      "termDays": 10,
-      "price": "24 900 ₽",
-      "priceValue": 24900,
+      "format": "Без доверенности: загранпаспорт и селфи",
+      "term": "1 рабочий день",
+      "termDays": 1,
+      "price": "9 900 ₽",
+      "priceValue": 9900,
       "transfersIn": "Нет",
       "regions": [
         "Европа",
         "Азия",
         "США и Канада"
+      ],
+      "strengths": [
+        "Готова за 1 рабочий день",
+        "Для онлайн-покупок и подписок"
       ],
       "weights": {
         "purpose": {
@@ -485,18 +490,101 @@
           "transfers": 0,
           "all": 0
         }
-      },
-      "strengths": [
-        "Сразу привязывается к Apple Pay и Google Pay",
-        "Оформление за 1–1,5 недели, верификация по видеосвязи"
-      ]
+      }
     },
     {
       "id": "02",
       "label": "Вариант",
-      "tag": "Apple Pay и P2P-переводы",
+      "tag": "Выгодный старт",
       "active": true,
       "priority": 0,
+      "applePay": false,
+      "googlePay": false,
+      "booking": true,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счета: RUB"
+      ],
+      "remote": true,
+      "format": "Дистанционно, нужна доверенность",
+      "term": "1–2 недели",
+      "termDays": 14,
+      "price": "14 900 ₽",
+      "priceValue": 14900,
+      "transfersIn": "Visa Direct и P2P (входящие)",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "strengths": [
+        "Кредитный БИН — его чаще принимают при аренде авто и в отелях",
+        "Вывод в РФ из приложения банка",
+        "Удобно пополнять из банков РФ"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 2,
+          "services": 1,
+          "transfers": 2,
+          "all": 2
+        },
+        "region": {
+          "asia": 2
+        }
+      }
+    },
+    {
+      "id": "03",
+      "label": "Вариант",
+      "tag": "Быстрый выпуск",
+      "active": true,
+      "priority": 2,
+      "applePay": true,
+      "googlePay": true,
+      "booking": true,
+      "onlinePayments": true,
+      "multiCurrency": false,
+      "currencies": [
+        "USD или EUR"
+      ],
+      "remote": true,
+      "format": "Без доверенности, только загранпаспорт",
+      "term": "4 рабочих дня",
+      "termDays": 6,
+      "price": "29 900 ₽",
+      "priceValue": 29900,
+      "transfersIn": "Входящий SWIFT, Visa Direct и P2P",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "strengths": [
+        "Выпуск за 4 рабочих дня",
+        "Входящий SWIFT и вывод в РФ",
+        "Для оформления нужен только загранпаспорт"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 3,
+          "services": 2,
+          "transfers": 3,
+          "all": 3
+        },
+        "region": {
+          "asia": 2
+        }
+      }
+    },
+    {
+      "id": "04",
+      "label": "Вариант",
+      "tag": "Для брони авто и отелей",
+      "active": true,
+      "priority": 1,
       "applePay": true,
       "googlePay": true,
       "booking": true,
@@ -504,79 +592,39 @@
       "multiCurrency": true,
       "currencies": [
         "USD или EUR",
-        "доп. счета: AMD, RUB"
+        "доп. счета: RUB, CNY, AED и др."
       ],
       "remote": true,
-      "format": "Дистанционно, без доверенности",
-      "term": "около 3 недель",
+      "format": "Дистанционно, нужна нотариальная доверенность",
+      "term": "до 3 недель",
       "termDays": 21,
-      "price": "30 900 ₽",
-      "priceValue": 30900,
-      "transfersIn": "Нет, есть P2P на Mastercard",
-      "regions": [
-        "Европа",
-        "Азия",
-        "США и Канада"
-      ],
-      "weights": {
-        "purpose": {
-          "travel": 2,
-          "services": 2,
-          "transfers": 0,
-          "all": 1
-        }
-      },
-      "strengths": [
-        "Кредитный БИН — его чаще принимают при аренде авто и депозитах в отелях",
-        "P2P-переводы на карты Mastercard",
-        "Оформление без доверенности"
-      ]
-    },
-    {
-      "id": "03",
-      "label": "Вариант",
-      "tag": "Пять валют на одной карте",
-      "active": true,
-      "priority": 0,
-      "applePay": true,
-      "googlePay": true,
-      "booking": false,
-      "onlinePayments": true,
-      "multiCurrency": true,
-      "currencies": [
-        "GEL",
-        "USD",
-        "EUR",
-        "GBP",
-        "RUB"
-      ],
-      "remote": true,
-      "format": "Дистанционно, верификация с банком",
-      "term": "2–3 месяца",
-      "termDays": 90,
-      "price": "20 900 ₽",
-      "priceValue": 20900,
+      "price": "29 900 ₽",
+      "priceValue": 29900,
       "transfersIn": "Входящий SWIFT",
       "regions": [
         "Европа",
         "Азия",
         "США и Канада"
       ],
+      "strengths": [
+        "Кредитный БИН — его чаще принимают при аренде авто и в отелях",
+        "Вывод в РФ без комиссии",
+        "Недорогое обслуживание"
+      ],
       "weights": {
         "purpose": {
-          "travel": 2,
+          "travel": 3,
           "services": 1,
           "transfers": 2,
-          "all": 3
+          "all": 2
+        },
+        "region": {
+          "asia": 1
         }
-      },
-      "strengths": [
-        "Мультивалютный счёт: GEL, USD, EUR, GBP, RUB",
-        "Премиальные карты VISA Signature и Mastercard World Elite"
-      ]
+      }
     },
     {
-      "id": "04",
+      "id": "05",
       "label": "Вариант",
       "tag": "Переводы за рубеж",
       "active": true,
@@ -602,105 +650,21 @@
         "Азия",
         "США и Канада"
       ],
+      "strengths": [
+        "Исходящие переводы Visa Direct",
+        "Исходящий SWIFT в юанях"
+      ],
       "weights": {
         "purpose": {
           "travel": 1,
           "services": 1,
           "transfers": 2,
-          "all": 2
+          "all": 1
         }
-      },
-      "strengths": [
-        "Исходящий SWIFT в юанях, рублях и долларах",
-        "Пополнение из РФ рублёвым SWIFT"
-      ]
-    },
-    {
-      "id": "05",
-      "label": "Вариант",
-      "tag": "Для брони авто и отелей",
-      "active": true,
-      "priority": 2,
-      "applePay": true,
-      "googlePay": true,
-      "booking": true,
-      "onlinePayments": true,
-      "multiCurrency": true,
-      "currencies": [
-        "USD или EUR",
-        "доп. счета: RUB, CNY, AED и др."
-      ],
-      "remote": true,
-      "format": "Дистанционно, нужна нотариальная доверенность",
-      "term": "до 3 недель",
-      "termDays": 21,
-      "price": "32 900 ₽",
-      "priceValue": 32900,
-      "transfersIn": "Входящий SWIFT",
-      "regions": [
-        "Европа",
-        "Азия",
-        "США и Канада"
-      ],
-      "weights": {
-        "purpose": {
-          "travel": 3,
-          "services": 1,
-          "transfers": 2,
-          "all": 2
-        }
-      },
-      "strengths": [
-        "Кредитный БИН — его чаще принимают при аренде авто и депозитах в отелях",
-        "Вывод в РФ без комиссии",
-        "Дополнительные счета в 8 валютах"
-      ]
+      }
     },
     {
       "id": "06",
-      "label": "Вариант",
-      "tag": "Максимум переводов",
-      "active": true,
-      "priority": 1,
-      "applePay": true,
-      "googlePay": true,
-      "booking": true,
-      "onlinePayments": true,
-      "multiCurrency": true,
-      "currencies": [
-        "USD или EUR",
-        "доп. счета: AMD, RUB и др."
-      ],
-      "remote": true,
-      "format": "Дистанционно, нужна справка 2-НДФЛ",
-      "term": "1–2 недели",
-      "termDays": 14,
-      "price": "40 900 ₽",
-      "priceValue": 40900,
-      "transfersIn": "Входящий SWIFT в 10 валютах",
-      "regions": [
-        "Европа",
-        "Азия",
-        "США и Канада"
-      ],
-      "weights": {
-        "purpose": {
-          "travel": 2,
-          "services": 1,
-          "transfers": 3,
-          "all": 2
-        },
-        "region": {
-          "asia": 2
-        }
-      },
-      "strengths": [
-        "Входящий и исходящий SWIFT в 10 валютах",
-        "Безлимитные платежи по карте и бизнес-залы в аэропортах"
-      ]
-    },
-    {
-      "id": "07",
       "label": "Вариант",
       "tag": "Без доверенности",
       "active": true,
@@ -718,13 +682,18 @@
       "format": "Дистанционно, без доверенности",
       "term": "3–4 недели",
       "termDays": 28,
-      "price": "24 900 ₽",
-      "priceValue": 24900,
+      "price": "29 900 ₽",
+      "priceValue": 29900,
       "transfersIn": "SWIFT только в рублях",
       "regions": [
         "Европа",
         "Азия",
         "США и Канада"
+      ],
+      "strengths": [
+        "Оформление без доверенности",
+        "Премиальная карта с привилегиями",
+        "Кредитный БИН — его чаще принимают при аренде авто и в отелях"
       ],
       "weights": {
         "purpose": {
@@ -733,59 +702,135 @@
           "transfers": 1,
           "all": 1
         }
-      },
-      "strengths": [
-        "Оформление без доверенности",
-        "Кредитный БИН и вывод в РФ"
-      ]
+      }
     },
     {
-      "id": "08",
+      "id": "07",
       "label": "Вариант",
-      "tag": "Выгодный старт",
+      "tag": "Переводы и вывод в РФ",
       "active": true,
       "priority": 0,
       "applePay": false,
       "googlePay": false,
-      "booking": true,
+      "booking": false,
       "onlinePayments": true,
-      "multiCurrency": true,
+      "multiCurrency": false,
       "currencies": [
-        "USD или EUR",
-        "доп. счёт: RUB"
+        "местная валюта"
       ],
       "remote": true,
-      "format": "Дистанционно, нужна доверенность",
-      "term": "1–2 недели",
-      "termDays": 14,
-      "price": "19 900 ₽",
-      "priceValue": 19900,
+      "format": "Без доверенности",
+      "term": "от 1 рабочего дня",
+      "termDays": 3,
+      "price": "14 900 ₽",
+      "priceValue": 14900,
       "transfersIn": "Visa Direct и P2P",
       "regions": [
         "Европа",
         "Азия",
         "США и Канада"
       ],
+      "strengths": [
+        "Быстрый выпуск без доверенности",
+        "Переводы Visa Direct и P2P",
+        "Вывод в РФ на карты МИР"
+      ],
       "weights": {
         "purpose": {
-          "travel": 1,
+          "travel": 0,
           "services": 1,
-          "transfers": 1,
+          "transfers": 2,
           "all": 1
-        },
-        "region": {
-          "asia": 2
         }
-      },
+      }
+    },
+    {
+      "id": "08",
+      "label": "Вариант",
+      "tag": "Пять валют на одной карте",
+      "active": true,
+      "priority": 0,
+      "applePay": true,
+      "googlePay": true,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "GEL",
+        "USD",
+        "EUR",
+        "GBP",
+        "RUB"
+      ],
+      "remote": true,
+      "format": "Дистанционно, верификация с банком",
+      "term": "2–3 месяца",
+      "termDays": 90,
+      "price": "19 900 ₽",
+      "priceValue": 19900,
+      "transfersIn": "Входящий SWIFT",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
       "strengths": [
-        "Первый год обслуживания на тарифе Gold бесплатно",
-        "Выпуск за 1–2 недели, поддерживает Alipay"
-      ]
+        "Мультивалютный счёт: GEL, USD, EUR, GBP, RUB",
+        "Премиальные карты VISA Signature и Mastercard World Elite"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 2,
+          "services": 1,
+          "transfers": 2,
+          "all": 3
+        }
+      }
     },
     {
       "id": "09",
       "label": "Вариант",
       "tag": "Без документов",
+      "active": true,
+      "priority": 0,
+      "applePay": true,
+      "googlePay": true,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": false,
+      "currencies": [
+        "USD"
+      ],
+      "remote": true,
+      "format": "Без документов: телефон и email",
+      "term": "моментально",
+      "termDays": 1,
+      "price": "24 900 ₽",
+      "priceValue": 24900,
+      "transfersIn": "Нет, пополнение в USDT",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "strengths": [
+        "Моментальное оформление без документов",
+        "Конвертация USDT в USD без комиссии",
+        "Можно оформить до 18 лет"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 1,
+          "services": 3,
+          "transfers": 0,
+          "all": 1
+        }
+      }
+    },
+    {
+      "id": "10",
+      "label": "Вариант",
+      "tag": "Крипто-карта",
       "active": true,
       "priority": 0,
       "applePay": false,
@@ -797,37 +842,204 @@
         "USD"
       ],
       "remote": true,
-      "format": "Без документов и верификации",
+      "format": "Без документов",
       "term": "сразу (виртуальная), ~2 недели (пластик)",
       "termDays": 1,
-      "price": "30 900 ₽",
-      "priceValue": 30900,
-      "transfersIn": "Нет, пополнение через USDT",
+      "price": "от 14 900 ₽",
+      "priceValue": 14900,
+      "transfersIn": "Нет, пополнение в USDT",
       "regions": [
         "Европа",
         "Азия",
         "США и Канада"
+      ],
+      "strengths": [
+        "Моментальное оформление без документов",
+        "Конвертация USDT в USD без комиссии"
       ],
       "weights": {
         "purpose": {
           "travel": 1,
           "services": 3,
           "transfers": 0,
-          "all": 0
+          "all": 1
         },
         "region": {
           "asia": 2
         }
-      },
-      "strengths": [
-        "Без документов и верификации",
-        "Виртуальная карта готова сразу после оформления"
-      ]
+      }
     },
     {
-      "id": "10",
+      "id": "11",
       "label": "Вариант",
-      "tag": "Быстрый выпуск",
+      "tag": "Apple Pay и кредитный БИН",
+      "active": true,
+      "priority": 0,
+      "applePay": true,
+      "googlePay": true,
+      "booking": true,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счета: AMD, RUB"
+      ],
+      "remote": true,
+      "format": "Дистанционно, без доверенности",
+      "term": "около 3 недель",
+      "termDays": 21,
+      "price": "29 900 ₽",
+      "priceValue": 29900,
+      "transfersIn": "Нет, есть P2P на Mastercard",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "strengths": [
+        "Кредитный БИН — его чаще принимают при аренде авто и в отелях",
+        "Оформление без доверенности",
+        "P2P-переводы на карты Mastercard"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 3,
+          "services": 2,
+          "transfers": 1,
+          "all": 2
+        }
+      }
+    },
+    {
+      "id": "12",
+      "label": "Вариант",
+      "tag": "Для онлайн-покупок",
+      "active": true,
+      "priority": 0,
+      "applePay": true,
+      "googlePay": true,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счета: AMD, RUB"
+      ],
+      "remote": true,
+      "format": "Дистанционно, без доверенности",
+      "term": "1–1,5 недели",
+      "termDays": 10,
+      "price": "29 900 ₽",
+      "priceValue": 29900,
+      "transfersIn": "Нет",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "strengths": [
+        "Быстрое оформление",
+        "Для онлайн-покупок и подписок"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 1,
+          "services": 3,
+          "transfers": 0,
+          "all": 1
+        }
+      }
+    },
+    {
+      "id": "13",
+      "label": "Вариант",
+      "tag": "Мультивалютная виртуальная",
+      "active": true,
+      "priority": 0,
+      "applePay": true,
+      "googlePay": false,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD",
+        "EUR",
+        "KZT",
+        "RUB"
+      ],
+      "remote": true,
+      "format": "Без доверенности",
+      "term": "1 рабочий день",
+      "termDays": 1,
+      "price": "19 900 ₽",
+      "priceValue": 19900,
+      "transfersIn": "Нет",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "strengths": [
+        "Мультивалютная: USD, EUR, KZT, RUB",
+        "Привязка к Apple Pay и Samsung Pay",
+        "Доход на остаток счёта"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 1,
+          "services": 3,
+          "transfers": 0,
+          "all": 2
+        }
+      }
+    },
+    {
+      "id": "14",
+      "label": "Вариант",
+      "tag": "Максимум переводов",
+      "active": true,
+      "priority": 1,
+      "applePay": true,
+      "googlePay": true,
+      "booking": true,
+      "onlinePayments": true,
+      "multiCurrency": true,
+      "currencies": [
+        "USD или EUR",
+        "доп. счета: AMD, RUB и др."
+      ],
+      "remote": true,
+      "format": "Дистанционно, нужна справка о доходах",
+      "term": "1–2 недели",
+      "termDays": 14,
+      "price": "29 900 ₽",
+      "priceValue": 29900,
+      "transfersIn": "Входящий SWIFT в 10 валютах",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "strengths": [
+        "Входящий и исходящий SWIFT, входящие без лимита и комиссии",
+        "Безлимитные платежи по карте"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 2,
+          "services": 1,
+          "transfers": 3,
+          "all": 3
+        },
+        "region": {
+          "asia": 2
+        }
+      }
+    },
+    {
+      "id": "15",
+      "label": "Вариант",
+      "tag": "Выпуск за 5 дней",
       "active": true,
       "priority": 0,
       "applePay": false,
@@ -839,7 +1051,7 @@
         "USD или EUR"
       ],
       "remote": true,
-      "format": "Дистанционно, сканы паспортов",
+      "format": "Дистанционно, без доверенности",
       "term": "5 рабочих дней",
       "termDays": 7,
       "price": "39 900 ₽",
@@ -849,6 +1061,11 @@
         "Европа",
         "Азия",
         "США и Канада"
+      ],
+      "strengths": [
+        "Выпуск за 5 рабочих дней",
+        "Входящий SWIFT",
+        "Вывод в РФ из приложения"
       ],
       "weights": {
         "purpose": {
@@ -860,11 +1077,89 @@
         "region": {
           "asia": 2
         }
-      },
+      }
+    },
+    {
+      "id": "16",
+      "label": "Вариант",
+      "tag": "Неименная карта",
+      "active": true,
+      "priority": 0,
+      "applePay": false,
+      "googlePay": false,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": false,
+      "currencies": [
+        "USD"
+      ],
+      "remote": true,
+      "format": "Без доверенности",
+      "term": "5–10 рабочих дней",
+      "termDays": 12,
+      "price": "29 900 ₽",
+      "priceValue": 29900,
+      "transfersIn": "Нет, есть переводы Visa+ и P2P",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
       "strengths": [
-        "Выпуск за 5 рабочих дней",
-        "Входящий SWIFT и переводы Visa Direct"
-      ]
+        "Быстрый выпуск",
+        "Недорогое обслуживание",
+        "Вывод в РФ из приложения"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 1,
+          "services": 1,
+          "transfers": 1,
+          "all": 1
+        }
+      }
+    },
+    {
+      "id": "17",
+      "label": "Вариант",
+      "tag": "Высокие лимиты",
+      "active": true,
+      "priority": 0,
+      "applePay": true,
+      "googlePay": true,
+      "booking": false,
+      "onlinePayments": true,
+      "multiCurrency": false,
+      "currencies": [
+        "USD"
+      ],
+      "remote": true,
+      "format": "Без доверенности",
+      "term": "1–2 рабочих дня (виртуальная)",
+      "termDays": 2,
+      "price": "от 14 900 ₽",
+      "priceValue": 14900,
+      "transfersIn": "Нет",
+      "regions": [
+        "Европа",
+        "Азия",
+        "США и Канада"
+      ],
+      "strengths": [
+        "Высокие лимиты: до 15 000 $ в день",
+        "Снятие наличных с пластиковой карты"
+      ],
+      "weights": {
+        "purpose": {
+          "travel": 2,
+          "services": 3,
+          "transfers": 0,
+          "all": 1
+        },
+        "region": {
+          "asia": 2
+        }
+      }
     }
   ]
 }
