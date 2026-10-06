@@ -517,7 +517,6 @@ function leadPayload(form) {
 function setupLead() {
   const form = $('#leadForm');
   const ep = cfg.leads?.endpoint;
-  if (!ep) return;
   form.hidden = false;
   if (cfg.leads.privacyUrl) { $('#leadPrivacy').href = cfg.leads.privacyUrl; $('#leadPrivacy').hidden = false; }
   const status = (text, ok) => {
@@ -531,6 +530,15 @@ function setupLead() {
     if (phone.length < 10) { status(t('leadPhoneError'), false); form.phone.focus(); return; }
     if (!form.consent.checked) { form.consent.focus(); return; }
     const btn = $('#leadSubmit');
+    const it0 = state.result?.status === 'ok' ? state.result.items[state.selected] : null;
+    if (!ep) {
+      // Таблица ещё не подключена: отправляем заявку менеджеру в Telegram с контактами и ответами
+      const contact = [`Имя: ${form.name.value.trim()}`, `Телефон: ${form.phone.value.trim()}`, form.email.value.trim() && `Email: ${form.email.value.trim()}`].filter(Boolean).join('\n');
+      window.open(tgLink(`${contact}\n\n${buildSummary()}`), '_blank', 'noopener');
+      status(t('leadTg'), true);
+      track(cfg.analytics?.goals?.lead, { variant: it0 ? it0.card.id : 'none', via: 'telegram' });
+      return;
+    }
     btn.disabled = true; btn.querySelector('span').textContent = t('leadSending');
     try {
       // Apps Script не отдаёт CORS-заголовки, поэтому no-cors: ответ не читаем, ошибкой считаем только сбой сети
@@ -557,7 +565,7 @@ function buildSummary() {
     const { label } = displayInfo(it, state.selected);
     lines.push(`${c.variantTitle}: ${label}${it.card.tag ? ` — ${it.card.tag}` : ''} (код ${it.card.id})`);
     const reasons = [...new Set(it.reasons || [])].slice(0, 3);
-    if (reasons.length) lines.push(`${t('why')}: ${reasons.join(', ')}`);
+    if (reasons.length) lines.push(`Подходит, потому что: ${reasons.join(', ')}`);
     const others = res.items.map((x, i) => (i === state.selected ? null : `${displayInfo(x, i).label} (код ${x.card.id})`)).filter(Boolean);
     if (others.length) lines.push(`Также предложены: ${others.join(', ')}`);
   } else {
@@ -571,6 +579,13 @@ function buildSummary() {
   const u = Object.entries(utm);
   if (u.length) lines.push('', `${c.utmTitle}: ${u.map(([k, v]) => `${k}=${v}`).join(', ')}`);
   return lines.join('\n');
+}
+
+// Ссылка в Telegram с готовым текстом: t.me/<username>?text=… открывает чат с менеджером,
+// и сообщение уже стоит в поле ввода — клиенту остаётся нажать «Отправить»
+function tgLink(text) {
+  const base = (cfg.brand?.telegramManager || '').split('?')[0];
+  return `${base}?text=${encodeURIComponent(text.slice(0, 1500))}`;
 }
 
 // Копирование, надёжное и для iOS Safari: сначала Clipboard API (вызов в рамках тапа),
@@ -607,6 +622,8 @@ function copyText(text) {
 function onContact(e) {
   // Копируем синхронно в рамках клика; ссылка открывается штатно (target=_blank)
   const text = buildSummary();
+  // Подставляем текст в ссылку до перехода — браузер откроет уже обновлённый адрес
+  if (e?.currentTarget?.tagName === 'A') e.currentTarget.href = tgLink(text);
   const box = e?.currentTarget?.closest('[data-cta]') || $('.cta');
   const hint = box.querySelector('.js-hint');
   copyText(text).then((ok) => {
