@@ -11,19 +11,11 @@
     "siteLabel": "topriders.ru"
   },
   "photos": {
-    "_readme": "Фото кладутся в папку assets/photos/ с этими именами. Если файла нет, блок просто не показывается.",
-    "hero": [
-      "assets/photos/hero.jpg",
-      "assets/photos/hero-2.jpg",
-      "assets/photos/hero-3.jpg"
-    ],
-    "heroAlt": "Путешествие с картой TOP RIDERS",
+    "_readme": "Фото в assets/photos/. Если файла нет, блок не показывается. Миниатюры стран задаются у вариантов вопроса region (поле photo).",
+    "quote": "assets/photos/band.jpg",
     "manager": "assets/photos/manager.jpg",
     "managerName": "",
-    "managerRole": "Менеджер TOP RIDERS, отвечает в Telegram",
-    "band": "assets/photos/band.jpg",
-    "cta": "assets/photos/cta.jpg",
-    "loading": "assets/photos/loading.jpg"
+    "managerRole": "Менеджер TOP RIDERS, отвечает в Telegram"
   },
   "analytics": {
     "metrikaId": "",
@@ -47,26 +39,86 @@
     "multiHint": "Можно выбрать несколько",
     "loading": "Подбираем варианты под Ваши ответы",
     "resultEyebrow": "Результат подбора",
-    "resultTitle": "Вам подходят эти варианты",
+    "resultTitle": "Вам подходят",
     "resultSubtitle": "Нажмите на вариант, чтобы обсудить с менеджером именно его.",
     "recommend": "рекомендуем",
     "alternative": "Ближайшая альтернатива",
     "selected": "Выбран",
     "select": "Выбрать",
-    "compareTitle": "Сравнение вариантов",
+    "compareTitle": "Сравнение",
     "compareDiff": "отличается",
     "unknown": "уточняется",
     "disclaimer": "Точные условия зависят от банка и подтверждаются менеджером.",
-    "nonstandardTitle": "Ваша задача нестандартная",
+    "nonstandardTitle": "Ваша задача",
     "nonstandardText": "Менеджер подберёт решение лично. Напишите нам, и мы обсудим варианты под Ваши ответы.",
-    "ctaTitle": "Обсудим детали?",
+    "ctaTitle": "Обсудим",
     "ctaText": "Менеджер ответит в Telegram и подтвердит актуальные условия.",
     "ctaButton": "Связаться с менеджером",
     "ctaCopied": "Ваши ответы скопированы, вставьте их в чат, чтобы менеджер сразу понял задачу",
     "ctaCopyFailed": "Не получилось скопировать автоматически. Просто опишите задачу в чате, менеджер поможет.",
     "ctaPhoneLabel": "или позвоните",
     "restart": "Пройти заново",
-    "footer": "TOP RIDERS · подбор зарубежных карт для путешествий"
+    "footer": "TOP RIDERS · подбор зарубежных карт для путешествий",
+    "heroHow": "Как это работает",
+    "heroTags": [
+      "6 вопросов",
+      "меньше минуты",
+      "2–3 варианта",
+      "менеджер в Telegram"
+    ],
+    "statsLabel": "Что Вы получите",
+    "stats": [
+      {
+        "value": "2–3",
+        "label": "подходящих варианта под Ваши ответы"
+      },
+      {
+        "value": "6",
+        "label": "вопросов, на всё меньше минуты"
+      },
+      {
+        "value": "1",
+        "label": "менеджер подтвердит условия в Telegram"
+      }
+    ],
+    "howLabel": "Три шага",
+    "howTitle": "Как это",
+    "howTitleAccent": "работает",
+    "howSteps": [
+      {
+        "title": "Ответьте на 6 вопросов",
+        "text": "Цель поездки, страны, важные функции, формат оформления, бюджет и сроки."
+      },
+      {
+        "title": "Сравните варианты",
+        "text": "Покажем 2–3 карты и таблицу: Apple Pay, бронь, валюты, сроки и стоимость."
+      },
+      {
+        "title": "Напишите менеджеру",
+        "text": "Ответы скопируются сами, менеджер сразу поймёт задачу и подтвердит условия."
+      }
+    ],
+    "marquee": [
+      "Лос-Анджелес",
+      "Нью-Йорк",
+      "Сан-Франциско",
+      "Париж",
+      "Майами",
+      "Токио",
+      "Лас-Вегас",
+      "Дубай",
+      "Чикаго",
+      "Бали"
+    ],
+    "quoteLabel": "TOP RIDERS · Travel",
+    "quoteStrong": "Путешествуйте уверенно —",
+    "quoteAccent": "мы всё уже просчитали",
+    "resultTitleAccent": "эти варианты",
+    "compareLabel": "Параметры",
+    "compareTitleAccent": "вариантов",
+    "nonstandardTitleAccent": "нестандартная",
+    "ctaLabel": "Следующий шаг",
+    "ctaTitleAccent": "детали?"
   },
   "clipboard": {
     "greeting": "Здравствуйте! Я прошёл(а) подбор карты на сайте TOP RIDERS.",
@@ -107,7 +159,7 @@
               "#A9845A"
             ],
             "icon": "apps",
-            "tone": "petrol"
+            "tone": "ink"
           }
         },
         {
@@ -115,10 +167,10 @@
           "label": "Получение переводов из-за рубежа",
           "card": {
             "edge": [
-              "#F4D3D6",
-              "#C17F89"
+              "#AB2328",
+              "#69131D"
             ],
-            "tone": "petrol"
+            "tone": "pearl"
           }
         },
         {
@@ -785,33 +837,5 @@
         }
       }
     }
-  ],
-  "uses": {
-    "eyebrow": "Где пригодится карта",
-    "titleStrong": "От аэропорта",
-    "titleLight": "до отеля",
-    "cta": "Подобрать карту",
-    "items": [
-      {
-        "photo": "assets/photos/use-car.jpg",
-        "title": "Аренда авто",
-        "text": "Для брони машины часто просят карту с кредитным БИН. Подскажем, какая подойдёт."
-      },
-      {
-        "photo": "assets/photos/use-hotel.jpg",
-        "title": "Отели",
-        "text": "Бронирование и депозит при заселении в отеле."
-      },
-      {
-        "photo": "assets/photos/use-flight.jpg",
-        "title": "Перелёты",
-        "text": "Билеты, багаж, такси и покупки в аэропорту, в валюте страны."
-      }
-    ]
-  },
-  "band": {
-    "titleStrong": "Путешествуйте уверенно —",
-    "titleLight": "мы всё уже просчитали",
-    "city": "Washington, D.C."
-  }
+  ]
 }

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Подбор карты для путешествий · TOP RIDERS</title>
   <meta name="description" content="Ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта зарубежной карты для путешествий.">
-  <meta name="theme-color" content="#F2EAE3">
+  <meta name="theme-color" content="#FFFFFF">
   <meta property="og:title" content="Карта для путешествий под Ваши задачи · TOP RIDERS">
   <meta property="og:description" content="Ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта.">
   <meta property="og:type" content="website">
@@ -13,7 +13,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;600&family=Montserrat:wght@400;600;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500&family=Montserrat:wght@400;600;800&family=Playfair+Display:ital,wght@1,500&display=swap">
   <link rel="stylesheet" href="assets/css/styles.css">
   <link rel="modulepreload" href="assets/js/app.js">
 </head>
@@ -23,7 +23,7 @@
     <div class="wrap site-header__in">
       <a class="brandmark" id="logoLink" href="https://topriders.ru" target="_blank" rel="noopener" aria-label="TOP RIDERS">
         <span class="logo js-logo"></span>
-        <span class="brandmark__tag">Искусство планировать путешествия</span>
+        <span class="brandmark__tag mono">Искусство планировать путешествия</span>
       </a>
       <a class="site-header__phone js-phone" href="tel:+79259908289">
         <span class="js-phone-text">+7 925 990 8289</span>
@@ -36,85 +36,76 @@
     <section class="screen hero is-enter" data-screen="hero" aria-labelledby="heroTitle">
       <div class="wrap hero__grid">
         <div class="hero__text">
-          <p class="eyebrow reveal" style="--d:0" data-t="heroEyebrow">Подбор зарубежной карты</p>
-          <h1 class="hero__title" id="heroTitle">
-            <span class="hero__line"><span class="hero__strong" data-t="heroTitleStrong">Карта для путешествий</span></span>
-            <span class="hero__line"><span class="hero__light" data-t="heroTitleLight">под Ваши задачи</span></span>
+          <p class="pill reveal" style="--d:0" data-t="heroEyebrow">Подбор зарубежной карты</p>
+          <h1 class="h1 hero__title" id="heroTitle">
+            <span class="hero__line"><span data-t="heroTitleStrong">Карта для путешествий</span></span>
+            <span class="hero__line"><em class="serif" data-t="heroTitleLight">под Ваши задачи</em></span>
           </h1>
-          <p class="hero__sub reveal" style="--d:3" data-t="heroSubtitle">Ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта. Это займёт меньше минуты.</p>
-        </div>
-
-        <div class="hero__visual" id="heroVisual">
-          <div class="badge-globe js-globe-badge" aria-hidden="true"></div>
-          <figure class="hero__photo" id="heroPhoto" hidden><span class="hero__slides" id="heroSlides"></span><span class="hero__dots" id="heroDots" aria-hidden="true"></span></figure>
-          <div class="hero__cardwrap" aria-hidden="true">
-          <svg class="orbit orbit--back" viewBox="0 0 400 260">
-            <g transform="rotate(-12 200 130)">
-              <ellipse class="orbit__line orbit__line--rose" cx="200" cy="130" rx="178" ry="96" pathLength="1"/>
-              <ellipse class="orbit__line" cx="200" cy="130" rx="196" ry="70" pathLength="1"/>
-              <circle class="orbit__dot" r="3">
-                <animateMotion dur="14s" repeatCount="indefinite" path="M4 130a196 70 0 1 0 392 0a196 70 0 1 0-392 0"/>
-              </circle>
-            </g>
-          </svg>
-          <div class="card-slot card-slot--hero" id="slotHero"></div>
-          <svg class="orbit orbit--front" viewBox="0 0 400 260">
-            <g transform="rotate(-12 200 130)">
-              <path class="orbit__line orbit__line--front" d="M4 130a196 70 0 0 0 392 0" pathLength="1"/>
-            </g>
-          </svg>
+          <p class="lead reveal" style="--d:3" data-t="heroSubtitle">Ответьте на 6 вопросов, и мы покажем 2–3 подходящих варианта. Это займёт меньше минуты.</p>
+          <ul class="tags reveal" style="--d:4" id="heroTags"></ul>
+          <div class="hero__actions reveal" style="--d:5">
+            <button class="btn btn--primary js-start" id="startBtn" type="button" disabled>
+              <span data-t="heroCta">Подобрать карту</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </button>
+            <a class="btn btn--outline" href="#how"><span data-t="heroHow">Как это работает</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m6 13 6 6 6-6"/></svg></a>
           </div>
-        </div>
-
-        <div class="hero__actions reveal" style="--d:4">
-          <button class="btn btn--primary btn--lg js-start" id="startBtn" type="button" disabled>
-            <span data-t="heroCta">Подобрать карту</span>
-            <span class="btn__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
-          </button>
           <p class="config-error" id="configError" hidden>
             Не удалось загрузить config.json. Откройте сайт через веб-сервер (см. README), а не как файл с диска.
           </p>
         </div>
-      </div>
-      <div class="marquee" aria-hidden="true">
-        <div class="marquee__track">
-          <span>Лос-Анджелес <i>34°03′N</i></span><span>Нью-Йорк <i>40°42′N</i></span><span>Сан-Франциско <i>37°46′N</i></span><span>Париж <i>48°51′N</i></span><span>Майами <i>25°46′N</i></span><span>Токио <i>35°41′N</i></span><span>Лас-Вегас <i>36°10′N</i></span><span>Дубай <i>25°12′N</i></span><span>Чикаго <i>41°52′N</i></span><span>Бали <i>8°20′S</i></span><span>Лос-Анджелес <i>34°03′N</i></span><span>Нью-Йорк <i>40°42′N</i></span><span>Сан-Франциско <i>37°46′N</i></span><span>Париж <i>48°51′N</i></span><span>Майами <i>25°46′N</i></span><span>Токио <i>35°41′N</i></span><span>Лас-Вегас <i>36°10′N</i></span><span>Дубай <i>25°12′N</i></span><span>Чикаго <i>41°52′N</i></span><span>Бали <i>8°20′S</i></span>
-        </div>
+
+        <aside class="panel hero__panel reveal" style="--d:2">
+          <div class="hero__visual" id="heroVisual">
+            <div class="badge-globe js-globe-badge" aria-hidden="true"></div>
+            <div class="hero__cardwrap" aria-hidden="true">
+              <svg class="orbit orbit--back" viewBox="0 0 400 260">
+                <g transform="rotate(-12 200 130)">
+                  <ellipse class="orbit__line orbit__line--soft" cx="200" cy="130" rx="178" ry="96" pathLength="1"/>
+                  <ellipse class="orbit__line" cx="200" cy="130" rx="196" ry="70" pathLength="1"/>
+                  <circle class="orbit__dot" r="3">
+                    <animateMotion dur="14s" repeatCount="indefinite" path="M4 130a196 70 0 1 0 392 0a196 70 0 1 0-392 0"/>
+                  </circle>
+                </g>
+              </svg>
+              <div class="card-slot card-slot--hero" id="slotHero"></div>
+              <svg class="orbit orbit--front" viewBox="0 0 400 260">
+                <g transform="rotate(-12 200 130)">
+                  <path class="orbit__line orbit__line--front" d="M4 130a196 70 0 0 0 392 0" pathLength="1"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+          <p class="mono-label" data-t="statsLabel">Что Вы получите</p>
+          <dl class="stats" id="heroStats"></dl>
+        </aside>
       </div>
 
-      <div class="band" id="band" hidden>
-        <span class="band__img"><img id="bandImg" alt="" loading="lazy" decoding="async" data-parallax></span>
-        <div class="band__plate sr">
-          <p class="band__kicker">TOP RIDERS · Travel</p>
-          <p class="band__title">
-            <span class="band__strong" data-t-band="titleStrong">Путешествуйте уверенно —</span>
-            <span class="band__light" data-t-band="titleLight">мы всё уже просчитали</span>
-          </p>
-        </div>
-        <div class="wrap band__foot">
-          <span class="band__city" data-t-band="city">Washington, D.C.</span>
-          <span class="stamp sr" aria-hidden="true">
-            <span class="stamp__top"><b>USA</b><b>✈</b></span>
-            <span class="stamp__mark js-globe"></span>
-            <span class="stamp__bottom">AIR MAIL</span>
-          </span>
-        </div>
-      </div>
+      <div class="marquee" aria-hidden="true"><div class="marquee__track" id="marquee"></div></div>
 
-      <div class="uses" id="uses" hidden>
+      <div class="how" id="how">
         <div class="wrap">
-          <p class="eyebrow sr" data-t-uses="eyebrow">Где пригодится карта</p>
-          <h2 class="uses__title sr">
-            <span class="uses__strong" data-t-uses="titleStrong">От аэропорта</span>
-            <span class="uses__light" data-t-uses="titleLight">до отеля</span>
-          </h2>
-        </div>
-        <div class="uses__track" id="usesTrack"></div>
-        <div class="wrap uses__foot">
-          <button class="btn btn--primary btn--lg sr js-start" type="button" disabled>
-            <span data-t-uses="cta">Подобрать карту</span>
-            <span class="btn__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
-          </button>
+          <p class="mono-label sr" data-t="howLabel">Три шага</p>
+          <h2 class="h2 sr"><span data-t="howTitle">Как это</span> <em class="serif" data-t="howTitleAccent">работает</em></h2>
+          <div class="steps" id="howSteps">
+            <svg class="steps__route" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M40 90C220 10 360 10 500 60s300 60 460-20" pathLength="1"/>
+            </svg>
+          </div>
+          <figure class="quote sr" id="quote" hidden>
+            <img id="quoteImg" alt="" decoding="async" data-parallax>
+            <figcaption class="quote__cap">
+              <p class="mono-label" data-t="quoteLabel">TOP RIDERS · Travel</p>
+              <p class="quote__text"><span data-t="quoteStrong">Путешествуйте уверенно —</span> <em class="serif" data-t="quoteAccent">мы всё уже просчитали</em></p>
+            </figcaption>
+            <span class="stamp" aria-hidden="true">
+              <span class="stamp__top"><b>USA</b><b>✈</b></span>
+              <span class="stamp__mark js-globe"></span>
+              <span class="stamp__bottom">AIR MAIL</span>
+            </span>
+          </figure>
+          <div class="how__foot sr">
+            <button class="btn btn--primary js-start" type="button" disabled><span data-t="heroCta">Подобрать карту</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+          </div>
         </div>
       </div>
     </section>
@@ -148,7 +139,7 @@
           </button>
           <button class="btn btn--primary" id="nextBtn" type="button" hidden>
             <span data-t="next">Далее</span>
-            <span class="btn__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
           </button>
         </div>
       </div>
@@ -156,10 +147,9 @@
 
     <!-- 3. Подсчёт -->
     <section class="screen loading" data-screen="loading" hidden>
-      <img class="loading__bg" id="loadingBg" alt="" decoding="async" hidden>
       <div class="wrap loading__wrap">
         <div class="shuffle" id="shuffle" aria-hidden="true"></div>
-        <p class="loading__text" role="status"><span data-t="loading">Подбираем варианты под Ваши ответы</span><span class="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></p>
+        <p class="loading__text mono" role="status"><span data-t="loading">Подбираем варианты под Ваши ответы</span><span class="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></p>
       </div>
     </section>
 
@@ -167,15 +157,16 @@
     <section class="screen result" data-screen="result" hidden aria-labelledby="resultHeading">
       <div class="wrap">
         <div id="resultOk">
-          <p class="eyebrow reveal" style="--d:0" data-t="resultEyebrow">Результат подбора</p>
-          <h2 class="result__title reveal" style="--d:1" id="resultHeading" tabindex="-1" data-t="resultTitle">Вам подходят эти варианты</h2>
-          <p class="result__sub reveal" style="--d:2" data-t="resultSubtitle"></p>
+          <p class="pill reveal" style="--d:0" data-t="resultEyebrow">Результат подбора</p>
+          <h2 class="h2 result__title reveal" style="--d:1" id="resultHeading" tabindex="-1"><span data-t="resultTitle">Вам подходят</span> <em class="serif" data-t="resultTitleAccent">эти варианты</em></h2>
+          <p class="lead reveal" style="--d:2" data-t="resultSubtitle"></p>
 
           <div class="res-track reveal" style="--d:3" id="resTrack" role="radiogroup" aria-labelledby="resultHeading"></div>
           <div class="res-dots" id="resDots" aria-hidden="true"></div>
 
           <div class="compare">
-            <h3 class="compare__title" data-t="compareTitle">Сравнение вариантов</h3>
+            <p class="mono-label" data-t="compareLabel">Параметры</p>
+            <h3 class="h3"><span data-t="compareTitle">Сравнение</span> <em class="serif" data-t="compareTitleAccent">вариантов</em></h3>
             <div class="cmp" id="cmp" role="table" aria-label="Сравнение вариантов"></div>
             <p class="disclaimer" data-t="disclaimer">Точные условия зависят от банка и подтверждаются менеджером.</p>
           </div>
@@ -183,17 +174,17 @@
 
         <div id="resultNone" class="none" hidden>
           <div class="none__text">
-            <p class="eyebrow reveal" style="--d:0" data-t="resultEyebrow">Результат подбора</p>
-            <h2 class="result__title reveal" style="--d:1" data-t="nonstandardTitle" tabindex="-1">Ваша задача нестандартная</h2>
-            <p class="result__sub reveal" style="--d:2" data-t="nonstandardText"></p>
+            <p class="pill reveal" style="--d:0" data-t="resultEyebrow">Результат подбора</p>
+            <h2 class="h2 result__title reveal" style="--d:1" tabindex="-1"><span data-t="nonstandardTitle">Ваша задача</span> <em class="serif" data-t="nonstandardTitleAccent">нестандартная</em></h2>
+            <p class="lead reveal" style="--d:2" data-t="nonstandardText"></p>
           </div>
           <div class="card-slot card-slot--none" id="slotNone"></div>
         </div>
 
         <div class="cta reveal" style="--d:4">
-          <div class="cta__photo" id="ctaPhoto" hidden aria-hidden="true"><img alt="" decoding="async"></div>
           <div class="cta__globe js-globe" aria-hidden="true"></div>
-          <h3 class="cta__title" data-t="ctaTitle">Обсудим детали?</h3>
+          <p class="mono-label" data-t="ctaLabel">Следующий шаг</p>
+          <h3 class="h2 cta__title"><span data-t="ctaTitle">Обсудим</span> <em class="serif" data-t="ctaTitleAccent">детали?</em></h3>
           <p class="cta__text" data-t="ctaText"></p>
           <div class="cta__manager" id="ctaManager" hidden>
             <img alt="" width="128" height="128" loading="lazy" decoding="async">
@@ -201,9 +192,9 @@
           </div>
           <p class="cta__choice" id="ctaChoice" hidden></p>
           <div class="cta__row">
-            <a class="btn btn--primary btn--xl js-tg" href="https://t.me/TopRiders_Travel" target="_blank" rel="noopener">
+            <a class="btn btn--light btn--xl js-tg" href="https://t.me/TopRiders_Travel" target="_blank" rel="noopener">
               <span data-t="ctaButton">Связаться с менеджером</span>
-              <span class="btn__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5 3.5 10.6l6.4 2.3 2.3 6.6 8.3-16z"/><path d="m9.9 12.9 4.6-4.6"/></svg></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5 3.5 10.6l6.4 2.3 2.3 6.6 8.3-16z"/><path d="m9.9 12.9 4.6-4.6"/></svg>
             </a>
             <a class="cta__phone js-phone" href="tel:+79259908289">
               <span class="cta__phone-label" data-t="ctaPhoneLabel">или позвоните</span>
@@ -225,7 +216,7 @@
   </main>
 
   <footer class="site-footer">
-    <div class="wrap site-footer__in"><span class="site-footer__globe js-globe" aria-hidden="true"></span><p data-t="footer">TOP RIDERS · подбор зарубежных карт для путешествий</p></div>
+    <div class="wrap site-footer__in"><span class="site-footer__globe js-globe" aria-hidden="true"></span><p class="mono" data-t="footer">TOP RIDERS · подбор зарубежных карт для путешествий</p></div>
   </footer>
 
   <noscript><p class="noscript">Для подбора карты включите JavaScript или напишите нам: <a href="https://t.me/TopRiders_Travel">t.me/TopRiders_Travel</a></p></noscript>

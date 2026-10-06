@@ -10,13 +10,13 @@ const pad = (n) => String(n).padStart(2, '0');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-// Три фирменных исполнения карты (гайд: бордо, петроль, крем) и их кант
+// Три исполнения карты: бордо, графит, жемчуг — и их кант
 const TONES = [
   { tone: 'wine', edge: ['#F3D9AE', '#B9806A'] },
-  { tone: 'petrol', edge: ['#E9CF9F', '#A9845A'] },
-  { tone: 'sand', edge: ['#AB2328', '#69131D'] },
+  { tone: 'ink', edge: ['#E9CF9F', '#A9845A'] },
+  { tone: 'pearl', edge: ['#AB2328', '#69131D'] },
   { tone: 'wine', edge: ['#F1CDB3', '#C48B6E'] },
-  { tone: 'petrol', edge: ['#F3D3BE', '#B98670'] },
+  { tone: 'ink', edge: ['#F3D3BE', '#B98670'] },
 ];
 
 let cfg;
@@ -62,7 +62,6 @@ function cardState() {
 
 /* ---------- Квиз ---------- */
 function startQuiz() {
-  preloadLater();
   track(cfg.analytics?.goals?.start);
   state.step = 0;
   state.answers = {};
@@ -512,42 +511,12 @@ function probe(src) {
 
 function setupPhotos() {
   const ph = cfg.photos || {};
-
-  // Слайдшоу на первом экране: первый кадр сразу, остальные подгружаются в фоне
-  const slides = [].concat(ph.hero || []);
-  (async () => {
-    let n = 0;
-    for (const src of slides) {
-      if (n) await wait(1500);
-      if (!(await probe(src))) continue;
-      const img = document.createElement('img');
-      img.src = src; img.alt = n ? '' : (ph.heroAlt || ''); img.decoding = 'async';
-      if (!n) img.className = 'is-active';
-      $('#heroSlides').appendChild(img);
-      n += 1;
-      if (n === 1) { $('#heroPhoto').hidden = false; $('#heroVisual').classList.add('has-photo'); }
-      if (n > 1) startSlideshow();
-    }
-  })();
-
-  // Фото ниже по странице грузятся лениво; если файла нет, блок не показывается
-  const lazyPhoto = (img, src, box) => {
-    if (!src) return;
-    img.onload = () => { box.hidden = false; };
-    img.onerror = () => { box.hidden = true; };
-    img.src = src;
-  };
-  $$('[data-t-band]').forEach((el) => { const v = cfg.band?.[el.dataset.tBand]; if (v) el.textContent = v; });
-  $('#band').hidden = !ph.band;
-  lazyPhoto($('#bandImg'), ph.band, $('#band'));
-  // Фото экранов подбора и результата грузим при старте квиза (в скрытых экранах lazy не сработает)
-  preloadLater = () => {
-    if (preloadLater.done) return;
-    preloadLater.done = true;
-    lazyPhoto($('#ctaPhoto img'), ph.cta, $('#ctaPhoto'));
-    lazyPhoto($('#loadingBg'), ph.loading, $('#loadingBg'));
-  };
-
+  // Фото-цитата: грузится лениво, без файла блок не показывается
+  if (ph.quote) {
+    const img = $('#quoteImg');
+    img.onload = () => { $('#quote').hidden = false; observeReveal(); };
+    img.src = ph.quote;
+  }
   probe(ph.manager).then((ok) => {
     if (!ok) return;
     const box = $('#ctaManager');
@@ -558,39 +527,23 @@ function setupPhotos() {
     $('#managerRole').textContent = ph.managerRole || '';
     box.hidden = false;
   });
-
-  // Галерея «где пригодится карта»
-  const uses = cfg.uses;
-  if (uses?.items?.length) {
-    $$('[data-t-uses]').forEach((el) => { const v = uses[el.dataset.tUses]; if (v) el.textContent = v; });
-    $('#usesTrack').innerHTML = uses.items.map((it, i) => `
-      <figure class="use sr" style="--i:${i}">
-        <span class="use__img"><img src="${esc(it.photo)}" alt="" loading="lazy" decoding="async" data-parallax onerror="this.closest('.use').remove()"></span>
-        <figcaption><b>${esc(it.title)}</b><span>${esc(it.text)}</span></figcaption>
-      </figure>`).join('');
-    $('#uses').hidden = false;
-  }
-
   // Миниатюры в вопросах подгружаем заранее, чтобы не мигали
   cfg.questions.forEach((q) => q.options.forEach((o) => o.photo && probe(o.photo)));
 }
 
-let preloadLater = () => {};
-let slideTimer = null;
-function startSlideshow() {
-  const imgs = $$('#heroSlides img');
-  const act = Math.max(0, imgs.findIndex((im) => im.classList.contains('is-active')));
-  $('#heroDots').innerHTML = imgs.map((_, i) => `<i class="${i === act ? 'is-on' : ''}"></i>`).join('');
-  if (slideTimer) return;
-  slideTimer = setInterval(() => {
-    if (document.hidden || document.body.dataset.screen !== 'hero') return;
-    const list = $$('#heroSlides img');
-    const cur = Math.max(0, list.findIndex((im) => im.classList.contains('is-active')));
-    const next = (cur + 1) % list.length;
-    list[cur].classList.remove('is-active');
-    list[next].classList.add('is-active');
-    $$('#heroDots i').forEach((d, i) => d.classList.toggle('is-on', i === next));
-  }, 5200);
+// Списки из конфига: теги, цифры, шаги, бегущая строка
+function renderLists() {
+  const tx = cfg.texts || {};
+  $('#heroTags').innerHTML = (tx.heroTags || []).map((x) => `<li>${esc(x)}</li>`).join('');
+  $('#heroStats').innerHTML = (tx.stats || []).map((x) => `<div><dt>${esc(x.value)}</dt><dd>${esc(x.label)}</dd></div>`).join('');
+  $('#howSteps').insertAdjacentHTML('beforeend', (tx.howSteps || []).map((x, i) => `
+    <article class="step sr" style="--i:${i}">
+      <span class="step__num">${pad(i + 1)}</span>
+      <h3 class="step__title">${esc(x.title)}</h3>
+      <p class="step__text">${esc(x.text)}</p>
+    </article>`).join(''));
+  const cities = (tx.marquee || []).map((x) => `<span>${esc(x)}</span>`).join('');
+  $('#marquee').innerHTML = cities + cities;
 }
 
 /* ---------- Появление при прокрутке и параллакс ---------- */
@@ -602,6 +555,16 @@ function observeReveal() {
     entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); revealIO.unobserve(en.target); } });
   }, { threshold: 0.18, rootMargin: '0px 0px -6% 0px' });
   els.forEach((el) => revealIO.observe(el));
+}
+
+// Пунктирный маршрут в блоке «Как это работает» прорисовывается при прокрутке
+function observeRoute() {
+  const el = $('#howSteps');
+  if (reduced || !('IntersectionObserver' in window)) { el.classList.add('is-in'); return; }
+  const io = new IntersectionObserver((en) => {
+    if (en.some((x) => x.isIntersecting)) { el.classList.add('is-in'); io.disconnect(); }
+  }, { threshold: 0.3 });
+  io.observe(el);
 }
 
 function startParallax() {
@@ -623,7 +586,7 @@ function startParallax() {
 
 /* ---------- Инициализация ---------- */
 function fillStatic() {
-  $$('[data-t]').forEach((el) => { const v = t(el.dataset.t); if (v) el.textContent = v; });
+  $$('[data-t]').forEach((el) => { const v = t(el.dataset.t); if (typeof v === 'string' && v) el.textContent = v; });
   $$('.js-logo').forEach((el) => { el.innerHTML = logoSVG(); });
   const b = cfg.brand || {};
   $$('.js-tg').forEach((a) => { a.href = b.telegramManager; });
@@ -654,11 +617,13 @@ async function init() {
     return;
   }
   fillStatic();
+  renderLists();
   setupPhotos();
   initAnalytics(cfg.analytics);
 
   $$('.js-start').forEach((b) => { b.disabled = false; b.addEventListener('click', startQuiz); });
   observeReveal();
+  observeRoute();
   startParallax();
   $('#opts').addEventListener('click', onOption);
   $('#nextBtn').addEventListener('click', onNext);
