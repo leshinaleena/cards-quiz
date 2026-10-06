@@ -5,6 +5,7 @@
 //   option.penalty  — сколько баллов отнять при явном несовпадении
 //   card.weights[questionId][optionId] — ручные баллы карты за конкретный ответ
 //   option.reason   — короткая фраза для строки «Подходит Вам, потому что…»
+//   card.demote     — штраф к итоговому баллу: карта показывается, только если остальные подходят хуже
 
 const PLACEHOLDER = /^_+$/;
 
@@ -59,6 +60,7 @@ export function scoreCard(card, answers, questions) {
       if (ok === false && opt.required) excluded = true;
     }
   }
+  score -= card.demote || 0;
   return { score, excluded, reasons };
 }
 
