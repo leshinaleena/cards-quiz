@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TOP RIDERS · Лос-Анджелес — Ваша поездка</title>
+  <meta name="description" content="Соберите экскурсии по Лос-Анджелесу, посмотрите цену сразу и отправьте готовый план менеджеру.">
+  <meta name="theme-color" content="#F2EAE3" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1C0F12" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TOP RIDERS · Лос-Анджелес — Ваша поездка">
+  <meta property="og:description" content="Соберите экскурсии, посмотрите цену сразу и отправьте план менеджеру.">
+  <meta property="og:image" content="assets/photos/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@600;800&display=swap">
+  <link rel="preload" as="image" href="assets/photos/hero.avif" type="image/avif">
+  <link rel="stylesheet" href="assets/css/la.css?v=2">
+  <script type="module" src="assets/js/app.js?v=2"></script>
+</head>
+<body>
+  <a class="skip" href="#quiz">К подбору экскурсии</a>
+
+  <header class="top">
+    <div class="wrap top__in">
+      <a class="logo" href="#" aria-label="TOP RIDERS — в начало" data-logo></a>
+      <nav class="top__nav" aria-label="Разделы">
+        <a href="#catalog">Экскурсии</a>
+        <a href="#seasons">Сезоны</a>
+        <a href="#riders">Под ключ</a>
+        <a href="#faq">Вопросы</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="wrap hero__grid">
+        <div class="hero__text">
+          <p class="overline" data-t="hero.overline">Каталог экскурсий: Лос-Анджелес</p>
+          <h1 class="h1"><b data-t="hero.titleBold">Поездки в США</b> <span data-t="hero.titleLight">индивидуально</span></h1>
+          <p class="hero__lead" data-t="hero.lead">Выберите экскурсии, посмотрите цену сразу и отправьте готовый план менеджеру. Без анкет на 15 полей.</p>
+          <div class="hero__actions">
+            <a class="btn btn--main" href="#quiz" data-start><span data-t="hero.cta">Подобрать экскурсию за 1 минуту</span></a>
+            <a class="link-arrow" href="#riders"><span data-t="hero.link">Хочу поездку под ключ</span></a>
+          </div>
+          <ul class="trust" data-trust></ul>
+        </div>
+        <figure class="hero__photo shape">
+          <picture>
+            <source srcset="assets/photos/hero.avif" type="image/avif">
+            <source srcset="assets/photos/hero.webp" type="image/webp">
+            <img src="assets/photos/hero.jpg" width="768" height="1365" alt="Вид на Даунтаун Лос-Анджелеса с холмов, пальмы на закате" fetchpriority="high">
+          </picture>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="quiz" aria-labelledby="quiz-h">
+      <div class="wrap">
+        <div class="sec-head" data-head="quiz"></div>
+        <div class="quiz" data-quiz aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section" id="catalog" aria-labelledby="catalog-h">
+      <div class="wrap">
+        <div class="sec-head" data-head="catalog"></div>
+        <div class="catalog__bar">
+          <div class="seg" role="radiogroup" aria-label="Размер группы" data-groupseg></div>
+          <div class="chips" role="tablist" aria-label="Фильтр экскурсий" data-filters></div>
+        </div>
+        <div class="grid" data-grid></div>
+      </div>
+    </section>
+
+    <section class="section" id="seasons" aria-labelledby="seasons-h">
+      <div class="wrap">
+        <div class="sec-head" data-head="seasons"></div>
+        <div class="months" role="radiogroup" aria-label="Месяц поездки" data-months></div>
+        <div class="season" data-season></div>
+      </div>
+    </section>
+
+    <section class="section section--dark" id="riders" aria-labelledby="riders-h">
+      <div class="wrap">
+        <div class="riders__top">
+          <div class="sec-head sec-head--dark" data-head="riders"></div>
+          <figure class="riders__photo shape">
+            <picture>
+              <source srcset="assets/photos/road.avif" type="image/avif">
+              <source srcset="assets/photos/road.webp" type="image/webp">
+              <img src="assets/photos/road.jpg" width="820" height="1230" alt="Дорога к океану между пальмами на закате" loading="lazy" decoding="async">
+            </picture>
+          </figure>
+        </div>
+        <div class="seg seg--dark" role="radiogroup" aria-label="Валюта" data-currency></div>
+        <div class="riders" data-riders></div>
+        <p class="riders__note" data-t="riders.note"></p>
+        <div class="calc" data-calc></div>
+      </div>
+    </section>
+
+    <section class="section" id="benefits" aria-labelledby="benefits-h">
+      <div class="wrap">
+        <div class="sec-head" data-head="benefits"></div>
+        <div class="benefits" data-benefits></div>
+      </div>
+    </section>
+
+    <section class="section" id="faq" aria-labelledby="faq-h">
+      <div class="wrap wrap--narrow">
+        <div class="sec-head" data-head="faq"></div>
+        <div class="faq" data-faq></div>
+      </div>
+    </section>
+
+    <section class="final" id="final">
+      <div class="wrap">
+        <div class="final__card shape">
+          <picture>
+            <source srcset="assets/photos/coast.avif" type="image/avif">
+            <source srcset="assets/photos/coast.webp" type="image/webp">
+            <img src="assets/photos/coast.jpg" width="1000" height="1250" alt="" loading="lazy" decoding="async">
+          </picture>
+          <div class="final__text">
+            <h2 class="h2 h2--light"><b data-t="final.titleBold"></b> <span data-t="final.titleLight"></span></h2>
+            <p data-t="final.lead"></p>
+            <button class="btn btn--light" type="button" data-open-lead><span data-t="plan.send"></span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot__in">
+      <span class="logo logo--foot" data-logo></span>
+      <ul class="foot__links" data-footlinks></ul>
+      <p class="foot__bye" data-t="footer.bye"></p>
+    </div>
+  </footer>
+
+  <!-- Нижняя панель: план и связь -->
+  <div class="dock" data-dock hidden>
+    <button class="dock__plan" type="button" data-open-plan hidden>
+      <span class="dock__icon" data-ui="plan"></span>
+      <span class="dock__label"><b data-t="plan.button"></b> <span data-dock-summary></span></span>
+    </button>
+    <button class="dock__write btn btn--main" type="button" data-open-lead><span data-t="plan.write"></span></button>
+  </div>
+
+  <dialog class="sheet" id="planSheet" aria-labelledby="plan-h">
+    <div class="sheet__in" data-plan></div>
+  </dialog>
+
+  <dialog class="sheet" id="leadSheet" aria-labelledby="lead-h">
+    <form class="sheet__in" method="dialog" data-lead novalidate></form>
+  </dialog>
+
+  <dialog class="sheet sheet--gift" id="giftSheet" aria-labelledby="gift-h">
+    <div class="sheet__in" data-gift></div>
+  </dialog>
+
+  <div class="toast" role="status" aria-live="polite" data-toast></div>
+  <noscript><p class="wrap">Для подбора экскурсий включите JavaScript или напишите нам в Telegram: @TopRiders_Travel</p></noscript>
+</body>
+</html>
