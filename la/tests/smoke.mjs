@@ -19,7 +19,7 @@ for (const { name, ...opts } of profiles) {
   const errors = []; const goals = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.text().startsWith('[metrika]')) goals.push(m.text().split(' ')[1]); });
-  await page.addInitScript(() => { window.open = (u) => { window.__opened = u; return null; }; });
+  await page.addInitScript(() => { document.addEventListener('click', (e) => { const a = e.target.closest?.('a[href^="https://t.me"], a[href^="https://wa.me"], a[href^="tel:"]'); if (a && !a.closest('footer')) { window.__opened = a.href; e.preventDefault(); } }, true); });
   await page.goto(`${URL}?debug&utm_source=smoke`);
   await page.waitForSelector('html[data-ready]');
   const cfg = await page.evaluate(() => fetch('config.json').then((r) => r.json()));

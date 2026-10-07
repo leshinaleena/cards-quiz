@@ -630,8 +630,10 @@ async function submitLead(e) {
   logEvent('Заявка', { 'Канал': C.lead.channels.find((x) => x.id === channel).text, 'Месяц': f.dates.value.trim() });
   if (channel !== 'call') navigator.clipboard?.writeText(text).catch(() => {});
   window.__lastLead = { url, text }; // для автотеста
-  if (channel === 'call') location.href = url;
-  else window.open(url, '_blank', 'noopener');
+  const a = document.createElement('a');
+  a.href = url;
+  if (channel !== 'call') { a.target = '_blank'; a.rel = 'noopener'; }
+  document.body.append(a); a.click(); a.remove();
   closeSheet($('#leadSheet'));
   openGift(name, f.dates.value.trim());
   if (channel !== 'call') setTimeout(() => toast(C.lead.copied), 900);
