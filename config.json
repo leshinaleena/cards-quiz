@@ -1423,7 +1423,7 @@
   ],
   "leads": {
     "_readme": "URL веб-приложения Apps Script (см. apps-script/Code.gs). Пусто — заявка уходит менеджеру в Telegram с готовым текстом.",
-    "endpoint": "",
+    "endpoint": "https://script.google.com/macros/s/AKfycbyXz7KOWWOQLtVZVcwI-rpckhP9YrON7GoGTYsipeHjRhH9k10T4OseRK7adpr3KlYi/exec",
     "privacyUrl": ""
   }
 }
