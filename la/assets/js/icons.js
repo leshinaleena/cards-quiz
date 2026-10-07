@@ -117,6 +117,8 @@ export const UI = {
   arrow: ui('<path d="M5 12h14M13 6l6 6-6 6"/>'),
   back: ui('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
   down: ui('<path d="m6 9 6 6 6-6"/>'),
+  up: ui('<path d="m6 15 6-6 6 6"/>'),
+  trip: ui('<path d="M4 7h16v12H4z"/><path d="M9 7V5h6v2M4 12h16"/>'),
   link: ui('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'),
   download: ui('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'),
   plan: ui('<path d="M5 6h14M5 12h14M5 18h9"/>'),
