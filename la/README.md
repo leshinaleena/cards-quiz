@@ -10,7 +10,10 @@
 | Фото | `assets/photos/` (AVIF, WebP, JPG) |
 | Стили | `assets/css/la.css` |
 | Иллюстрации | `assets/js/icons.js` |
+| Разметка карточек, маршрутов, вопросов | `assets/js/render.js` |
 | Памятки-подарки для менеджера | `memos/` |
+
+После правки `config.json` запустите `node la/tools/prerender.mjs` — он впишет экскурсии, маршруты и вопросы прямо в `index.html` (для поисковиков). Автотест проверяет, что это не забыто.
 
 После правки `config.json`, CSS или JS увеличьте версию `?v=` в `index.html` и `VERSION` в `assets/js/app.js` — иначе телефон может показать старое из кэша.
 

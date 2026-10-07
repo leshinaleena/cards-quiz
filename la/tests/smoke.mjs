@@ -11,6 +11,12 @@ const profiles = [
 let failed = 0;
 const check = (cond, msg) => { console.log(`${cond ? '✓' : '✗'} ${msg}`); if (!cond) failed += 1; };
 
+// Каталог и вопросы есть в HTML без JavaScript — для поисковиков
+const raw = await (await fetch(URL)).text();
+const cfg0 = JSON.parse(await (await fetch(new globalThis.URL('config.json', URL))).text());
+check(cfg0.excursions.every((e) => raw.includes(e.name)), 'все экскурсии есть в HTML без JS');
+check(cfg0.faq.items.every((f) => raw.includes(f.q)), 'вопросы есть в HTML без JS');
+
 const browser = await chromium.launch();
 for (const { name, ...opts } of profiles) {
   console.log(`\n— ${name}`);
@@ -42,11 +48,20 @@ for (const { name, ...opts } of profiles) {
     for (const l of likes) await click(`[data-opt="${l}"]`);
     await click('[data-qnext]'); await page.waitForTimeout(300);
     if (people) { await click(`[data-opt="${people}"]`); await page.waitForTimeout(400); }
-    const n = await page.locator('.result__grid .card').count();
-    check(n >= 2 && n <= 3, `квиз ${who}/${d}/${likes.join('+')}: выдача ${n}`);
-    if (people === 'l') check((await page.textContent('.result__grid')).includes(cfg.plan.individual), '7+ — цены «рассчитаем индивидуально»');
+    const n = await page.locator('.dayplan__row').count();
+    const want = cfg.quiz.questions[1].options.find((o) => o.id === d).count;
+    check(n === want, `квиз ${who}/${d}/${likes.join('+')}: маршрут на ${n} дн.`);
+    if (people === 'l') check((await page.textContent('.dayplan')).includes(cfg.plan.individual), '7+ — цены «рассчитаем индивидуально»');
     if (d === 'd5') check(await page.isVisible('.quiz .note'), '5+ дней — плашка Travel Rider');
   }
+
+  // Готовый маршрут добавляется целиком
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
+  const r3 = cfg.routes.items[1];
+  await click(`[data-route="${r3.id}"]`);
+  const planIds = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan.map((p) => p.id));
+  check(JSON.stringify(planIds) === JSON.stringify(r3.days), `маршрут «${r3.title}» добавлен по дням`);
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
 
   // Переключатель группы меняет цены в каталоге
   await click('[data-group="s"]');
@@ -66,7 +81,11 @@ for (const { name, ...opts } of profiles) {
   await page.evaluate(() => scrollTo(0, 2000)); await page.waitForTimeout(400);
   await page.evaluate(() => document.querySelector('[data-open-plan]').click());
   const planText = (await page.textContent('[data-plan]')).replace(/\s/g, '');
-  check(planText.includes(`$${sum.toLocaleString('ru-RU').replace(/\s/g, '')}`), `план сохранился после перезагрузки, итог $${sum}`);
+  check(planText.includes(`$${sum.toLocaleString('ru-RU').replace(/\s/g, '')}`), `поездка сохранилась после перезагрузки, итог $${sum}`);
+  check((await page.locator('.plan-item__day').count()) === 2, 'поездка разложена по дням');
+  await page.evaluate(() => document.querySelector('[data-move="0"][data-d="1"]').click());
+  const firstAfter = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan[0].id);
+  check(firstAfter === two[1].id, 'дни переставляются');
   check(await page.isVisible('[data-plan] .note'), '2+ экскурсии — подсказка про райдер');
 
   // Райдер: калькулятор и переключатель валюты
