@@ -1,8 +1,8 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { ILLUSTRATIONS, UI } from './icons.js?v=1';
-import { drawGift } from './gift.js?v=1';
+import { ILLUSTRATIONS, UI } from './icons.js?v=2';
+import { drawGift } from './gift.js?v=2';
 
-const VERSION = '1';
+const VERSION = '2';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -652,15 +652,23 @@ async function openGift(name, dates) {
   openSheet($('#giftSheet'));
   const mo = C.seasons.months.find((x) => x.name === dates.toLowerCase()) || (S.month != null ? C.seasons.months[S.month] : null);
   const q = S.quiz || {};
-  const meta = [name, mo ? mo.name : dates, q.who === 'solo' ? '1 человек' : { s: 'до 3 человек', m: '4–6 человек', l: '7 человек и больше' }[S.group], q.who === 'kids' ? 'с детьми' : ''].filter(Boolean).join(' · ');
-  const route = S.plan.map((i) => exById(i.id).name);
+  const who = q.who === 'solo' ? 'Поездка для одного' : `${C.groups[S.group].phrase}${q.who === 'kids' ? ', с детьми' : ''}`;
   const total = planTotal();
   const r = S.rider ? riderCalc(S.rider.id, S.rider.days, S.rider.adults) : null;
+  const bonus = giftBonus();
   const blob = await drawGift({
-    logoSvg, meta, route, total: S.plan.length ? (total == null ? C.plan.individual : usd(total)) : '',
+    logoSvg,
+    title: name ? G.hello.replace('{name}', name) : G.helloNoName,
+    who: `${who}${mo ? ` · ${mo.name}` : (dates ? ` · ${dates}` : '')}`,
+    routeTitle: G.routeTitle,
+    route: S.plan.map((i) => exById(i.id).name),
     rider: r ? `${r.name} · ${r.term}` : '',
-    season: mo ? { title: `${G.seasonLabel} ${mo.in}`, tips: mo.tips.slice(0, 2) } : null,
-    bonus: giftBonus(), G, contacts: C.contacts,
+    total: S.plan.length && total != null ? G.total.replace('{sum}', usd(total)) : '',
+    seasonTitle: G.seasonTitle,
+    season: mo?.card || '',
+    gift: bonus ? G.giftLine.replace('{gift}', bonus.title[0].toLowerCase() + bonus.title.slice(1)) : '',
+    giftNote: G.giftNote,
+    contacts: C.contacts,
   });
   const img = $('[data-gift-img]', box);
   img.src = URL.createObjectURL(blob);
