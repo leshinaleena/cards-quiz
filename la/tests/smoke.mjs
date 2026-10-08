@@ -21,6 +21,9 @@ const browser = await chromium.launch();
 for (const { name, ...opts } of profiles) {
   console.log(`\n— ${name}`);
   const ctx = await browser.newContext({ ...opts, reducedMotion: 'reduce', permissions: ['clipboard-read', 'clipboard-write'] });
+  // Тест не пишет в настоящую Google Таблицу: запросы к Apps Script перехватываем
+  const logged = [];
+  await ctx.route('https://script.google.com/**', (r) => { logged.push(r.request().postData()); r.fulfill({ status: 200, body: 'ok' }); });
   const page = await ctx.newPage();
   const errors = []; const goals = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -52,6 +55,10 @@ for (const { name, ...opts } of profiles) {
     const want = cfg.quiz.questions[1].options.find((o) => o.id === d).count;
     check(n === want, `квиз ${who}/${d}/${likes.join('+')}: маршрут на ${n} дн.`);
     if (people === 'l') check((await page.textContent('.dayplan')).includes(cfg.plan.individual), '7+ — цены «рассчитаем индивидуально»');
+    const picked = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).picked);
+    const clash = picked.some((id) => (cfg.excursions.find((e) => e.id === id).overlaps || []).some((o) => picked.includes(o)));
+    check(!clash, 'в маршруте нет экскурсий, которые повторяют друг друга');
+    check(await page.isVisible('[data-result-send]') && await page.isVisible('[data-result-keep]'), 'понятный следующий шаг: отправить или сохранить');
     if (d === 'd5') check(await page.isVisible('.quiz .note'), '5+ дней — плашка Travel Rider');
   }
 
@@ -61,6 +68,36 @@ for (const { name, ...opts } of profiles) {
   await click(`[data-route="${r3.id}"]`);
   const planIds = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan.map((p) => p.id));
   check(JSON.stringify(planIds) === JSON.stringify(r3.days), `маршрут «${r3.title}» добавлен по дням`);
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
+
+  // Карта: переключается, подсвечивает маршрут выбранной экскурсии
+  await click('[data-view="map"]');
+  check(await page.isVisible('.map__svg'), 'карта показывается');
+  await click('[data-mapfocus="lagrand"]');
+  check((await page.locator('.map__route.is-focus').count()) === 1 && (await page.locator('.map__pt.is-on').count()) >= 5, 'маршрут экскурсии подсвечен на карте');
+  check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'карта не даёт горизонтальной прокрутки страницы');
+  await click('[data-view="cards"]');
+
+  // Сравнение: до трёх экскурсий, таблица
+  const cmpIds = cfg.excursions.slice(0, 4).map((e) => e.id);
+  for (const id of cmpIds) await click(`[data-grid] [data-compare="${id}"]`);
+  check((await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).compare.length)) === 3, 'в сравнении не больше трёх');
+  await page.evaluate(() => document.querySelector('[data-open-cmp]').click());
+  check((await page.locator('.cmp thead th').count()) === 4, 'таблица сравнения на три экскурсии');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => document.querySelector('[data-cmp-clear]').click());
+
+  // Из результата квиза — сразу в заявку с маршрутом
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
+  await click('[data-opt="couple"]'); await page.waitForTimeout(300); await click('[data-opt="d4"]'); await page.waitForTimeout(300);
+  await click('[data-opt="first"]'); await click('[data-qnext]'); await page.waitForTimeout(300); await click('[data-opt="s"]'); await page.waitForTimeout(400);
+  const picked0 = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).picked);
+  check(!(picked0.includes('la6') && picked0.includes('lagrand')), '«впервые»: не предлагаем 6-часовой и гранд-тур вместе');
+  await page.evaluate(() => document.querySelector('[data-result-send]').click());
+  await page.waitForTimeout(200);
+  const pv = await page.textContent('[data-preview]');
+  check(picked0.every((id) => pv.includes(cfg.excursions.find((e) => e.id === id).name)), 'форма открылась, маршрут в сообщении');
+  await page.keyboard.press('Escape');
   await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
 
   // Переключатель группы меняет цены в каталоге
@@ -103,30 +140,34 @@ for (const { name, ...opts } of profiles) {
   await click('[data-calc="goal"][data-v="rest"]');
   await click('[data-calc-add]');
 
-  // Заявка: сообщение и ссылки
+  // Заявка: одно нажатие, никаких полей
   await page.evaluate(() => document.querySelector('[data-dock] [data-open-lead]').click());
-  await page.fill('[data-lead] [name="name"]', 'Анна');
-  await page.fill('[data-lead] [name="dates"]', 'май');
+  check((await page.locator('[data-lead] input').count()) === 0, 'в форме нет полей для ввода');
+  await click('[data-leadmonth="4"]');
+  await page.evaluate(() => document.querySelector('.lead__preview').open = true);
   const preview = await page.textContent('[data-preview]');
   check(!/[{}]/.test(preview), 'в сообщении нет «{…}»');
-  check(preview.includes('примерно в мае') && preview.includes('Меня зовут Анна') && preview.includes('Travel Rider'), 'сообщение собрано: месяц, имя, райдер');
+  check(preview.includes('в мае') && preview.includes('Travel Rider') && preview.includes('Мой маршрут'), 'сообщение собрано: месяц, маршрут, райдер');
   check(!/\(а\)/.test(preview), 'без «(а)»');
-  await click('[data-channel="wa"]');
-  await click('[data-submit]');
+  await click('[data-send="wa"]');
   await page.waitForTimeout(300);
   const opened = await page.evaluate(() => window.__opened);
-  check(opened?.startsWith(`https://wa.me/${cfg.contacts.whatsapp}?text=`) && !/[а-я]/i.test(opened), 'WhatsApp: кириллица закодирована');
+  check(opened?.startsWith(`https://wa.me/${cfg.contacts.whatsapp}?text=`) && !/[а-я]/i.test(opened), 'WhatsApp: одно нажатие, кириллица закодирована');
   await page.waitForSelector('[data-gift-img][src^="blob:"]', { timeout: 8000 });
-  check(true, 'открытка-подарок нарисована');
+  check(true, 'открытка нарисована');
+  const giftHref = await page.getAttribute('[data-gift-file]', 'href');
+  const giftOk = giftHref && (await page.evaluate(async (h) => (await fetch(h)).ok, giftHref));
+  check(giftOk, `подарок скачивается: ${giftHref}`);
   await page.keyboard.press('Escape');
   await page.evaluate(() => document.querySelector('[data-dock] [data-open-lead]').click());
-  await page.fill('[data-lead] [name="name"]', 'Анна');
-  await click('[data-channel="tg"]');
-  await click('[data-submit]');
+  await click('[data-send="tg"]');
   await page.waitForTimeout(300);
   check((await page.evaluate(() => window.__opened))?.startsWith(`https://t.me/${cfg.contacts.telegram}?text=`), 'Telegram открывается с набранным текстом');
 
-  for (const g of ['quiz_start', 'quiz_done', 'excursion_add', 'rider_calc', 'plan_open', 'lead_wa', 'lead_tg']) check(goals.includes(g), `цель ${g}`);
+  check(logged.some((b) => b?.includes('Квиз пройден')) && logged.some((b) => b?.includes('Заявка')), 'события уходят в таблицу (перехвачены тестом)');
+  check(!logged.some((b) => /Анна|\+7|@/.test(b || '')), 'в таблицу не уходят имя и контакты');
+
+  for (const g of ['quiz_start', 'quiz_done', 'excursion_add', 'rider_calc', 'plan_open', 'lead_wa', 'lead_tg', 'map_open', 'compare_open']) check(goals.includes(g), `цель ${g}`);
   check(!errors.length, `нет ошибок JS ${errors.join(' | ')}`);
   await ctx.close();
 }

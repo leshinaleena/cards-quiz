@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=3';
-import { drawGift } from './gift.js?v=3';
-import * as R from './render.js?v=3';
+import { UI } from './icons.js?v=7';
+import { drawGift } from './gift.js?v=7';
+import * as R from './render.js?v=7';
 
-const VERSION = '3';
+const VERSION = '7';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -21,13 +21,15 @@ const S = {       // состояние, сохраняется в браузе�
   travelPkg: 7,
   month: null,
   calc: { days: 7, adults: 2, need: 'route', goal: 'rest' },
+  compare: [],
   quiz: null,     // { who, days, likes:[], people }
   picked: [],
 };
 const Q = { screen: 'q', idx: 0, answers: { likes: [] } };
 let quizStarted = false;
 let filter = 'all';
-let leadName = '';
+let view = 'cards';
+let mapFocus = null;
 
 /* ——— Утилиты ——— */
 const get = (path) => path.split('.').reduce((o, k) => o?.[k], C);
@@ -201,39 +203,42 @@ function quizTags() {
 }
 
 function pickResults() {
-  const qWho = C.quiz.questions[0];
-  const qDays = C.quiz.questions[1];
-  const qLikes = C.quiz.questions[2];
+  const [qWho, qDays, qLikes] = C.quiz.questions;
   const who = qWho.options.find((o) => o.id === Q.answers.who);
   const dayOpt = qDays.options.find((o) => o.id === Q.answers.days) || qDays.options[1];
-  const likes = (Q.answers.likes || []).map((id) => qLikes.options.find((o) => o.id === id));
+  const likes = (Q.answers.likes || []).map((id) => qLikes.options.find((o) => o.id === id)).filter(Boolean);
   const kids = Q.answers.who === 'kids';
-  const count = dayOpt.count;
+  const base = kids ? C.quiz.kidsFirst : C.quiz.popular;
 
-  let ids;
-  if (!likes.length || likes.some((o) => o.exclusive)) {
-    ids = kids ? [...C.quiz.kidsFirst] : [...C.quiz.popular];
-  } else {
+  let ranked = [];
+  if (likes.length && !likes.some((o) => o.exclusive)) {
     const likeTags = new Set(likes.flatMap((o) => o.tags));
-    const scored = C.excursions.map((ex, i) => {
+    ranked = C.excursions.map((ex, i) => {
       let s = ex.tags.filter((t) => likeTags.has(t)).length * 3;
       if (who?.tags?.some((t) => ex.tags.includes(t))) s += 1.5;
       if (kids && C.quiz.kidsFirst.includes(ex.id)) s += 4;
       return { id: ex.id, s: s - i * 0.01 };
-    }).sort((a, b) => b.s - a.s);
-    ids = scored.map((x) => x.id);
+    }).filter((x) => x.s > 1).sort((a, b) => b.s - a.s).map((x) => x.id);
   }
-  return ids.slice(0, count);
+  // Сначала совпадения, потом популярное; похожие экскурсии (одна включает другую) не ставим вместе
+  const out = [];
+  for (const id of [...ranked, ...base, ...C.excursions.map((e) => e.id)]) {
+    if (out.length >= dayOpt.count) break;
+    if (out.includes(id)) continue;
+    if (out.some((x) => (exById(x).overlaps || []).includes(id))) continue;
+    out.push(id);
+  }
+  return out;
 }
 
 function reasonFor(ex) {
   const qLikes = C.quiz.questions[2];
   const parts = (Q.answers.likes || [])
     .map((id) => qLikes.options.find((o) => o.id === id))
-    .filter((o) => o && !o.exclusive && o.tags.some((t) => ex.tags.includes(t)))
-    .map((o) => o.text.toLowerCase());
+    .filter((o) => o?.reason && o.tags.some((t) => ex.tags.includes(t)))
+    .map((o) => o.reason);
   if (Q.answers.who === 'kids' && ex.tags.includes('дети')) parts.push('с детьми');
-  return parts.length ? `${C.quiz.reasonPrefix} ${parts.join(' · ')}` : '';
+  return parts.length ? `${C.quiz.reasonPrefix} ${parts.join(', ')}` : '';
 }
 
 function finishQuiz() {
@@ -250,33 +255,42 @@ function finishQuiz() {
   if (top < -40) $('#quiz').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
 }
 
-const card = (ex, opts = {}) => R.card(C, ex, { group: S.group, inPlan: S.plan.some((p) => p.id === ex.id), ...opts });
+const card = (ex, opts = {}) => R.card(C, ex, { group: S.group, inPlan: S.plan.some((p) => p.id === ex.id), compared: (S.compare || []).includes(ex.id), ...opts });
 
 function renderResult(box) {
   const long = S.quiz?.days === 'd5';
-  const allIn = S.picked.every((id) => S.plan.some((p) => p.id === id));
+  const exs = S.picked.map(exById);
+  const hours = exs.reduce((h, ex) => h + (ex.hours || 0), 0);
+  const total = S.group === 'l' ? null : exs.reduce((t, ex) => t + exPrice(ex, ex.perPerson ? { people: heliPeople() } : null).value, 0);
+  const sum = total == null ? C.plan.individual : `${usd(total)} за группу ${C.groups[S.group].short}`;
   box.innerHTML = `
     <h3 class="result__title">${esc(C.quiz.resultTitle)}</h3>
     <p class="result__lead">${esc(C.quiz.resultLead)}</p>
-    <ol class="dayplan">${S.picked.map((id, i) => {
-      const ex = exById(id);
-      const pr = exPrice(ex);
-      const on = S.plan.some((p) => p.id === id);
+    <ol class="dayplan">${exs.map((ex, i) => {
+      const pr = exPrice(ex, ex.perPerson ? { people: heliPeople() } : null);
       const reason = reasonFor(ex);
       return `<li class="dayplan__row">
         <span class="dayplan__day">День ${i + 1}</span>
         <span class="dayplan__art">${tile(ex.icon)}</span>
         <div class="dayplan__body"><b>${esc(ex.name)}</b><span>${esc(ex.hook)}</span>
-          <small>${esc(R.hoursText(ex.hours))} · ${esc(pr.label)}${reason ? ` · ${esc(reason)}` : ''}</small></div>
-        <button class="icon-btn icon-btn--add ${on ? 'is-on' : ''}" type="button" data-add="${id}" aria-pressed="${on}" aria-label="${on ? 'Убрать из поездки' : 'Добавить в поездку'}">${on ? UI.check : UI.plus}</button>
+          <small>${esc(R.hoursText(ex.hours))} · ${esc(S.group === 'l' ? C.plan.individual : usd(pr.value))}${reason ? ` · ${esc(reason)}` : ''}</small></div>
       </li>`;
     }).join('')}</ol>
-    <button class="btn ${allIn ? 'btn--ghost' : 'btn--main'} btn--block result__all" type="button" data-addall>${allIn ? `${UI.check}<span>${esc(C.quiz.addedAll)}</span>` : `${UI.plus}<span>${esc(C.quiz.addAll)}</span>`}</button>
+    <p class="result__sum">${esc(C.quiz.summary.replace('{days}', days(exs.length)).replace('{hours}', `≈ ${hours} ч`).replace('{sum}', sum))}</p>
     ${long ? `<div class="note"><p>${esc(C.quiz.longNote)}</p><a class="link-arrow" href="#riders">${esc(C.quiz.longLink)}</a></div>` : ''}
-    <div class="result__actions">
-      <a class="link-arrow" href="#catalog">${esc(C.quiz.toCatalog)}</a>
-      <button class="quiz__back" type="button" data-qrestart>${esc(C.quiz.restart)}</button>
+    <div class="result__next">
+      <p class="result__nexttitle">${esc(C.quiz.next)}</p>
+      <p>${esc(C.quiz.nextText)}</p>
+      <button class="btn btn--main btn--block" type="button" data-result-send>${esc(C.quiz.send)}</button>
+      <button class="btn btn--ghost btn--block" type="button" data-result-keep>${esc(C.quiz.keep)}</button>
+      <button class="quiz__back result__restart" type="button" data-qrestart>${esc(C.quiz.restart)}</button>
     </div>`;
+}
+
+function takeResult() {
+  S.picked.forEach((id) => { if (!S.plan.some((p) => p.id === id)) S.plan.push(id === 'heli' ? { id, people: heliPeople() } : { id }); });
+  save(); refreshCards();
+  reach('excursion_add');
 }
 
 /* ——— Каталог ——— */
@@ -289,10 +303,58 @@ function renderFilters() {
     `<button class="chip" type="button" role="tab" aria-selected="${filter === f.id}" data-filter="${f.id}">${esc(f.text)}</button>`).join('');
 }
 function renderCatalog() {
-  $('[data-grid]').innerHTML = R.catalogHtml(C, { group: S.group, filter, plan: S.plan });
+  $('[data-grid]').innerHTML = R.catalogHtml(C, { group: S.group, filter, plan: S.plan, compare: S.compare || [] });
+  $('[data-grid]').hidden = view === 'map';
+  $('[data-map]').hidden = view !== 'map';
+  if (view === 'map') renderMap();
+  renderCompareBar();
   $('[data-routes]').innerHTML = R.routesHtml(C, { group: S.group, plan: S.plan });
   if (Q.screen === 'result') renderQuiz();
 }
+function renderViewSeg() {
+  $('[data-viewseg]').innerHTML = [['cards', C.map.cards], ['map', C.map.title]].map(([k, t]) =>
+    `<button type="button" role="radio" aria-checked="${view === k}" data-view="${k}">${esc(t)}</button>`).join('');
+}
+function renderMap() {
+  const list = C.excursions.filter((ex) => filter === 'all' || ex.filters.includes(filter));
+  const trip = exItems().map((i) => i.id);
+  const box = $('[data-map]');
+  const scrollX = box.querySelector('.map__frame')?.scrollLeft;
+  box.innerHTML = `
+    <p class="map__hint">${esc(C.map.lead)}</p>
+    <div class="map__frame">${R.mapSvg(C, { focus: mapFocus, trip })}</div>
+    <p class="map__hint">${esc(C.map.hint)} <span class="mobile-only">${esc(C.map.hintMobile)}</span></p>
+    <div class="map__list" role="radiogroup" aria-label="Показать маршрут">${list.map((ex) =>
+      `<button class="chip ${trip.includes(ex.id) ? 'is-trip' : ''}" type="button" role="radio" aria-checked="${mapFocus === ex.id}" data-mapfocus="${ex.id}">${esc(ex.name)}</button>`).join('')}</div>
+    ${mapFocus ? `<div class="map__focus">${card(exById(mapFocus), { compared: (S.compare || []).includes(mapFocus) })}</div>` : ''}`;
+  const frame = box.querySelector('.map__frame');
+  if (scrollX != null) frame.scrollLeft = scrollX;
+  else if (frame.scrollWidth > frame.clientWidth) frame.scrollLeft = (frame.scrollWidth - frame.clientWidth) * 0.3;
+}
+function renderCompareBar() {
+  const n = (S.compare || []).length;
+  const bar = $('[data-cmpbar]');
+  bar.hidden = n === 0;
+  $('[data-cmpcount]').textContent = n < 2 ? 'Выберите ещё одну' : `${n} ${plural(n, ['экскурсия', 'экскурсии', 'экскурсий'])}`;
+  const btn = $('[data-open-cmp]');
+  btn.textContent = `${C.compare.bar}${n ? ` (${n})` : ''}`;
+  btn.disabled = n < 2;
+}
+function toggleCompare(id) {
+  const list = S.compare || (S.compare = []);
+  const i = list.indexOf(id);
+  if (i >= 0) list.splice(i, 1);
+  else if (list.length >= 3) { toast(C.compare.max); return; }
+  else list.push(id);
+  save(); renderCatalog();
+}
+function renderCompare() {
+  $('[data-cmp]').innerHTML = `
+    <div class="sheet__head"><h2 class="sheet__title" id="cmp-h">${esc(C.compare.title)}</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Закрыть">${UI.close}</button></div>
+    ${R.compareHtml(C, S.compare, S.group)}`;
+}
+
 function addRoute(route) {
   const ids = route.days;
   const allIn = ids.filter((d) => d !== 'free').every((id) => S.plan.some((p) => p.id === id));
@@ -324,6 +386,7 @@ function toggleExcursion(id) {
   save();
   refreshCards();
   if ($('#planSheet').open) renderPlan();
+  if ($('#cmpSheet').open) renderCompare();
 }
 
 /* ——— Сезоны ——— */
@@ -456,7 +519,7 @@ function planSummary() {
 function updateDock() {
   const has = S.plan.length || S.rider;
   $('[data-open-plan]').hidden = !has;
-  $('[data-dock-summary]').textContent = has ? `· ${planSummary()}` : '';
+  $('[data-dock-summary]').textContent = has ? planSummary() : '';
   const n = $('[data-trip-count]');
   if (n) { n.textContent = S.plan.length || ''; n.hidden = !S.plan.length; }
   measureDock();
@@ -552,129 +615,117 @@ function giftBonus() {
   return C.gift.bonuses.find((b) => when[b.when]);
 }
 
-function buildMessage(name, dates) {
+function buildMessage(monthIdx) {
   const m = C.messages;
   const q = S.quiz || {};
-  const lines = [];
-  const mo = C.seasons.months.find((x) => x.name === dates.trim().toLowerCase());
-  lines.push(`${m.hello}${mo ? `, примерно ${mo.in}` : ''}.`);
-  if (dates.trim() && !mo) lines.push(`Даты: ${dates.trim()}.`);
-
-  let people = q.who === 'solo' ? m.solo : C.groups[S.group].phrase;
-  if (q.who === 'kids') people += `, ${m.kids}`;
-  if (S.group === 'l') people += ` — ${m.large}`;
-  if (S.plan.length || q.who) lines.push(`${people}.`);
+  const mo = monthIdx != null ? C.seasons.months[monthIdx] : null;
+  const cap = (t) => t[0].toUpperCase() + t.slice(1);
+  const lines = [`${m.hello}${mo ? ` ${mo.in}` : ''}.`];
+  const who = [q.who && m.who[q.who], q.who !== 'solo' && (exItems().length || q.who) ? m.group[S.group] : ''].filter(Boolean).join(', ');
+  if (who) lines.push(`${cap(who)}.`);
   if (leadMode === 'concierge') lines.push(m.concierge);
-
   if (exItems().length) {
-    const names = exItems().map((item) => {
+    lines.push('', m.route);
+    S.plan.forEach((item, i) => {
+      if (isFree(item)) { lines.push(`${i + 1}. ${m.free}`); return; }
       const ex = exById(item.id);
-      return ex.perPerson && S.group !== 'l' ? `«${ex.name}» (${heliPeople(item)} ${plural(heliPeople(item), ['человек', 'человека', 'человек'])})` : `«${ex.name}»`;
+      const extra = ex.perPerson && S.group !== 'l' ? ` (${heliPeople(item)} ${plural(heliPeople(item), ['человек', 'человека', 'человек'])})` : '';
+      lines.push(`${i + 1}. ${ex.name}${extra}`);
     });
-    const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} и ${names.at(-1)}` : names[0];
     const total = planTotal();
-    lines.push(`${m.include} ${list}${total != null ? ` — ${m.sum.replace('{sum}', usd(total))}` : ''}.`);
+    if (total != null) lines.push(m.sum.replace('{sum}', usd(total)));
+    lines.push('');
   }
   if (S.rider) {
     const r = riderCalc(S.rider.id, S.rider.days, S.rider.adults);
-    const what = S.rider.id === 'standard' ? `${r.name}, ${r.term}` : `${r.name} на ${days(S.rider.days)}, взрослых — ${S.rider.adults}`;
-    lines.push(`${exItems().length ? m.riderAlso : m.riderOnly} ${what}.`);
+    const what = S.rider.id === 'standard' ? `${r.name} (${r.term})` : `${r.name} на ${days(S.rider.days)}`;
+    lines.push((exItems().length ? m.rider : m.riderOnly).replace('{rider}', what));
   }
-  if (S.plan.length > exItems().length && exItems().length) lines.push(`Всего в Лос-Анджелесе — ${days(S.plan.length)}.`);
   if (!exItems().length && !S.rider && leadMode !== 'concierge') lines.push(m.nothing);
+  else lines.push(m.ask);
   const gift = giftBonus();
   if (gift) lines.push(m.gift.replace('{gift}', gift.message));
-  lines.push(m.close);
-  if (name.trim()) lines.push(m.name.replace('{name}', name.trim()));
-  return lines.join('\n');
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n');
 }
 
-let channel = 'tg';
+let leadMonth = null;
 function renderLead() {
   const L = C.lead;
   const form = $('[data-lead]');
-  const month = S.month != null ? C.seasons.months[S.month].name : '';
+  leadMonth = S.month;
+  const summary = planSummary();
   form.innerHTML = `
     <div class="sheet__head"><h2 class="sheet__title" id="lead-h">${esc(L.title)}</h2>
       <button class="icon-btn" type="button" data-close aria-label="Закрыть">${UI.close}</button></div>
-    <div class="form">
-      <label class="field"><span class="field__label">${esc(L.name)}</span>
-        <input class="input" name="name" autocomplete="given-name" required placeholder="${esc(L.namePh)}" value="${esc(leadName)}"></label>
-      <p class="err" data-err hidden>${esc(L.nameError)}</p>
-      <label class="field"><span class="field__label">${esc(L.dates)}</span>
-        <input class="input" name="dates" placeholder="${esc(L.datesPh)}" value="${esc(month)}"></label>
-      <div class="field"><span class="field__label">${esc(L.channel)}</span>
-        <div class="channels" role="radiogroup">${L.channels.map((c) =>
-          `<button class="opt" type="button" role="radio" aria-checked="${channel === c.id}" data-channel="${c.id}">${UI[{ tg: 'telegram', wa: 'whatsapp', call: 'phone' }[c.id]]}<span>${esc(c.text)}</span></button>`).join('')}</div></div>
-      <div class="field"><span class="field__label">${esc(L.preview)}</span><p class="preview" data-preview></p></div>
-      <button class="btn btn--main btn--block" type="submit" data-submit>${esc(L.submit[channel])}</button>
-      <p class="consent">${esc(L.consent)} — <a href="${esc(C.contacts.consentUrl)}" target="_blank" rel="noopener">условия</a>.</p>
-      <p class="hours">${esc(C.contacts.hours)}</p>
-    </div>`;
+    <p class="lead__text">${esc(L.lead)}</p>
+    ${summary ? `<p class="lead__summary">${UI.trip}<span>${esc(summary)}</span></p>` : ''}
+    <div class="field"><span class="field__label">${esc(L.when)} <small>${esc(L.whenHint)}</small></span>
+      <div class="months months--lead" role="radiogroup">${C.seasons.months.map((mo, i) =>
+        `<button class="chip" type="button" role="radio" aria-checked="${leadMonth === i}" data-leadmonth="${i}">${esc(mo.short)}</button>`).join('')}</div></div>
+    <div class="send">${L.channels.map((c, i) =>
+      `<button class="btn ${i ? 'btn--ghost' : 'btn--main'} btn--block send__btn" type="button" data-send="${c.id}">${UI[c.id === 'tg' ? 'telegram' : 'whatsapp']}<span>${esc(c.text)}</span>${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}</div>
+    <p class="lead__call">${esc(L.call)}: <a href="tel:${esc(C.contacts.phone)}" data-send-call>${esc(C.contacts.phoneLabel)}</a></p>
+    <details class="lead__preview"><summary>${esc(L.preview)} ${UI.down}</summary><p class="preview" data-preview></p></details>
+    <p class="consent">${esc(L.consent)} — <a href="${esc(C.contacts.consentUrl)}" target="_blank" rel="noopener">условия</a>.</p>
+    <p class="hours">${esc(C.contacts.hours)}</p>`;
   updatePreview();
 }
 function updatePreview() {
-  const f = $('[data-lead]');
-  $('[data-preview]', f).textContent = buildMessage(f.name.value, f.dates.value);
-  $('[data-submit]', f).textContent = C.lead.submit[channel];
+  const el = $('[data-preview]');
+  if (el) el.textContent = buildMessage(leadMonth);
 }
 
-async function submitLead(e) {
-  e.preventDefault();
-  const f = $('[data-lead]');
-  const name = f.name.value.trim();
-  if (!name) {
-    f.name.setAttribute('aria-invalid', 'true');
-    $('[data-err]', f).hidden = false;
-    f.name.focus();
-    return;
-  }
-  leadName = name;
-  const text = buildMessage(name, f.dates.value);
+function sendLead(channel) {
+  const text = buildMessage(leadMonth);
   const enc = encodeURIComponent(text);
   const c = C.contacts;
   const url = { tg: `https://t.me/${c.telegram}?text=${enc}`, wa: `https://wa.me/${c.whatsapp}?text=${enc}`, call: `tel:${c.phone}` }[channel];
   reach({ tg: 'lead_tg', wa: 'lead_wa', call: 'lead_call' }[channel]);
-  logEvent('Заявка', { 'Канал': C.lead.channels.find((x) => x.id === channel).text, 'Месяц': f.dates.value.trim() });
+  logEvent('Заявка', { 'Канал': { tg: 'Telegram', wa: 'WhatsApp', call: 'Звонок' }[channel], 'Месяц': leadMonth != null ? C.seasons.months[leadMonth].name : '' });
   if (channel !== 'call') navigator.clipboard?.writeText(text).catch(() => {});
   window.__lastLead = { url, text }; // для автотеста
-  const a = document.createElement('a');
-  a.href = url;
-  if (channel !== 'call') { a.target = '_blank'; a.rel = 'noopener'; }
-  document.body.append(a); a.click(); a.remove();
+  if (channel !== 'call') {
+    const a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    document.body.append(a); a.click(); a.remove();
+  }
   closeSheet($('#leadSheet'));
-  openGift(name, f.dates.value.trim());
+  openGift(leadMonth);
   if (channel !== 'call') setTimeout(() => toast(C.lead.copied), 900);
 }
 
 /* ——— Подарок ——— */
-async function openGift(name, dates) {
+async function openGift(monthIdx) {
   const box = $('[data-gift]');
   const G = C.gift;
+  const bonus = giftBonus();
   box.innerHTML = `
     <div class="sheet__head"><h2 class="sheet__title" id="gift-h">${esc(G.title)}</h2>
       <button class="icon-btn" type="button" data-close aria-label="Закрыть">${UI.close}</button></div>
     <p class="muted" style="margin:0">${esc(G.lead)}</p>
+    ${bonus ? `<a class="giftbox" href="${esc(bonus.file)}" download target="_blank" rel="noopener" data-gift-file>
+      <img class="giftbox__cover" src="${esc(bonus.file.replace('.pdf', '.jpg'))}" alt="" width="560" height="794">
+      <span class="giftbox__label">Ваш подарок</span><b>${esc(bonus.title)}</b><span class="giftbox__cta">${UI.download}${esc(G.download)} · PDF</span></a>` : ''}
     <img class="gift-img" alt="Открытка с Вашим маршрутом" data-gift-img>
-    <div class="gift-actions"><button class="btn btn--main btn--block" type="button" data-gift-save disabled>${UI.download}<span>${esc(G.save)}</span></button></div>`;
+    <div class="gift-actions"><button class="btn btn--ghost btn--block" type="button" data-gift-save disabled>${UI.download}<span>${esc(G.save)}</span></button></div>`;
   openSheet($('#giftSheet'));
-  const mo = C.seasons.months.find((x) => x.name === dates.toLowerCase()) || (S.month != null ? C.seasons.months[S.month] : null);
+  const mo = monthIdx != null ? C.seasons.months[monthIdx] : null;
   const q = S.quiz || {};
-  const who = q.who === 'solo' ? 'Поездка для одного' : `${C.groups[S.group].phrase}${q.who === 'kids' ? ', с детьми' : ''}`;
+  const cap = (t) => t[0].toUpperCase() + t.slice(1);
+  const who = [q.who && C.messages.who[q.who], q.who !== 'solo' ? C.messages.group[S.group].split(' — ')[0] : ''].filter(Boolean).join(', ');
   const total = planTotal();
   const r = S.rider ? riderCalc(S.rider.id, S.rider.days, S.rider.adults) : null;
-  const bonus = giftBonus();
   const blob = await drawGift({
     logoSvg,
-    title: name ? G.hello.replace('{name}', name) : G.helloNoName,
-    who: `${who}${mo ? ` · ${mo.name}` : (dates ? ` · ${dates}` : '')}`,
+    title: G.helloNoName,
+    who: cap(`${who || 'Ваша поездка'}${mo ? ` · ${mo.name}` : ''}`),
     routeTitle: G.routeTitle,
     route: S.plan.map((i) => (isFree(i) ? C.plan.freeDay : exById(i.id).name)),
     rider: r ? `${r.name} · ${r.term}` : '',
     total: exItems().length && total != null ? G.total.replace('{sum}', usd(total)) : '',
     seasonTitle: G.seasonTitle,
     season: mo?.card || '',
-    gift: bonus ? G.giftLine.replace('{gift}', bonus.title[0].toLowerCase() + bonus.title.slice(1)) : '',
+    gift: bonus ? G.giftLine.replace('{gift}', bonus.message) : '',
     giftNote: G.giftNote,
     contacts: C.contacts,
   });
@@ -762,14 +813,14 @@ function bind() {
     else if ('qback' in ds) back();
     else if ('qrestart' in ds) { Q.screen = 'q'; Q.idx = 0; Q.answers = { likes: [] }; swap(renderQuiz); }
     else if (ds.add) toggleExcursion(ds.add);
-    else if ('addall' in ds) {
-      const allIn = S.picked.every((id) => S.plan.some((p) => p.id === id));
-      if (allIn) S.plan = S.plan.filter((p) => !S.picked.includes(p.id));
-      else S.picked.forEach((id) => { if (!S.plan.some((p) => p.id === id)) S.plan.push(id === 'heli' ? { id, people: heliPeople() } : { id }); });
-      if (!allIn) { toast(C.toasts.routeAdded); reach('excursion_add'); }
-      save(); refreshCards();
-    }
+    else if ('resultSend' in ds) { takeResult(); leadMode = 'plan'; renderLead(); openSheet($('#leadSheet')); }
+    else if ('resultKeep' in ds) { takeResult(); toast(C.toasts.routeAdded); renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
     else if (ds.route) addRoute(C.routes.items.find((r) => r.id === ds.route));
+    else if (ds.view) { view = ds.view; renderViewSeg(); renderCatalog(); if (view === 'map') reach('map_open'); }
+    else if (ds.mapfocus) { mapFocus = mapFocus === ds.mapfocus ? null : ds.mapfocus; renderMap(); }
+    else if (ds.compare) toggleCompare(ds.compare);
+    else if ('openCmp' in ds) { renderCompare(); openSheet($('#cmpSheet')); reach('compare_open'); }
+    else if ('cmpClear' in ds) { S.compare = []; save(); renderCatalog(); }
     else if (ds.move) {
       const i = +ds.move; const j = i + +ds.d;
       [S.plan[i], S.plan[j]] = [S.plan[j], S.plan[i]];
@@ -797,7 +848,7 @@ function bind() {
     else if (ds.calc) { S.calc[ds.calc] = ds.v; save(); renderCalc(); reach('rider_calc'); }
     else if ('calcAdd' in ds) setRider(recommend(), S.calc.days, S.calc.adults);
     else if ('openPlan' in ds || 'openPlanTop' in ds) { renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
-    else if ('openLead' in ds) { leadMode = ds.openLead === 'concierge' ? 'concierge' : 'plan'; closeSheet($('#planSheet')); renderLead(); openSheet($('#leadSheet')); setTimeout(() => $('[data-lead]').name.focus(), 60); }
+    else if ('openLead' in ds) { leadMode = ds.openLead === 'concierge' ? 'concierge' : 'plan'; closeSheet($('#planSheet')); renderLead(); openSheet($('#leadSheet')); }
     else if ('close' in ds) closeSheet(t.closest('dialog'));
     else if ('closeGo' in ds) closeSheet(t.closest('dialog'));
     else if (ds.remove) toggleExcursion(ds.remove);
@@ -811,14 +862,16 @@ function bind() {
       const url = shareUrl();
       (navigator.clipboard?.writeText(url) || Promise.reject()).then(() => toast(C.plan.shared)).catch(() => prompt('Ссылка на план', url));
     }
-    else if (ds.channel) { channel = ds.channel; $$('[data-channel]').forEach((b) => b.setAttribute('aria-checked', b.dataset.channel === channel)); updatePreview(); }
+    else if (ds.send) sendLead(ds.send);
+    else if ('sendCall' in ds) sendLead('call');
+    else if (ds.leadmonth != null && t.closest('[data-lead]')) {
+      const m = +ds.leadmonth; leadMonth = leadMonth === m ? null : m;
+      $$('[data-leadmonth]').forEach((b) => b.setAttribute('aria-checked', +b.dataset.leadmonth === leadMonth)); updatePreview();
+    }
+    else if ('giftFile' in ds) reach('gift_download');
   });
 
-  $('[data-lead]').addEventListener('input', (e) => {
-    if (e.target.name === 'name') { e.target.removeAttribute('aria-invalid'); $('[data-err]').hidden = true; leadName = e.target.value; }
-    updatePreview();
-  });
-  $('[data-lead]').addEventListener('submit', submitLead);
+  $('[data-lead]').addEventListener('submit', (e) => e.preventDefault());
   $$('dialog').forEach((d) => d.addEventListener('close', () => {
     if (!$$('dialog').some((x) => x.open)) document.documentElement.style.overflow = '';
   }));
@@ -856,6 +909,7 @@ async function init() {
   renderStatic();
   renderQuiz();
   renderGroupSeg();
+  renderViewSeg();
   renderFilters();
   renderCatalog();
   renderSeasons();
