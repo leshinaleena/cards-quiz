@@ -21,7 +21,7 @@
 ## Подключить
 
 - **Google Таблица:** «TOP RIDERS — Лос-Анджелес, заявки с сайта» (лист LA) уже создана. Приёмник — `apps-script/Code.gs`, инструкция в начале файла → URL в `config.json → leads.endpoint`.
-- **Яндекс Метрика:** номер счётчика в `config.json → analytics.metrikaId`. Цели: quiz_start, quiz_done, excursion_add, rider_calc, plan_open, lead_tg, lead_wa, lead_call, gift_save, map_open, compare_open, advice_apply.
+- **Яндекс Метрика:** номер счётчика в `config.json → analytics.metrikaId`. Цели: quiz_start, quiz_done, excursion_add, rider_calc, plan_open, lead_tg, lead_wa, lead_call, gift_save, map_open, compare_open, advice_apply, tune_calm|ocean|kids|wow|cheaper, plan_share.
 
 ## Проверка
 

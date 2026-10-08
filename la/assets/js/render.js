@@ -1,6 +1,6 @@
 // Чистые функции разметки: работают и в браузере, и в Node (tools/prerender.mjs),
 // чтобы каталог, маршруты и вопросы были в HTML сразу — для поисковиков и быстрого первого экрана.
-import { ILLUSTRATIONS, UI } from './icons.js?v=16';
+import { ILLUSTRATIONS, UI } from './icons.js?v=17';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const nf = (n) => Math.round(n).toLocaleString('ru-RU').replace(/\s/g, ' ');
@@ -59,6 +59,7 @@ export function card(C, ex, { group = 's', inPlan = false, reason = '', compared
       </div>
       ${ex.terms ? `<p class="term">${esc(ex.terms)}</p>` : ''}
       ${ex.season ? `<p class="when"><b>Когда лучше:</b> ${esc(ex.season)}</p>` : ''}
+      <button class="link-arrow more__map" type="button" data-map-ex="${ex.id}">${esc(C.catalog.onMap)}</button>
     </details>
     <div class="card__foot">${addBtn(C, ex.id, inPlan)}</div>
   </article>`;
@@ -157,13 +158,13 @@ export function mapStops(C, trip) {
   }).filter(Boolean);
 }
 
-export function mapSvg(C, { trip = [] } = {}) {
+export function mapSvg(C, { trip = [], stops: given = null, label = 'Схема Лос-Анджелеса: Ваш маршрут по дням', names = true } = {}) {
   const M = C.map;
   const P = Object.fromEntries(Object.entries(M.points).map(([k, v]) => [k, px(v.lat, v.lon)]));
   const coast = COAST.map(([a, b]) => px(a, b));
   const sea = `${smooth(coast)} L${BOX.w},${BOX.h} L0,${BOX.h} Z`;
   const hills = `${smooth(HILLS.map(([a, b]) => px(a, b)))} Z`;
-  const stops = mapStops(C, trip);
+  const stops = given || mapStops(C, trip);
   // Повторная точка (две экскурсии в одном месте) — смещаем кружок, чтобы цифры не слипались
   const seen = {};
   const at = (s) => {
@@ -198,7 +199,7 @@ export function mapSvg(C, { trip = [] } = {}) {
     let [lx, ly, la] = left ? [x + 10, y - 40, 'end'] : crowded ? [x, y - 42, 'middle'] : [x + 36, y + 10, 'start'];
     if (la === 'middle' && x < name.length * 11) [lx, la] = [Math.max(16, x - 26), 'start']; // у левого края — внутрь карты
     return `<g class="map__pin"><circle cx="${x}" cy="${y}" r="26"/><text class="map__n" x="${x}" y="${y + 9}">${s.n}</text>
-      <text class="map__label" x="${lx}" y="${ly}" text-anchor="${la}">${esc(name)}</text></g>`;
+      ${names ? `<text class="map__label" x="${lx}" y="${ly}" text-anchor="${la}">${esc(name)}</text>` : ''}</g>`;
   }).join('');
   const farTags = Object.entries(M.far).map(([k, f]) => {
     const on = pos.filter((s) => s.far === k);
@@ -210,7 +211,7 @@ export function mapSvg(C, { trip = [] } = {}) {
       ${on.length ? `<circle cx="${rx + 24}" cy="${y}" r="15"/><text class="map__n map__n--sm" x="${rx + 24}" y="${y + 6}">${on.map((s) => s.n).join(',')}</text>` : ''}
       <text x="${rx + (on.length ? 48 : 16)}" y="${y + 7}">${esc(text)}</text></g>`;
   }).join('');
-  return `<svg class="map__svg" viewBox="0 0 ${BOX.w} ${BOX.h}" role="img" aria-label="Схема Лос-Анджелеса: Ваш маршрут по дням">
+  return `<svg class="map__svg" viewBox="0 0 ${BOX.w} ${BOX.h}" role="img" aria-label="${esc(label)}">
     <defs><pattern id="waves" width="46" height="18" patternUnits="userSpaceOnUse"><path d="M0 9 q11.5 -7 23 0 t23 0" class="map__wave"/></pattern></defs>
     <rect class="map__land" width="${BOX.w}" height="${BOX.h}"/>
     <path class="map__hills" d="${hills}"/>
@@ -222,6 +223,18 @@ export function mapSvg(C, { trip = [] } = {}) {
     ${pins}
     ${farTags}
   </svg>`;
+}
+
+// Остановки одной экскурсии — по порядку программы
+export function exStops(C, ex) {
+  return ex.map.map((m, i) => (m.startsWith('far:') ? { n: i + 1, ex, far: m.slice(4) } : { n: i + 1, ex, point: m }));
+}
+export function exMapHtml(C, ex) {
+  const M = C.map;
+  const stops = exStops(C, ex);
+  const where = (s) => (s.far ? `${M.far[s.far].time} ${M.fromCenter}` : M.times[s.point] ? (M.times[s.point] === 'в центре' ? 'в центре' : `${M.times[s.point]} ${M.fromCenter}`) : '');
+  return `<div class="map__frame">${mapSvg(C, { stops, label: `Схема: ${ex.name}`, names: stops.length < 3 })}</div>
+    <ol class="map__legend">${stops.map((s) => `<li><span class="map__ln">${s.n}</span><b>${esc(s.far ? M.far[s.far].name : M.points[s.point].name)}</b><span>${esc(where(s))}</span></li>`).join('')}</ol>`;
 }
 
 export function mapLegend(C, trip) {

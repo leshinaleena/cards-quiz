@@ -48,6 +48,18 @@ export const ILLUSTRATIONS = {
     <path class="a" d="M0 40h64v3.5H0Z"/>
     <path class="a" d="M2 39C8 35 14 27 18 13c4 13 9 18 14 22 5-4 10-9 14-22 4 14 10 22 16 26l-.8 1C55 36 50 29 46 18c-4 10-8 15-14 19.2C26 33 22 28 18 18 14 29 9 36 2.8 40Z"/>
     <path class="h" d="M0 50c4 0 4-2 8-2s4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2" fill="none" stroke-width="1.6"/>`),
+  lighthouse: art(`
+    <circle class="c" cx="52" cy="32" r="5"/>
+    <path class="b" d="M0 50c6-4 12-6 18-5l6-5h16l6 5c6-1 12 1 18 5v14H0Z"/>
+    <rect class="g" x="0" y="56" width="64" height="8"/>
+    <path class="a" d="M26.5 50 28.6 18h6.8l2.1 32Z"/>
+    <path class="h" d="M27.6 30h8.8M27 40h10" fill="none" stroke-width="2.2"/>
+    <path class="a" d="M27 15h10v3H27Z"/>
+    <path class="c" d="M28.5 10h7v5h-7Z"/>
+    <path class="a" d="M27 10.5 32 5l5 5.5Z"/>
+    <path class="c" d="M21 11 9 7v8Zm22 0 12-4v8Z" opacity=".55"/>
+    <path class="a" d="M22 50h20v3H22Z"/>
+    <path class="h" d="M0 58c4 0 4-2 8-2s4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2" fill="none" stroke-width="1.6"/>`),
   mission: art(`
     <circle class="c" cx="49" cy="15" r="6"/>
     <path class="b" d="M0 48c10-8 20-10 30-8s22-8 34-4v20H0Z"/>
