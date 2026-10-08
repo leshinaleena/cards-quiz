@@ -396,7 +396,7 @@ a { color: inherit; }
 .plan-item__sub { font-size: 13px; color: var(--muted); }
 .plan-item__right { display: grid; justify-items: end; gap: 2px; }
 .plan-item__price { font: 800 16px/1 var(--head); color: var(--title); white-space: nowrap; }
-.plan-item .icon-btn { width: 36px; height: 36px; color: var(--muted); }
+.plan-item .icon-btn { width: 42px; height: 42px; color: var(--muted); }
 .plan-item .stepper { margin-top: 8px; }
 .plan-item .stepper button { width: 40px; height: 40px; }
 .plan-item .stepper output { font-size: 16px; min-width: 34px; }
@@ -598,7 +598,7 @@ button.link-arrow { background: none; border: 0; border-bottom: 1px solid var(--
 .plan-item__day { grid-area: day; font: 600 12px/1 var(--head); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
 .plan-item__right { grid-area: right; display: flex; align-items: center; gap: 2px; }
 .plan-item__move { display: inline-flex; }
-.plan-item__move .icon-btn { width: 36px; height: 36px; }
+.plan-item__move .icon-btn { width: 42px; height: 42px; }
 .plan-item__move .icon-btn[disabled] { opacity: .25; }
 .plan-item--free .plan-item__name { color: var(--muted); }
 .plan-rider { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
