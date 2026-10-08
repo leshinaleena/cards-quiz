@@ -1,6 +1,6 @@
 // Чистые функции разметки: работают и в браузере, и в Node (tools/prerender.mjs),
 // чтобы каталог, маршруты и вопросы были в HTML сразу — для поисковиков и быстрого первого экрана.
-import { ILLUSTRATIONS, UI } from './icons.js?v=8';
+import { ILLUSTRATIONS, UI } from './icons.js?v=9';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const nf = (n) => Math.round(n).toLocaleString('ru-RU').replace(/\s/g, ' ');
@@ -99,9 +99,7 @@ export function faqHtml(C) {
 
 export function benefitsHtml(C) {
   const b = C.benefits;
-  return `<div class="visa"><div class="visa__big">${esc(b.visaBig)}</div><h3 class="visa__title">${esc(b.visaTitle)}</h3><p>${esc(b.visaText)}</p></div>
-    <div class="loyal"><h3 class="loyal__title">${esc(b.loyaltyTitle)}</h3>
-      <div class="loyal__row">${b.loyalty.map((l) => `<div><b>${esc(l.off)}</b><span>${esc(l.trips)}</span></div>`).join('')}</div></div>`;
+  return `<div class="visa"><div class="visa__big">${esc(b.visaBig)}</div><h3 class="visa__title">${esc(b.visaTitle)}</h3><p>${esc(b.visaText)}</p></div>`;
 }
 
 export function conciergeHtml(C) {
