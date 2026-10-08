@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=15';
-import { drawGift } from './gift.js?v=15';
-import * as R from './render.js?v=15';
+import { UI } from './icons.js?v=16';
+import { drawGift } from './gift.js?v=16';
+import * as R from './render.js?v=16';
 
-const VERSION = '15';
+const VERSION = '16';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
