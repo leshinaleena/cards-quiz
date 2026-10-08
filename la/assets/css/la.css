@@ -698,3 +698,41 @@ button.link-arrow { background: none; border: 0; border-bottom: 1px solid var(--
   .result__next p, .result__restart { grid-column: 1 / -1; }
 }
 .dayplan__row { align-items: start; }
+
+/* ——— v6: лососевый акцент (Peach Fuzz-семейство), короткая форма, подарок ——— */
+:root { --salmon: #E8957F; --salmon-soft: #F8E4DB; --salmon-ink: #A8402C; }
+@media (prefers-color-scheme: dark) { :root { --salmon: #EBA08C; --salmon-soft: #3A1E1E; --salmon-ink: #F2B7A6; } }
+.section--soft { background: var(--salmon-soft); }
+.badge { background: var(--salmon-soft); color: var(--salmon-ink); }
+.badge--recommend { background: var(--wine); color: var(--cream); }
+.hero__tagline { color: var(--salmon-ink); }
+.overline, .label { color: var(--salmon-ink); }
+.step__n { background: var(--salmon); color: var(--wine-deep); }
+.trust li::before, .card__points li::before, .season li::before { background: var(--salmon); }
+.dayplan__day, .plan-item__day { color: var(--salmon-ink); }
+.progress i { background: linear-gradient(90deg, var(--salmon), var(--accent)); }
+.final__card::before { background: linear-gradient(180deg, rgba(232, 149, 127, 0) 15%, rgba(105, 19, 29, .78) 68%, rgba(52, 9, 16, .95)); }
+
+.lead__text { margin: -6px 0 0; color: var(--muted); }
+.lead__summary { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 14px; border-radius: 14px; background: var(--salmon-soft); color: var(--title); font: 600 14px/1.3 var(--head); }
+.lead__summary svg { width: 20px; height: 20px; flex: none; color: var(--salmon-ink); }
+.field__label small { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.months--lead { margin: 0 calc(var(--gutter) * -1); flex-wrap: nowrap; }
+.send { display: grid; gap: 10px; }
+.send__btn { min-height: 60px; flex-wrap: wrap; row-gap: 2px; }
+.send__btn small { flex-basis: 100%; font: 400 12px/1 var(--body); opacity: .8; }
+.lead__call { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
+.lead__call a { color: var(--title); font-weight: 600; }
+.lead__preview summary { list-style: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; cursor: pointer; font: 600 13px/1 var(--head); color: var(--muted); }
+.lead__preview summary::-webkit-details-marker { display: none; }
+.lead__preview summary svg { width: 16px; height: 16px; }
+.lead__preview[open] summary svg { transform: rotate(180deg); }
+
+.giftbox { display: grid; gap: 6px; padding: 18px 20px; border-radius: var(--shape); text-decoration: none; color: var(--wine-deep);
+  background: linear-gradient(135deg, var(--salmon) 0%, #F3B8A6 55%, var(--salmon-soft) 100%); max-width: 420px; width: 100%; margin: 0 auto; }
+.giftbox__label { font: 600 11px/1 var(--head); letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+.giftbox b { font: 800 20px/1.2 var(--head); }
+.giftbox__cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; font: 600 14px/1 var(--head); }
+.giftbox__cta svg { width: 18px; height: 18px; }
+.giftbox { grid-template-columns: 72px 1fr; column-gap: 16px; align-items: center; }
+.giftbox__cover { grid-row: 1 / span 3; width: 72px; height: auto; border-radius: 8px; box-shadow: 0 10px 20px -12px rgba(76, 13, 21, .6); }

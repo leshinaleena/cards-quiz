@@ -8,7 +8,7 @@
  * 3. Скопируйте URL и вставьте в la/config.json → leads.endpoint.
  * Лист «LA» с заголовками создастся сам при первом событии.
  */
-var HEADERS = ['Дата и время', 'Событие', 'С кем', 'Дней', 'Интересы', 'Группа', 'Подобрано', 'План', 'Сумма', 'Райдер', 'Месяц', 'Канал', 'UTM', 'Страница'];
+var HEADERS = ['Дата и время', 'Событие', 'Режим', 'С кем', 'Дней', 'Интересы', 'Группа', 'Подобрано', 'План', 'Сумма', 'Райдер', 'Месяц', 'Канал', 'UTM', 'Страница'];
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -18,7 +18,9 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName('LA') || ss.insertSheet('LA');
     if (sheet.getLastRow() === 0) sheet.appendRow(HEADERS);
-    var row = HEADERS.map(function (h) {
+    // Колонки берём из первой строки таблицы: их можно переставлять и добавлять
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var row = headers.map(function (h) {
       if (h === 'Дата и время') return new Date();
       var v = data[h] == null ? '' : String(data[h]).slice(0, 500);
       return /^[=+\-@]/.test(v) ? "'" + v : v;   // защита от формул в ячейках

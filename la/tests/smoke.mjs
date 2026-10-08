@@ -137,26 +137,27 @@ for (const { name, ...opts } of profiles) {
   await click('[data-calc="goal"][data-v="rest"]');
   await click('[data-calc-add]');
 
-  // Заявка: сообщение и ссылки
+  // Заявка: одно нажатие, никаких полей
   await page.evaluate(() => document.querySelector('[data-dock] [data-open-lead]').click());
-  await page.fill('[data-lead] [name="name"]', 'Анна');
-  await page.fill('[data-lead] [name="dates"]', 'май');
+  check((await page.locator('[data-lead] input').count()) === 0, 'в форме нет полей для ввода');
+  await click('[data-leadmonth="4"]');
+  await page.evaluate(() => document.querySelector('.lead__preview').open = true);
   const preview = await page.textContent('[data-preview]');
   check(!/[{}]/.test(preview), 'в сообщении нет «{…}»');
-  check(preview.includes('примерно в мае') && preview.includes('Меня зовут Анна') && preview.includes('Travel Rider'), 'сообщение собрано: месяц, имя, райдер');
+  check(preview.includes('в мае') && preview.includes('Travel Rider') && preview.includes('Мой маршрут'), 'сообщение собрано: месяц, маршрут, райдер');
   check(!/\(а\)/.test(preview), 'без «(а)»');
-  await click('[data-channel="wa"]');
-  await click('[data-submit]');
+  await click('[data-send="wa"]');
   await page.waitForTimeout(300);
   const opened = await page.evaluate(() => window.__opened);
-  check(opened?.startsWith(`https://wa.me/${cfg.contacts.whatsapp}?text=`) && !/[а-я]/i.test(opened), 'WhatsApp: кириллица закодирована');
+  check(opened?.startsWith(`https://wa.me/${cfg.contacts.whatsapp}?text=`) && !/[а-я]/i.test(opened), 'WhatsApp: одно нажатие, кириллица закодирована');
   await page.waitForSelector('[data-gift-img][src^="blob:"]', { timeout: 8000 });
-  check(true, 'открытка-подарок нарисована');
+  check(true, 'открытка нарисована');
+  const giftHref = await page.getAttribute('[data-gift-file]', 'href');
+  const giftOk = giftHref && (await page.evaluate(async (h) => (await fetch(h)).ok, giftHref));
+  check(giftOk, `подарок скачивается: ${giftHref}`);
   await page.keyboard.press('Escape');
   await page.evaluate(() => document.querySelector('[data-dock] [data-open-lead]').click());
-  await page.fill('[data-lead] [name="name"]', 'Анна');
-  await click('[data-channel="tg"]');
-  await click('[data-submit]');
+  await click('[data-send="tg"]');
   await page.waitForTimeout(300);
   check((await page.evaluate(() => window.__opened))?.startsWith(`https://t.me/${cfg.contacts.telegram}?text=`), 'Telegram открывается с набранным текстом');
 

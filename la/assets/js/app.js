@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=5';
-import { drawGift } from './gift.js?v=5';
-import * as R from './render.js?v=5';
+import { UI } from './icons.js?v=6';
+import { drawGift } from './gift.js?v=6';
+import * as R from './render.js?v=6';
 
-const VERSION = '5';
+const VERSION = '6';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -30,7 +30,6 @@ let quizStarted = false;
 let filter = 'all';
 let view = 'cards';
 let mapFocus = null;
-let leadName = '';
 
 /* ——— Утилиты ——— */
 const get = (path) => path.split('.').reduce((o, k) => o?.[k], C);
@@ -616,129 +615,117 @@ function giftBonus() {
   return C.gift.bonuses.find((b) => when[b.when]);
 }
 
-function buildMessage(name, dates) {
+function buildMessage(monthIdx) {
   const m = C.messages;
   const q = S.quiz || {};
-  const lines = [];
-  const mo = C.seasons.months.find((x) => x.name === dates.trim().toLowerCase());
-  lines.push(`${m.hello}${mo ? `, примерно ${mo.in}` : ''}.`);
-  if (dates.trim() && !mo) lines.push(`Даты: ${dates.trim()}.`);
-
-  let people = q.who === 'solo' ? m.solo : C.groups[S.group].phrase;
-  if (q.who === 'kids') people += `, ${m.kids}`;
-  if (S.group === 'l') people += ` — ${m.large}`;
-  if (S.plan.length || q.who) lines.push(`${people}.`);
+  const mo = monthIdx != null ? C.seasons.months[monthIdx] : null;
+  const cap = (t) => t[0].toUpperCase() + t.slice(1);
+  const lines = [`${m.hello}${mo ? ` ${mo.in}` : ''}.`];
+  const who = [q.who && m.who[q.who], q.who !== 'solo' && (exItems().length || q.who) ? m.group[S.group] : ''].filter(Boolean).join(', ');
+  if (who) lines.push(`${cap(who)}.`);
   if (leadMode === 'concierge') lines.push(m.concierge);
-
   if (exItems().length) {
-    const names = exItems().map((item) => {
+    lines.push('', m.route);
+    S.plan.forEach((item, i) => {
+      if (isFree(item)) { lines.push(`${i + 1}. ${m.free}`); return; }
       const ex = exById(item.id);
-      return ex.perPerson && S.group !== 'l' ? `«${ex.name}» (${heliPeople(item)} ${plural(heliPeople(item), ['человек', 'человека', 'человек'])})` : `«${ex.name}»`;
+      const extra = ex.perPerson && S.group !== 'l' ? ` (${heliPeople(item)} ${plural(heliPeople(item), ['человек', 'человека', 'человек'])})` : '';
+      lines.push(`${i + 1}. ${ex.name}${extra}`);
     });
-    const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} и ${names.at(-1)}` : names[0];
     const total = planTotal();
-    lines.push(`${m.include} ${list}${total != null ? ` — ${m.sum.replace('{sum}', usd(total))}` : ''}.`);
+    if (total != null) lines.push(m.sum.replace('{sum}', usd(total)));
+    lines.push('');
   }
   if (S.rider) {
     const r = riderCalc(S.rider.id, S.rider.days, S.rider.adults);
-    const what = S.rider.id === 'standard' ? `${r.name}, ${r.term}` : `${r.name} на ${days(S.rider.days)}, взрослых — ${S.rider.adults}`;
-    lines.push(`${exItems().length ? m.riderAlso : m.riderOnly} ${what}.`);
+    const what = S.rider.id === 'standard' ? `${r.name} (${r.term})` : `${r.name} на ${days(S.rider.days)}`;
+    lines.push((exItems().length ? m.rider : m.riderOnly).replace('{rider}', what));
   }
-  if (S.plan.length > exItems().length && exItems().length) lines.push(`Всего в Лос-Анджелесе — ${days(S.plan.length)}.`);
   if (!exItems().length && !S.rider && leadMode !== 'concierge') lines.push(m.nothing);
+  else lines.push(m.ask);
   const gift = giftBonus();
   if (gift) lines.push(m.gift.replace('{gift}', gift.message));
-  lines.push(m.close);
-  if (name.trim()) lines.push(m.name.replace('{name}', name.trim()));
-  return lines.join('\n');
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n');
 }
 
-let channel = 'tg';
+let leadMonth = null;
 function renderLead() {
   const L = C.lead;
   const form = $('[data-lead]');
-  const month = S.month != null ? C.seasons.months[S.month].name : '';
+  leadMonth = S.month;
+  const summary = planSummary();
   form.innerHTML = `
     <div class="sheet__head"><h2 class="sheet__title" id="lead-h">${esc(L.title)}</h2>
       <button class="icon-btn" type="button" data-close aria-label="Закрыть">${UI.close}</button></div>
-    <div class="form">
-      <label class="field"><span class="field__label">${esc(L.name)}</span>
-        <input class="input" name="name" autocomplete="given-name" required placeholder="${esc(L.namePh)}" value="${esc(leadName)}"></label>
-      <p class="err" data-err hidden>${esc(L.nameError)}</p>
-      <label class="field"><span class="field__label">${esc(L.dates)}</span>
-        <input class="input" name="dates" placeholder="${esc(L.datesPh)}" value="${esc(month)}"></label>
-      <div class="field"><span class="field__label">${esc(L.channel)}</span>
-        <div class="channels" role="radiogroup">${L.channels.map((c) =>
-          `<button class="opt" type="button" role="radio" aria-checked="${channel === c.id}" data-channel="${c.id}">${UI[{ tg: 'telegram', wa: 'whatsapp', call: 'phone' }[c.id]]}<span>${esc(c.text)}</span></button>`).join('')}</div></div>
-      <div class="field"><span class="field__label">${esc(L.preview)}</span><p class="preview" data-preview></p></div>
-      <button class="btn btn--main btn--block" type="submit" data-submit>${esc(L.submit[channel])}</button>
-      <p class="consent">${esc(L.consent)} — <a href="${esc(C.contacts.consentUrl)}" target="_blank" rel="noopener">условия</a>.</p>
-      <p class="hours">${esc(C.contacts.hours)}</p>
-    </div>`;
+    <p class="lead__text">${esc(L.lead)}</p>
+    ${summary ? `<p class="lead__summary">${UI.trip}<span>${esc(summary)}</span></p>` : ''}
+    <div class="field"><span class="field__label">${esc(L.when)} <small>${esc(L.whenHint)}</small></span>
+      <div class="months months--lead" role="radiogroup">${C.seasons.months.map((mo, i) =>
+        `<button class="chip" type="button" role="radio" aria-checked="${leadMonth === i}" data-leadmonth="${i}">${esc(mo.short)}</button>`).join('')}</div></div>
+    <div class="send">${L.channels.map((c, i) =>
+      `<button class="btn ${i ? 'btn--ghost' : 'btn--main'} btn--block send__btn" type="button" data-send="${c.id}">${UI[c.id === 'tg' ? 'telegram' : 'whatsapp']}<span>${esc(c.text)}</span>${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}</div>
+    <p class="lead__call">${esc(L.call)}: <a href="tel:${esc(C.contacts.phone)}" data-send-call>${esc(C.contacts.phoneLabel)}</a></p>
+    <details class="lead__preview"><summary>${esc(L.preview)} ${UI.down}</summary><p class="preview" data-preview></p></details>
+    <p class="consent">${esc(L.consent)} — <a href="${esc(C.contacts.consentUrl)}" target="_blank" rel="noopener">условия</a>.</p>
+    <p class="hours">${esc(C.contacts.hours)}</p>`;
   updatePreview();
 }
 function updatePreview() {
-  const f = $('[data-lead]');
-  $('[data-preview]', f).textContent = buildMessage(f.name.value, f.dates.value);
-  $('[data-submit]', f).textContent = C.lead.submit[channel];
+  const el = $('[data-preview]');
+  if (el) el.textContent = buildMessage(leadMonth);
 }
 
-async function submitLead(e) {
-  e.preventDefault();
-  const f = $('[data-lead]');
-  const name = f.name.value.trim();
-  if (!name) {
-    f.name.setAttribute('aria-invalid', 'true');
-    $('[data-err]', f).hidden = false;
-    f.name.focus();
-    return;
-  }
-  leadName = name;
-  const text = buildMessage(name, f.dates.value);
+function sendLead(channel) {
+  const text = buildMessage(leadMonth);
   const enc = encodeURIComponent(text);
   const c = C.contacts;
   const url = { tg: `https://t.me/${c.telegram}?text=${enc}`, wa: `https://wa.me/${c.whatsapp}?text=${enc}`, call: `tel:${c.phone}` }[channel];
   reach({ tg: 'lead_tg', wa: 'lead_wa', call: 'lead_call' }[channel]);
-  logEvent('Заявка', { 'Канал': C.lead.channels.find((x) => x.id === channel).text, 'Месяц': f.dates.value.trim() });
+  logEvent('Заявка', { 'Канал': { tg: 'Telegram', wa: 'WhatsApp', call: 'Звонок' }[channel], 'Месяц': leadMonth != null ? C.seasons.months[leadMonth].name : '' });
   if (channel !== 'call') navigator.clipboard?.writeText(text).catch(() => {});
   window.__lastLead = { url, text }; // для автотеста
-  const a = document.createElement('a');
-  a.href = url;
-  if (channel !== 'call') { a.target = '_blank'; a.rel = 'noopener'; }
-  document.body.append(a); a.click(); a.remove();
+  if (channel !== 'call') {
+    const a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    document.body.append(a); a.click(); a.remove();
+  }
   closeSheet($('#leadSheet'));
-  openGift(name, f.dates.value.trim());
+  openGift(leadMonth);
   if (channel !== 'call') setTimeout(() => toast(C.lead.copied), 900);
 }
 
 /* ——— Подарок ——— */
-async function openGift(name, dates) {
+async function openGift(monthIdx) {
   const box = $('[data-gift]');
   const G = C.gift;
+  const bonus = giftBonus();
   box.innerHTML = `
     <div class="sheet__head"><h2 class="sheet__title" id="gift-h">${esc(G.title)}</h2>
       <button class="icon-btn" type="button" data-close aria-label="Закрыть">${UI.close}</button></div>
     <p class="muted" style="margin:0">${esc(G.lead)}</p>
+    ${bonus ? `<a class="giftbox" href="${esc(bonus.file)}" download target="_blank" rel="noopener" data-gift-file>
+      <img class="giftbox__cover" src="${esc(bonus.file.replace('.pdf', '.jpg'))}" alt="" width="560" height="794">
+      <span class="giftbox__label">Ваш подарок</span><b>${esc(bonus.title)}</b><span class="giftbox__cta">${UI.download}${esc(G.download)} · PDF</span></a>` : ''}
     <img class="gift-img" alt="Открытка с Вашим маршрутом" data-gift-img>
-    <div class="gift-actions"><button class="btn btn--main btn--block" type="button" data-gift-save disabled>${UI.download}<span>${esc(G.save)}</span></button></div>`;
+    <div class="gift-actions"><button class="btn btn--ghost btn--block" type="button" data-gift-save disabled>${UI.download}<span>${esc(G.save)}</span></button></div>`;
   openSheet($('#giftSheet'));
-  const mo = C.seasons.months.find((x) => x.name === dates.toLowerCase()) || (S.month != null ? C.seasons.months[S.month] : null);
+  const mo = monthIdx != null ? C.seasons.months[monthIdx] : null;
   const q = S.quiz || {};
-  const who = q.who === 'solo' ? 'Поездка для одного' : `${C.groups[S.group].phrase}${q.who === 'kids' ? ', с детьми' : ''}`;
+  const cap = (t) => t[0].toUpperCase() + t.slice(1);
+  const who = [q.who && C.messages.who[q.who], q.who !== 'solo' ? C.messages.group[S.group].split(' — ')[0] : ''].filter(Boolean).join(', ');
   const total = planTotal();
   const r = S.rider ? riderCalc(S.rider.id, S.rider.days, S.rider.adults) : null;
-  const bonus = giftBonus();
   const blob = await drawGift({
     logoSvg,
-    title: name ? G.hello.replace('{name}', name) : G.helloNoName,
-    who: `${who}${mo ? ` · ${mo.name}` : (dates ? ` · ${dates}` : '')}`,
+    title: G.helloNoName,
+    who: cap(`${who || 'Ваша поездка'}${mo ? ` · ${mo.name}` : ''}`),
     routeTitle: G.routeTitle,
     route: S.plan.map((i) => (isFree(i) ? C.plan.freeDay : exById(i.id).name)),
     rider: r ? `${r.name} · ${r.term}` : '',
     total: exItems().length && total != null ? G.total.replace('{sum}', usd(total)) : '',
     seasonTitle: G.seasonTitle,
     season: mo?.card || '',
-    gift: bonus ? G.giftLine.replace('{gift}', bonus.title[0].toLowerCase() + bonus.title.slice(1)) : '',
+    gift: bonus ? G.giftLine.replace('{gift}', bonus.message) : '',
     giftNote: G.giftNote,
     contacts: C.contacts,
   });
@@ -826,7 +813,7 @@ function bind() {
     else if ('qback' in ds) back();
     else if ('qrestart' in ds) { Q.screen = 'q'; Q.idx = 0; Q.answers = { likes: [] }; swap(renderQuiz); }
     else if (ds.add) toggleExcursion(ds.add);
-    else if ('resultSend' in ds) { takeResult(); leadMode = 'plan'; renderLead(); openSheet($('#leadSheet')); setTimeout(() => $('[data-lead]').name.focus(), 60); }
+    else if ('resultSend' in ds) { takeResult(); leadMode = 'plan'; renderLead(); openSheet($('#leadSheet')); }
     else if ('resultKeep' in ds) { takeResult(); toast(C.toasts.routeAdded); renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
     else if (ds.route) addRoute(C.routes.items.find((r) => r.id === ds.route));
     else if (ds.view) { view = ds.view; renderViewSeg(); renderCatalog(); if (view === 'map') reach('map_open'); }
@@ -861,7 +848,7 @@ function bind() {
     else if (ds.calc) { S.calc[ds.calc] = ds.v; save(); renderCalc(); reach('rider_calc'); }
     else if ('calcAdd' in ds) setRider(recommend(), S.calc.days, S.calc.adults);
     else if ('openPlan' in ds || 'openPlanTop' in ds) { renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
-    else if ('openLead' in ds) { leadMode = ds.openLead === 'concierge' ? 'concierge' : 'plan'; closeSheet($('#planSheet')); renderLead(); openSheet($('#leadSheet')); setTimeout(() => $('[data-lead]').name.focus(), 60); }
+    else if ('openLead' in ds) { leadMode = ds.openLead === 'concierge' ? 'concierge' : 'plan'; closeSheet($('#planSheet')); renderLead(); openSheet($('#leadSheet')); }
     else if ('close' in ds) closeSheet(t.closest('dialog'));
     else if ('closeGo' in ds) closeSheet(t.closest('dialog'));
     else if (ds.remove) toggleExcursion(ds.remove);
@@ -875,14 +862,16 @@ function bind() {
       const url = shareUrl();
       (navigator.clipboard?.writeText(url) || Promise.reject()).then(() => toast(C.plan.shared)).catch(() => prompt('Ссылка на план', url));
     }
-    else if (ds.channel) { channel = ds.channel; $$('[data-channel]').forEach((b) => b.setAttribute('aria-checked', b.dataset.channel === channel)); updatePreview(); }
+    else if (ds.send) sendLead(ds.send);
+    else if ('sendCall' in ds) sendLead('call');
+    else if (ds.leadmonth != null && t.closest('[data-lead]')) {
+      const m = +ds.leadmonth; leadMonth = leadMonth === m ? null : m;
+      $$('[data-leadmonth]').forEach((b) => b.setAttribute('aria-checked', +b.dataset.leadmonth === leadMonth)); updatePreview();
+    }
+    else if ('giftFile' in ds) reach('gift_download');
   });
 
-  $('[data-lead]').addEventListener('input', (e) => {
-    if (e.target.name === 'name') { e.target.removeAttribute('aria-invalid'); $('[data-err]').hidden = true; leadName = e.target.value; }
-    updatePreview();
-  });
-  $('[data-lead]').addEventListener('submit', submitLead);
+  $('[data-lead]').addEventListener('submit', (e) => e.preventDefault());
   $$('dialog').forEach((d) => d.addEventListener('close', () => {
     if (!$$('dialog').some((x) => x.open)) document.documentElement.style.overflow = '';
   }));
