@@ -1,10 +1,33 @@
 // Чистые функции разметки: работают и в браузере, и в Node (tools/prerender.mjs),
 // чтобы каталог, маршруты и вопросы были в HTML сразу — для поисковиков и быстрого первого экрана.
-import { ILLUSTRATIONS, UI } from './icons.js?v=17';
+import { ILLUSTRATIONS, UI } from './icons.js?v=18';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const nf = (n) => Math.round(n).toLocaleString('ru-RU').replace(/\s/g, ' ');
 export const usd = (n) => `$${nf(n)}`;
+
+/* ——— Типографика ———
+   Правила вёрстки: предлоги, союзы и другие слова в 1–3 буквы, числа и «≈» не остаются в конце строки;
+   перед тире — неразрывный пробел; частицы «ли, же, бы» не отрываются от слова. */
+const NB = '\u00a0';
+const SHORT = /(?<=^|[\s\u00a0(«„"—–-])([А-Яа-яЁё]{1,3}|[$≈№]?\d[\d\u00a0.,:]*|≈|№)[ \t]+(?=[^\s—–])/g;
+export function typo(s) {
+  if (typeof s !== 'string' || !/[А-Яа-яЁё]/.test(s)) return s;
+  return s.replace(SHORT, `$1${NB}`)
+    .replace(/[ \t]+([—–])(?=[ \t\u00a0])/g, `${NB}$1`)
+    .replace(/[ \t]+(ли|же|бы)(?=[\s\u00a0.,!?:;)»]|$)/g, `${NB}$1`);
+}
+// Весь config, кроме текстов сообщений в мессенджер (их клиент копирует как есть)
+export function typoConfig(c, key = '') {
+  if (key === 'messages') return c;
+  if (Array.isArray(c)) return c.map((x) => typoConfig(x));
+  if (c && typeof c === 'object') return Object.fromEntries(Object.entries(c).map(([k, v]) => [k, typoConfig(v, k)]));
+  return typo(c);
+}
+// Текст внутри готового HTML (теги, скрипты и стили не трогаем)
+export function typoHtml(html) {
+  return html.split(/(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<[^>]+>)/).map((p, i) => (i % 2 ? p : typo(p))).join('');
+}
 export const plural = (n, f) => f[(n % 100 > 4 && n % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][Math.min(n % 10, 5)]];
 export const tile = (icon, cls = '') => `<span class="tile ${cls}">${ILLUSTRATIONS[icon] || ''}</span>`;
 export const hoursText = (h) => `${h} ${plural(h, ['час', 'часа', 'часов'])}`;
