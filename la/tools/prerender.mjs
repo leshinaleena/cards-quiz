@@ -15,6 +15,7 @@ const parts = {
   catalog: R.catalogHtml(C),
   routes: R.routesHtml(C),
   why: R.whyHtml(C),
+  reviews: R.reviewsHtml(C),
   concierge: R.conciergeHtml(C),
   faq: R.faqHtml(C),
 };

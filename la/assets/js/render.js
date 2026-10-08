@@ -1,6 +1,6 @@
 // Чистые функции разметки: работают и в браузере, и в Node (tools/prerender.mjs),
 // чтобы каталог, маршруты и вопросы были в HTML сразу — для поисковиков и быстрого первого экрана.
-import { ILLUSTRATIONS, UI } from './icons.js?v=12';
+import { ILLUSTRATIONS, UI } from './icons.js?v=13';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const nf = (n) => Math.round(n).toLocaleString('ru-RU').replace(/\s/g, ' ');
@@ -92,6 +92,14 @@ export function routesHtml(C, { group = 's', plan = [] } = {}) {
 
 export function whyHtml(C) {
   return C.why.items.map((w) => `<div class="why__item"><h3 class="h3">${esc(w.title)}</h3><p>${esc(w.text)}</p></div>`).join('');
+}
+
+export function reviewsHtml(C) {
+  const r = C.reviews;
+  return `<h3 class="reviews__title">${esc(r.title)}</h3>
+    <div class="reviews__row">${r.items.map((it) => `<figure class="review"><blockquote><p>${esc(it.text)}</p></blockquote>
+      <figcaption><b>${esc(it.author)}</b><span>${esc(it.about)}</span></figcaption></figure>`).join('')}</div>
+    <p class="reviews__note">${esc(r.source)}</p>`;
 }
 
 export function faqHtml(C) {

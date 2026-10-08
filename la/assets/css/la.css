@@ -822,3 +822,20 @@ button.link-arrow { background: none; border: 0; border-bottom: 1px solid var(--
 .pace--0, .pace--1 { color: var(--title); }
 .pace--2 { color: var(--salmon-ink); }
 .map__note { margin: 0; padding: 12px 16px 0; font: 600 14px/1.4 var(--head); color: var(--title); }
+
+/* ——— Отзывы ——— */
+.reviews { margin-top: 36px; }
+.reviews__title { margin: 0 0 16px; font: 800 12px/1 var(--head); letter-spacing: .08em; text-transform: uppercase; color: var(--salmon-ink); }
+.reviews__row { display: grid; grid-auto-flow: column; grid-auto-columns: 84%; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); scrollbar-width: none; margin: 0 calc(var(--gutter) * -1); padding: 4px var(--gutter) 8px; align-items: start; }
+.reviews__row::-webkit-scrollbar { display: none; }
+.review { margin: 0; scroll-snap-align: start; position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; padding: 26px 22px 20px; border-radius: var(--shape); background: var(--salmon-soft); }
+.review::before { content: '“'; position: absolute; top: 2px; left: 18px; font: 800 48px/1 var(--head); color: var(--salmon); }
+.review blockquote { margin: 0; }
+.review p { margin: 14px 0 0; font-size: 16px; line-height: 1.5; color: var(--ink); }
+.review figcaption { display: grid; gap: 2px; font-size: 13px; color: var(--muted); }
+.review figcaption b { font: 600 15px/1.2 var(--head); color: var(--title); }
+.reviews__note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
+@media (min-width: 760px) {
+  .reviews__row { grid-auto-flow: row; grid-template-columns: repeat(2, 1fr); overflow: visible; margin: 0; padding: 0; }
+}
+@media (min-width: 1100px) { .reviews__row { grid-template-columns: repeat(3, 1fr); } }
