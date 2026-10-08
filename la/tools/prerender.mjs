@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import * as R from '../assets/js/render.js';
 
 const dir = new URL('..', import.meta.url);
-const C = JSON.parse(fs.readFileSync(new URL('config.json', dir), 'utf8'));
+const C = R.typoConfig(JSON.parse(fs.readFileSync(new URL('config.json', dir), 'utf8')));
 const file = new URL('index.html', dir);
 const html = fs.readFileSync(file, 'utf8');
 
@@ -25,6 +25,7 @@ for (const [key, body] of Object.entries(parts)) {
   if (!re.test(out)) throw new Error(`нет метки prerender:${key}`);
   out = out.replace(re, () => `<!--prerender:${key}-->${body.replace(/\n\s*/g, ' ')}<!--/prerender:${key}-->`);
 }
+out = R.typoHtml(out);
 if (process.argv.includes('--check')) {
   if (out !== html) { console.error('✗ index.html устарел: запустите node la/tools/prerender.mjs'); process.exit(1); }
   console.log('✓ index.html актуален');

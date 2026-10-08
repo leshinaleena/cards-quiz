@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=17';
-import { drawGift } from './gift.js?v=17';
-import * as R from './render.js?v=17';
+import { UI } from './icons.js?v=18';
+import { drawGift } from './gift.js?v=18';
+import * as R from './render.js?v=18';
 
-const VERSION = '17';
+const VERSION = '18';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -735,7 +735,7 @@ function renderLead() {
     <div class="send">${L.channels.map((c, i) =>
       `<button class="btn ${i ? 'btn--ghost' : 'btn--main'} btn--block send__btn" type="button" data-send="${c.id}">${UI[c.id === 'tg' ? 'telegram' : 'whatsapp']}<span>${esc(c.text)}</span>${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}</div>
     <p class="lead__call">${esc(L.call)}: <a href="tel:${esc(C.contacts.phone)}" data-send-call>${esc(C.contacts.phoneLabel)}</a></p>
-    <details class="lead__preview"><summary>${esc(L.preview)} ${UI.down}</summary><p class="preview" data-preview></p></details>
+    <details class="lead__preview"><summary>${esc(L.preview)} ${UI.down}</summary><p class="preview" data-preview data-notypo></p></details>
     <p class="consent">${esc(L.consent)} — <a href="${esc(C.contacts.consentUrl)}" target="_blank" rel="noopener">условия</a>.</p>
     <p class="hours">${esc(C.contacts.hours)}</p>`;
   updatePreview();
@@ -970,14 +970,33 @@ function metrika() {
   window.ym(id, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
 }
 
+// Типографика для текста, который собирается прямо в коде (подписи, суммы, «День 1» и т. п.)
+function typoNode(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.parentElement?.closest('script, style, textarea, [data-notypo]') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  });
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const t = R.typo(n.nodeValue);
+    if (t !== n.nodeValue) n.nodeValue = t;
+  }
+}
+function watchTypo() {
+  typoNode(document.body);
+  new MutationObserver((list) => list.forEach((m) => m.addedNodes.forEach((n) => {
+    if (n.nodeType === 1) typoNode(n);
+    else if (n.nodeType === 3 && !n.parentElement?.closest('script, style, textarea, [data-notypo]')) { const t = R.typo(n.nodeValue); if (t !== n.nodeValue) n.nodeValue = t; }
+  }))).observe(document.body, { childList: true, subtree: true });
+}
+
 async function init() {
   const [cfg, logo] = await Promise.all([
     fetch(`config.json?v=${VERSION}`, { cache: 'no-cache' }).then((r) => r.json()),
     fetch(`assets/logo-word.svg?v=${VERSION}`).then((r) => r.text()).catch(() => ''),
   ]);
-  C = cfg;
+  C = R.typoConfig(cfg);
   logoSvg = logo.replace('<svg ', '<svg role="img" aria-label="TOP RIDERS" ');
   restore();
+  watchTypo();
   const shared = readShared();
   utm();
   renderStatic();

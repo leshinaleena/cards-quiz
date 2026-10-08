@@ -12,10 +12,14 @@ let failed = 0;
 const check = (cond, msg) => { console.log(`${cond ? '✓' : '✗'} ${msg}`); if (!cond) failed += 1; };
 
 // Каталог и вопросы есть в HTML без JavaScript — для поисковиков
-const raw = await (await fetch(URL)).text();
+const raw = (await (await fetch(URL)).text()).replace(/\u00a0/g, ' ');
 const cfg0 = JSON.parse(await (await fetch(new globalThis.URL('config.json', URL))).text());
 check(cfg0.excursions.every((e) => raw.includes(e.name)), 'все экскурсии есть в HTML без JS');
 check(cfg0.faq.items.every((f) => raw.includes(f.q)), 'вопросы есть в HTML без JS');
+// Типографика: в тексте страницы нет предлогов и союзов в 1–3 буквы в конце строки (после них — неразрывный пробел)
+const html0 = (await (await fetch(URL)).text()).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<[^>]+>/g, '\n');
+const hanging = html0.match(/(?:^|[\s(«])(?:в|к|с|у|о|и|а|на|по|за|из|от|до|об|не|ни|но|для|без|под|над|про|при) (?=[А-Яа-яЁё$\d«])/gm) || [];
+check(hanging.length === 0, `нет висячих предлогов в HTML${hanging.length ? ': ' + hanging.slice(0, 5).join('|') : ''}`);
 
 const browser = await chromium.launch();
 for (const { name, ...opts } of profiles) {
@@ -25,6 +29,9 @@ for (const { name, ...opts } of profiles) {
   const logged = [];
   await ctx.route('https://script.google.com/**', (r) => { logged.push(r.request().postData()); r.fulfill({ status: 200, body: 'ok' }); });
   const page = await ctx.newPage();
+  // На сайте стоят неразрывные пробелы (типографика) — в проверках сравниваем текст как обычный
+  const rawText = page.textContent.bind(page);
+  page.textContent = async (...x) => (await rawText(...x))?.replace(/\u00a0/g, ' ');
   const errors = []; const goals = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.text().startsWith('[metrika]')) goals.push(m.text().split(' ')[1]); });
@@ -41,6 +48,16 @@ for (const { name, ...opts } of profiles) {
   check(await page.evaluate(() => [...document.images].every((i) => i.complete && i.naturalWidth > 0)), 'все фото показаны');
 
   check((await page.locator('#why .review').count()) === cfg.reviews.items.length, `отзывы на месте: ${cfg.reviews.items.length}`);
+
+  const hangingDom = () => page.evaluate(() => {
+    const re = /(?:^|[\s(«])(?:в|к|с|у|о|и|а|на|по|за|из|от|до|об|не|ни|но|для|без|под|над|про|при) (?=[А-Яа-яЁё$\d«])/;
+    const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const bad = [];
+    for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('script, style, [data-notypo]') && re.test(n.nodeValue)) bad.push(n.nodeValue.trim().slice(0, 50));
+    return bad;
+  });
+  const hang1 = await hangingDom();
+  check(hang1.length === 0, `нет висячих предлогов на странице${hang1.length ? ': ' + hang1.slice(0, 3).join(' | ') : ''}`);
 
   // Первый экран: написать менеджеру сразу, без квиза
   check(await page.isVisible('.hero [data-quick="tg"]') && await page.isVisible('.hero [data-quick="wa"]'), 'на первом экране — Telegram и WhatsApp');
@@ -129,6 +146,15 @@ for (const { name, ...opts } of profiles) {
   check(ids1.includes('safari') && !ids1.includes('santabarbara'), '«Дешевле»: Санта-Барбару заменили на сафари');
   await page.evaluate(() => document.querySelector('#planSheet [data-tune="ocean"]').click());
   check((await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan.map((p) => p.id))).includes('whales'), '«Больше океана»: добавили китов');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
+
+  // Висячие предлоги в собранной поездке и советах
+  await page.evaluate(() => localStorage.setItem('tr-la-v1', JSON.stringify({ plan: [{ id: 'la6' }, { id: 'lagrand' }, { id: 'sandiego' }, { id: 'santabarbara' }], group: 's' })));
+  await page.reload(); await page.waitForSelector('html[data-ready]');
+  await page.evaluate(() => document.querySelector('[data-open-plan-top]').click()); await page.waitForTimeout(300);
+  const hang2 = await hangingDom();
+  check(hang2.length === 0, `нет висячих предлогов в «Моей поездке»${hang2.length ? ': ' + hang2.slice(0, 3).join(' | ') : ''}`);
   await page.keyboard.press('Escape');
   await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
 
