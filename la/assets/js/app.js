@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=9';
-import { drawGift } from './gift.js?v=9';
-import * as R from './render.js?v=9';
+import { UI } from './icons.js?v=10';
+import { drawGift } from './gift.js?v=10';
+import * as R from './render.js?v=10';
 
-const VERSION = '9';
+const VERSION = '10';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -328,6 +328,7 @@ function addRoute(route) {
       else if (!S.plan.some((p) => p.id === id)) S.plan.push(id === 'heli' ? { id, people: heliPeople() } : { id });
     }
     toast(C.toasts.routeAdded);
+    bump();
     reach('excursion_add');
   }
   save(); refreshCards();
@@ -338,12 +339,21 @@ function refreshCards() {
   updateDock();
 }
 
+// Короткая вспышка у «Моей поездки», чтобы было видно, куда всё складывается
+function bump() {
+  if (reduced) return;
+  for (const el of $$('[data-open-plan-top], [data-open-plan]')) {
+    el.classList.remove('is-bump'); void el.offsetWidth; el.classList.add('is-bump');
+  }
+}
+
 function toggleExcursion(id) {
   const i = S.plan.findIndex((p) => p.id === id);
   if (i >= 0) { S.plan.splice(i, 1); toast(C.toasts.removed); }
   else {
     S.plan.push(id === 'heli' ? { id, people: heliPeople() } : { id });
     toast(C.toasts.added);
+    bump();
     reach('excursion_add');
   }
   save();
@@ -485,6 +495,7 @@ function updateDock() {
   $('[data-dock-summary]').textContent = has ? planSummary() : '';
   const n = $('[data-trip-count]');
   if (n) { n.textContent = S.plan.length || ''; n.hidden = !S.plan.length; }
+  $('[data-dock-count]').textContent = S.plan.length ? ` · ${S.plan.length}` : '';
   $('[data-open-plan-top]').hidden = !has;
   measureDock();
 }
