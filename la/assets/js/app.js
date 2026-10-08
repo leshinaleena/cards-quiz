@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=18';
-import { drawGift } from './gift.js?v=18';
-import * as R from './render.js?v=18';
+import { UI } from './icons.js?v=20';
+import { drawGift } from './gift.js?v=20';
+import * as R from './render.js?v=20';
 
-const VERSION = '18';
+const VERSION = '20';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -450,34 +450,26 @@ function toggleExcursion(id) {
 }
 
 /* ——— Сезоны ——— */
+let seasonId = null;
+const seasonOf = (m) => C.seasons.groups.find((g) => g.months.includes(m));
 function renderSeasons() {
+  const G = C.seasons.groups;
   const m = C.seasons.months;
-  $('[data-months]').innerHTML = m.map((x, i) =>
-    `<button class="chip" type="button" role="radio" aria-checked="${S.month === i}" data-month="${i}" aria-label="${esc(x.name)}">${esc(x.short)}</button>`).join('');
-  const box = $('[data-season]');
-  if (S.month == null) {
-    box.innerHTML = `<span class="season__art">${tile('sun', 'tile--warm')}</span>
-      <div class="season__all">${groupMonths().map(([names, tips]) => `<div><b>${esc(names)}</b><span>${esc(tips)}</span></div>`).join('')}</div>
-      <p class="season__always">${esc(C.seasons.always)}</p>
-      <p class="season__note">${esc(C.seasons.note)}</p>`;
-    return;
-  }
-  const mo = m[S.month];
-  box.innerHTML = `<span class="season__art">${tile('sun', 'tile--warm')}</span>
-    <h3 class="season__title">${esc(mo.name)}</h3>
-    <ul>${mo.tips.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+  if (!seasonId) seasonId = seasonOf(S.month ?? new Date().getMonth()).id;
+  const g = G.find((x) => x.id === seasonId);
+  $('[data-months]').innerHTML = G.map((x) =>
+    `<button class="season-tab" type="button" role="tab" aria-selected="${x.id === seasonId}" data-season-g="${x.id}"><b>${esc(x.name)}</b><span>${esc(x.range)}</span></button>`).join('');
+  const mo = g.months.includes(S.month) ? m[S.month] : null;
+  $('[data-season]').innerHTML = `<span class="season__art">${tile(g.art, 'tile--warm')}</span>
+    <p class="season__kicker">${esc(g.name)} · ${esc(g.range)}</p>
+    <h3 class="season__title">${esc(g.title)}</h3>
+    <p class="season__text">${esc(g.text)}</p>
+    <div class="season__months" role="radiogroup" aria-label="${esc(C.seasons.pickMonth)}">${g.months.map((i) =>
+      `<button class="chip" type="button" role="radio" aria-checked="${S.month === i}" data-month="${i}">${esc(m[i].name[0].toUpperCase() + m[i].name.slice(1))}</button>`).join('')}</div>
+    ${mo ? `<ul>${mo.tips.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`
+      : `<div class="season__all">${g.months.map((i) => `<div><b>${esc(m[i].short)}</b><span>${esc(m[i].card)}</span></div>`).join('')}</div>`}
     <p class="season__always">${esc(C.seasons.always)}</p>
     <p class="season__note">${esc(C.seasons.note)}</p>`;
-}
-// Короткий обзор сезонов, пока месяц не выбран
-function groupMonths() {
-  return [
-    ['Дек — апр', 'Серые киты, в парках спокойнее в будни января — февраля'],
-    ['Май — июнь', 'Жакаранды и утренний туман у океана'],
-    ['Июнь — сен', 'Синие киты и горбачи, самая тёплая вода в августе — сентябре'],
-    ['Авг — окт', 'Сбор урожая в винных долинах, хеллоуинский сезон'],
-    ['Ноя — дек', 'Рождественское оформление парков'],
-  ];
 }
 
 /* ——— Райдеры ——— */
@@ -888,6 +880,7 @@ function bind() {
     else if ('resultKeep' in ds) { takeResult(); toast(C.toasts.routeAdded); renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
     else if (ds.quick) { leadMode = 'direct'; leadMonth = S.month; sendLead(ds.quick); }
     else if (ds.tune) applyTune(ds.tune);
+    else if (ds.seasonG) { seasonId = ds.seasonG; renderSeasons(); }
     else if (ds.advice) applyAdvice(ds.advice);
     else if (ds.route) addRoute(C.routes.items.find((r) => r.id === ds.route));
     else if ('openCmp' in ds) { S.compare = exItems().map((i) => i.id).slice(0, 3); closeSheet($('#planSheet')); renderCompare(); openSheet($('#cmpSheet')); reach('compare_open'); }
@@ -899,8 +892,8 @@ function bind() {
     else if (ds.removeI) { S.plan.splice(+ds.removeI, 1); save(); renderPlan(); refreshCards(); }
     else if (ds.group) { S.group = ds.group; save(); renderGroupSeg(); refreshCards(); if ($('#planSheet').open) renderPlan(); }
     else if (ds.filter) { filter = ds.filter; renderFilters(); renderCatalog(); }
-    else if (ds.month != null && ds.month !== undefined && t.closest('[data-months]')) {
-      const m = +ds.month; S.month = S.month === m ? null : m; save(); renderSeasons();
+    else if (ds.month != null && ds.month !== undefined && t.closest('[data-season]')) {
+      const m = +ds.month; S.month = S.month === m ? null : m; if (S.month != null) seasonId = seasonOf(S.month).id; save(); renderSeasons();
     }
     else if (ds.cur) { S.currency = ds.cur; save(); renderRiders(); if ($('#planSheet').open) renderPlan(); }
     else if (ds.pkg) { S.travelPkg = +ds.pkg; save(); renderRiders(); }

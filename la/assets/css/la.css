@@ -50,7 +50,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font: 400 16px/1.55 var(--body);
-  overflow-x: hidden;
+  overflow-x: clip; /* не hidden: в iOS Safari hidden делает body прокручиваемым и ломает «липкую» шапку */
   padding-bottom: var(--dock-h);
 }
 /* Лёгкое зерно по фотостилю брендбука — один слой на всю страницу */
@@ -138,7 +138,7 @@ a { color: inherit; }
 .icon-btn:hover { background: var(--line); }
 
 /* ——— Шапка ——— */
-.top { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: border-color .3s; }
+.top { position: sticky; top: 0; z-index: 40; background: var(--bg); border-bottom: 1px solid transparent; transition: border-color .3s; }
 .top.is-scrolled { border-bottom-color: var(--line); }
 .top__in { display: flex; align-items: center; justify-content: space-between; height: 60px; }
 .logo { display: block; width: 132px; color: var(--wine); line-height: 0; }
@@ -355,7 +355,8 @@ a { color: inherit; }
 .foot__links { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .foot__links a { display: inline-flex; min-height: 40px; align-items: center; text-decoration: none; color: var(--text); }
 .foot__links a:hover { color: var(--title); }
-.foot__bye { font: 800 20px/1.2 var(--head); color: var(--title); margin: 0; }
+.foot__sign { display: grid; gap: 6px; justify-items: start; }
+.foot__bye { font: 400 30px/1.1 'Marck Script', cursive; color: var(--accent); margin: 0; transform: rotate(-2deg); transform-origin: left; }
 
 /* ——— Нижняя панель ——— */
 .dock {
@@ -858,3 +859,20 @@ button.link-arrow { background: none; border: 0; border-bottom: 1px solid var(--
 .tune__chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .tune__chips .chip { min-height: 40px; }
 .tune__hint { margin: 0; font-size: 14px; color: var(--muted); }
+
+/* ——— Сезоны ——— */
+.season-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 4px; margin-bottom: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+.season-tab { display: grid; gap: 2px; justify-items: center; min-height: 54px; padding: 8px 4px; border: 0; border-radius: 12px; background: transparent; color: var(--title); cursor: pointer; transition: background .2s, color .2s; }
+.season-tab b { font: 800 14px/1.1 var(--head); }
+.season-tab span { font-size: 11px; color: var(--muted); }
+.season-tab[aria-selected="true"] { background: var(--wine); color: var(--cream); }
+.season-tab[aria-selected="true"] span { color: rgba(242, 234, 227, .75); }
+.season__kicker { margin: 0; font: 800 11px/1 var(--head); letter-spacing: .08em; text-transform: uppercase; color: var(--salmon-ink); }
+.season__title::first-letter { text-transform: none; }
+.season__text { margin: 0; font-size: 16px; }
+.season__months { display: flex; flex-wrap: wrap; gap: 8px; }
+.season__all > div { grid-template-columns: 52px 1fr; }
+@media (min-width: 760px) { .season-tab b { font-size: 16px; } .season-tab span { font-size: 12px; } .season__art { grid-row: 1 / span 6; } }
+
+/* Шапка закрывает и полосу над собой: в Safari страница прокручивается под строкой адреса, текст не должен «проступать» над шапкой */
+.top::before { content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 200px; background: var(--bg); }

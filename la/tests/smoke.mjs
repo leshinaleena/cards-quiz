@@ -59,6 +59,18 @@ for (const { name, ...opts } of profiles) {
   const hang1 = await hangingDom();
   check(hang1.length === 0, `нет висячих предлогов на странице${hang1.length ? ': ' + hang1.slice(0, 3).join(' | ') : ''}`);
 
+  // Шапка держится наверху при прокрутке, над ней не проступает текст
+  await page.mouse.wheel(0, 2500); await page.waitForTimeout(500);
+  check(await page.evaluate(() => { const t = document.querySelector('.top'); return Math.abs(t.getBoundingClientRect().top) < 1 && t.contains(document.elementFromPoint(innerWidth / 2, 5)); }), 'шапка закреплена наверху');
+  await page.evaluate(() => scrollTo(0, 0));
+
+  // Сезоны: у каждого времени года своя картинка, месяцы внутри
+  const arts = await page.evaluate(() => ['winter', 'spring', 'summer', 'autumn'].map((g) => { document.querySelector(`[data-season-g="${g}"]`).click(); return document.querySelector('[data-season] .season__art').innerHTML; }));
+  check(new Set(arts).size === 4, 'у четырёх сезонов разные картинки');
+  await page.evaluate(() => { document.querySelector('[data-season-g="spring"]').click(); document.querySelector('[data-season] [data-month="4"]').click(); });
+  check((await page.textContent('[data-season]')).includes('жакаранд'), 'май: про жакаранды');
+  await page.evaluate(() => document.querySelector('[data-season] [data-month="4"]').click());
+
   // Первый экран: написать менеджеру сразу, без квиза
   check(await page.isVisible('.hero [data-quick="tg"]') && await page.isVisible('.hero [data-quick="wa"]'), 'на первом экране — Telegram и WhatsApp');
   await page.evaluate(() => document.querySelector('.hero [data-quick="tg"]').click());

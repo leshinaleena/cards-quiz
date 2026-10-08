@@ -18,10 +18,10 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@600;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Marck+Script&family=Montserrat:wght@600;800&display=swap">
   <link rel="preload" as="image" href="assets/photos/hero.avif" type="image/avif">
-  <link rel="stylesheet" href="assets/css/la.css?v=18">
-  <script type="module" src="assets/js/app.js?v=18"></script>
+  <link rel="stylesheet" href="assets/css/la.css?v=20">
+  <script type="module" src="assets/js/app.js?v=20"></script>
 </head>
 <body>
   <a class="skip" href="#quiz">К подбору поездки</a>
@@ -109,7 +109,7 @@
     <section class="section" id="seasons" aria-labelledby="seasons-h">
       <div class="wrap">
         <div class="sec-head" data-head="seasons"></div>
-        <div class="months" role="radiogroup" aria-label="Месяц поездки" data-months></div>
+        <div class="season-tabs" role="tablist" aria-label="Время года" data-months></div>
         <div class="season" data-season></div>
       </div>
     </section>
@@ -181,9 +181,8 @@
 
   <footer class="foot">
     <div class="wrap foot__in">
-      <span class="logo logo--foot" data-logo></span>
+      <div class="foot__sign"><span class="logo logo--foot" data-logo></span><p class="foot__bye" data-t="footer.bye"></p></div>
       <ul class="foot__links" data-footlinks></ul>
-      <p class="foot__bye" data-t="footer.bye"></p>
     </div>
   </footer>
 
