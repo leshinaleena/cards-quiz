@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=16';
-import { drawGift } from './gift.js?v=16';
-import * as R from './render.js?v=16';
+import { UI } from './icons.js?v=17';
+import { drawGift } from './gift.js?v=17';
+import * as R from './render.js?v=17';
 
-const VERSION = '16';
+const VERSION = '17';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -330,6 +330,24 @@ function renderCompare() {
     ${R.compareHtml(C, S.compare, S.group)}`;
 }
 
+let mapEx = null;
+function renderExMap() {
+  const ex = exById(mapEx);
+  if (!ex) return;
+  const far = ex.map.find((m) => m.startsWith('far:'));
+  const mins = (t) => (t === 'в центре' ? 0 : (/(\d+)\s*мин/.exec(t)?.[1] || 0) * 1 + (/(\d+)\s*ч/.exec(t)?.[1] || 0) * 60);
+  const farthest = ex.map.filter((m) => C.map.times[m]).sort((a, b) => mins(C.map.times[b]) - mins(C.map.times[a]))[0];
+  const note = far ? C.map.exNoteFar.replace('{time}', C.map.far[far.slice(4)].time)
+    : farthest && mins(C.map.times[farthest]) ? C.map.exNoteCity.replace('{name}', C.map.points[farthest].name).replace('{time}', C.map.times[farthest]) : C.map.exNoteCenter;
+  $('[data-exmap]').innerHTML = `
+    <div class="sheet__head"><div><p class="sheet__kicker">${esc(C.map.exTitle)}</p><h2 class="sheet__title" id="map-h">${esc(ex.name)}</h2></div>
+      <button class="icon-btn" type="button" data-close aria-label="Закрыть">${UI.close}</button></div>
+    <p class="map__note map__note--sheet">${esc(R.hoursText(ex.hours))} · ${esc(note)}</p>
+    ${R.exMapHtml(C, ex)}
+    <p class="map__hint">${esc(C.map.hint)}</p>
+    <div class="plan-actions">${R.addBtn(C, ex.id, S.plan.some((p) => p.id === ex.id))}</div>`;
+}
+
 function addRoute(route) {
   const ids = route.days;
   const allIn = ids.filter((d) => d !== 'free').every((id) => S.plan.some((p) => p.id === id));
@@ -357,6 +375,55 @@ function bump() {
   for (const el of $$('[data-open-plan-top], [data-open-plan]')) {
     el.classList.remove('is-bump'); void el.offsetWidth; el.classList.add('is-bump');
   }
+}
+
+/* ——— Быстрые сценарии «Настроить маршрут» ——— */
+const planIds = () => S.plan.map((p) => p.id);
+const clashes = (id) => planIds().some((p) => p === id || exById(p)?.overlaps?.includes(id));
+function swapOptions() {
+  if (S.group === 'l') return [];
+  return C.tune.swaps.filter((w) => planIds().includes(w.from) && !planIds().includes(w.to))
+    .map((w) => ({ ...w, save: exPrice(exById(w.from)).value - exPrice(exById(w.to)).value })).filter((w) => w.save > 0);
+}
+function tuneOptions() {
+  const T = C.tune;
+  return T.items.filter((t) => {
+    if (t.id === 'cheaper') return swapOptions().length > 0;
+    if (t.id === 'calm') return exItems().length >= 2;
+    return t.order.some((id) => !clashes(id));
+  });
+}
+function applyTune(id) {
+  const T = C.tune;
+  const t = T.items.find((x) => x.id === id);
+  if (id === 'calm') {
+    const i = S.plan.findIndex((p, k) => k > 0 && (exById(p.id)?.hours || 0) >= 8 && (exById(S.plan[k - 1].id)?.hours || 0) >= 8);
+    if (i < 0) return toast(T.calmAlready);
+    S.plan.splice(i, 0, { id: 'free' }); toast(T.calmDone);
+  } else if (id === 'cheaper') {
+    const w = swapOptions().sort((a, b) => b.save - a.save)[0];
+    const i = S.plan.findIndex((p) => p.id === w.from);
+    S.plan[i] = { id: w.to };
+    toast(T.swapped.replace('{to}', exById(w.to).name).replace('{from}', exById(w.from).name).replace('{sum}', usd(w.save)));
+  } else {
+    const next = t.order.find((x) => !clashes(x));
+    if (!next) return toast(T.nothing);
+    S.plan.push(next === 'heli' ? { id: next, people: heliPeople() } : { id: next });
+    toast(T.added.replace('{name}', exById(next).name));
+  }
+  reach('tune_' + id);
+  save(); refreshCards(); renderPlan();
+}
+function tuneHtml() {
+  if (!exItems().length) return '';
+  const opts = tuneOptions();
+  const best = swapOptions().sort((a, b) => b.save - a.save)[0];
+  const cheapest = S.group === 'l' ? null : C.excursions.filter((e) => e.price && !clashes(e.id)).map((e) => exPrice(e).value).sort((a, b) => a - b)[0];
+  const hints = [best ? C.tune.save.replace('{sum}', usd(best.save)) : '', cheapest ? C.tune.more.replace('{sum}', usd(cheapest)) : ''].filter(Boolean);
+  if (!opts.length && !hints.length) return '';
+  return `<section class="tune" aria-label="${esc(C.tune.title)}"><b class="tune__title">${esc(C.tune.title)}</b>
+    <div class="tune__chips">${opts.map((t) => `<button class="chip" type="button" data-tune="${t.id}">${esc(t.text)}</button>`).join('')}</div>
+    ${hints.length ? `<p class="tune__hint">${hints.map(esc).join(' · ')}</p>` : ''}</section>`;
 }
 
 function applyAdvice(arg) {
@@ -565,6 +632,7 @@ function renderPlan() {
       `<button type="button" role="radio" aria-checked="${S.group === k}" data-group="${k}">${esc(g.short)}</button>`).join('')}</div>
     ${empty ? `<p class="plan-empty">${esc(C.plan.empty)}</p>` : `<ol class="plan-list">${items}</ol>${rider}`}
     ${R.adviceHtml(C, S.plan.map((i) => i.id))}
+    ${tuneHtml()}
     ${ex ? `<div class="plan-total">
       <div class="plan-total__facts"><span><b>${days(S.plan.length)}</b></span><span><b>${ex}</b> ${plural(ex, ['экскурсия', 'экскурсии', 'экскурсий'])}</span><span><b>≈${hours}</b> ч в пути и на месте</span></div>
       <div class="plan-total__sum"><span>${esc(C.plan.total)}${total == null ? '' : `, за группу ${esc(C.groups[S.group].short)}, ${esc(C.plan.totalNote)}`}</span>
@@ -814,10 +882,12 @@ function bind() {
     else if ('qnext' in ds) next();
     else if ('qback' in ds) back();
     else if ('qrestart' in ds) { Q.screen = 'q'; Q.idx = 0; Q.answers = { likes: [] }; swap(renderQuiz); }
-    else if (ds.add) toggleExcursion(ds.add);
+    else if (ds.add) { toggleExcursion(ds.add); if ($('#mapSheet').open) renderExMap(); }
+    else if (ds.mapEx) { mapEx = ds.mapEx; renderExMap(); openSheet($('#mapSheet')); reach('map_open'); }
     else if ('resultSend' in ds) { takeResult(); leadMode = 'plan'; renderLead(); openSheet($('#leadSheet')); }
     else if ('resultKeep' in ds) { takeResult(); toast(C.toasts.routeAdded); renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
     else if (ds.quick) { leadMode = 'direct'; leadMonth = S.month; sendLead(ds.quick); }
+    else if (ds.tune) applyTune(ds.tune);
     else if (ds.advice) applyAdvice(ds.advice);
     else if (ds.route) addRoute(C.routes.items.find((r) => r.id === ds.route));
     else if ('openCmp' in ds) { S.compare = exItems().map((i) => i.id).slice(0, 3); closeSheet($('#planSheet')); renderCompare(); openSheet($('#cmpSheet')); reach('compare_open'); }
@@ -860,7 +930,10 @@ function bind() {
     }
     else if ('share' in ds) {
       const url = shareUrl();
-      (navigator.clipboard?.writeText(url) || Promise.reject()).then(() => toast(C.plan.shared)).catch(() => prompt('Ссылка на план', url));
+      reach('plan_share');
+      const copy = () => (navigator.clipboard?.writeText(url) || Promise.reject()).then(() => toast(C.plan.shared)).catch(() => prompt('Ссылка на план', url));
+      if (navigator.share) navigator.share({ title: C.plan.shareText, text: `${C.plan.shareText}: ${planSummary()}`, url }).catch((e) => { if (e?.name !== 'AbortError') copy(); });
+      else copy();
     }
     else if (ds.send) sendLead(ds.send);
     else if ('sendCall' in ds) sendLead('call');

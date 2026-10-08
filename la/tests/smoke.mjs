@@ -111,6 +111,27 @@ for (const { name, ...opts } of profiles) {
   await page.keyboard.press('Escape');
   await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
 
+  // Карта одной экскурсии из карточки
+  await page.evaluate(() => document.querySelector('[data-grid] [data-map-ex="lagrand"]').click());
+  await page.waitForTimeout(300);
+  check(await page.isVisible('#mapSheet .map__svg') && (await page.locator('#mapSheet .map__legend li').count()) === cfg.excursions.find((e) => e.id === 'lagrand').map.length, '«Показать на карте»: все остановки экскурсии');
+  await page.evaluate(() => document.querySelector('#mapSheet [data-add]').click());
+  check(await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan.some((p) => p.id === 'lagrand')), 'из карты — в поездку');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
+
+  // «Настроить маршрут»: дешевле, океан, спокойнее
+  await page.evaluate(() => localStorage.setItem('tr-la-v1', JSON.stringify({ plan: [{ id: 'lagrand' }, { id: 'santabarbara' }], group: 's' })));
+  await page.reload(); await page.waitForSelector('html[data-ready]');
+  await page.evaluate(() => document.querySelector('[data-open-plan-top]').click());
+  await page.evaluate(() => document.querySelector('#planSheet [data-tune="cheaper"]').click());
+  const ids1 = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan.map((p) => p.id));
+  check(ids1.includes('safari') && !ids1.includes('santabarbara'), '«Дешевле»: Санта-Барбару заменили на сафари');
+  await page.evaluate(() => document.querySelector('#planSheet [data-tune="ocean"]').click());
+  check((await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan.map((p) => p.id))).includes('whales'), '«Больше океана»: добавили китов');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
+
   // «Помочь выбрать»: сравнение экскурсий из поездки
   for (const e of cfg.excursions.slice(0, 2)) await click(`[data-grid] [data-add="${e.id}"]`);
   await page.evaluate(() => document.querySelector('[data-open-plan]').click());
