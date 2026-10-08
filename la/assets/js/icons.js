@@ -60,6 +60,31 @@ export const ILLUSTRATIONS = {
     <path class="c" d="M21 11 9 7v8Zm22 0 12-4v8Z" opacity=".55"/>
     <path class="a" d="M22 50h20v3H22Z"/>
     <path class="h" d="M0 58c4 0 4-2 8-2s4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2" fill="none" stroke-width="1.6"/>`),
+  bloom: art(`
+    <circle class="c" cx="51" cy="14" r="6"/>
+    <path class="b" d="M0 50c10-6 22-8 34-6s22-2 30-6v18H0Z"/>
+    <rect class="g" x="0" y="56" width="64" height="8"/>
+    <path class="a" d="M30 56V38l-7-7 2-2 6 6v-9h3v12l6-6 2 2-8 8v14Z"/>
+    <circle class="a" cx="22" cy="24" r="8"/><circle class="a" cx="33" cy="17" r="9"/><circle class="a" cx="44" cy="25" r="8"/><circle class="a" cx="31" cy="29" r="7"/>
+    <circle class="h" cx="20" cy="22" r="1.4"/><circle class="h" cx="31" cy="14" r="1.4"/><circle class="h" cx="37" cy="20" r="1.4"/><circle class="h" cx="46" cy="23" r="1.4"/><circle class="h" cx="27" cy="28" r="1.4"/><circle class="h" cx="25" cy="18" r="1.2"/><circle class="h" cx="41" cy="28" r="1.2"/>
+    <circle class="a" cx="12" cy="50" r="1.6"/><circle class="a" cx="50" cy="48" r="1.6"/><circle class="a" cx="55" cy="51" r="1.3"/>`),
+  beach: art(`
+    <circle class="c" cx="14" cy="15" r="7"/>
+    <rect class="b" x="0" y="40" width="64" height="16"/>
+    <path class="h" d="M0 44c4 0 4-2 8-2s4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2" fill="none" stroke-width="1.6"/>
+    <path class="g" d="M0 52c12-4 30-5 64-2v14H0Z"/>
+    <path class="a" d="M37 22h2l3 34h-2Z"/>
+    <path class="a" d="M20 30c3-12 18-17 30-12 5 2 9 6 10 11-5-3-10-3-14 0-3-3-8-4-12-1-4-2-10-1-14 2Z"/>
+    <path class="h" d="M33 28c1-6 4-10 9-12-3 3-5 7-6 12Z"/>
+    <path class="a" d="M10 54h14l-2 3H12Z"/>`),
+  grapes: art(`
+    <circle class="c" cx="50" cy="14" r="6"/>
+    <path class="b" d="M0 46c10-5 20-6 32-4s22-2 32-5v19H0Z"/>
+    <rect class="g" x="0" y="56" width="64" height="8"/>
+    <path class="a" d="M31 9c1 3 1 6 0 9h-2c1-3 1-6 0-9Z"/>
+    <path class="a" d="M31 13c4-6 12-7 17-3-6 0-11 2-15 6Z"/>
+    <circle class="a" cx="24" cy="23" r="5"/><circle class="a" cx="34" cy="22" r="5"/><circle class="a" cx="29" cy="31" r="5"/><circle class="a" cx="39" cy="31" r="5"/><circle class="a" cx="19" cy="32" r="5"/><circle class="a" cx="24" cy="40" r="5"/><circle class="a" cx="34" cy="40" r="5"/><circle class="a" cx="29" cy="48" r="5"/>
+    <circle class="h" cx="22" cy="21" r="1.3"/><circle class="h" cx="32" cy="20" r="1.3"/><circle class="h" cx="27" cy="29" r="1.3"/><circle class="h" cx="37" cy="29" r="1.3"/><circle class="h" cx="17" cy="30" r="1.3"/><circle class="h" cx="22" cy="38" r="1.3"/><circle class="h" cx="32" cy="38" r="1.3"/><circle class="h" cx="27" cy="46" r="1.3"/>`),
   mission: art(`
     <circle class="c" cx="49" cy="15" r="6"/>
     <path class="b" d="M0 48c10-8 20-10 30-8s22-8 34-4v20H0Z"/>
