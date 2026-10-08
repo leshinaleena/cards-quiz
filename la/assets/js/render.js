@@ -1,6 +1,6 @@
 // Чистые функции разметки: работают и в браузере, и в Node (tools/prerender.mjs),
 // чтобы каталог, маршруты и вопросы были в HTML сразу — для поисковиков и быстрого первого экрана.
-import { ILLUSTRATIONS, UI } from './icons.js?v=10';
+import { ILLUSTRATIONS, UI } from './icons.js?v=11';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const nf = (n) => Math.round(n).toLocaleString('ru-RU').replace(/\s/g, ' ');
@@ -245,4 +245,65 @@ export function compareHtml(C, ids, group = 's') {
     <tbody>${rows.map(([label, f]) => `<tr><th scope="row">${esc(label)}</th>${exs.map((ex) => `<td>${f(ex)}</td>`).join('')}</tr>`).join('')}
       <tr><th></th>${exs.map((ex) => `<td><button class="btn btn--main btn--block add-sm" type="button" data-add="${ex.id}">${UI.plus}<span>${esc(C.catalog.add)}</span></button></td>`).join('')}</tr>
     </tbody></table></div>`;
+}
+
+/* ——— Советы консьержа: правила из config.advice, без «умного» сервера ——— */
+const exOf = (C, id) => C.excursions.find((e) => e.id === id);
+export const isFar = (ex) => Array.isArray(ex?.map) && ex.map.some((m) => String(m).startsWith('far:'));
+export const paceText = (C, h) => (C.advice.pace.find((p) => h <= p.max) || C.advice.pace.at(-1)).text;
+
+// ids — дни поездки по порядку ('free' — свободный день). Возвращает [{ text, action?, arg? }]
+export function adviseTrip(C, ids) {
+  const A = C.advice;
+  const tips = [];
+  const seen = new Set();
+  ids.forEach((a, i) => ids.slice(i + 1).forEach((b) => {
+    const key = [a, b].sort().join('+');
+    const ex = exOf(C, a);
+    if (seen.has(key) || !ex?.overlaps?.includes(b)) return;
+    seen.add(key);
+    const rule = A.pairs[key];
+    if (rule) tips.push({ text: rule.text, ...(rule.keep ? { action: rule.action, arg: `keep:${rule.keep}:${rule.keep === a ? b : a}` } : {}) });
+  }));
+  for (let i = 1; i < ids.length; i++) {
+    const a = exOf(C, ids[i - 1]); const b = exOf(C, ids[i]);
+    if (isFar(a) && isFar(b) && !seen.has([a.id, b.id].sort().join('+'))) {
+      tips.push({ text: A.farRow.replace('{a}', a.name).replace('{b}', b.name), action: A.addFree, arg: `free:${i}` });
+    }
+  }
+  let run = 0;
+  for (let i = 0; i < ids.length; i++) {
+    run = (exOf(C, ids[i])?.hours || 0) >= 8 ? run + 1 : 0;
+    if (run === 3 && !tips.some((t) => t.arg?.startsWith('free:'))) tips.push({ text: A.longRow, action: A.addFree, arg: `free:${i}` });
+  }
+  return tips;
+}
+
+export function adviceHtml(C, ids) {
+  const tips = adviseTrip(C, ids);
+  if (ids.filter((id) => exOf(C, id)).length < 2) return '';
+  const body = tips.length
+    ? tips.map((t) => `<li><p>${esc(t.text)}</p>${t.action ? `<button class="link-arrow" type="button" data-advice="${esc(t.arg)}">${esc(t.action)}</button>` : ''}</li>`).join('')
+    : `<li class="advice__ok"><p>${esc(C.advice.ok)}</p></li>`;
+  return `<section class="advice ${tips.length ? '' : 'advice--ok'}" aria-label="${esc(C.advice.title)}"><b class="advice__title">${esc(C.advice.title)}</b><ul>${body}</ul></section>`;
+}
+
+// Одна фраза над картой: где проходит маршрут
+export function mapNote(C, ids) {
+  const far = [...new Set(ids.map((id) => exOf(C, id)).filter(isFar)
+    .flatMap((ex) => ex.map.filter((m) => String(m).startsWith('far:')).map((m) => m.slice(4))))];
+  if (!far.length) return C.advice.mapCity;
+  return C.advice.mapFar.replace('{list}', far.map((k) => `${C.map.far[k].name} ${C.map.far[k].time}`).join(', '));
+}
+
+// Дальние выезды не ставим подряд, если есть чем их разделить
+export function spreadFar(C, ids) {
+  const far = ids.filter((id) => isFar(exOf(C, id)));
+  const near = ids.filter((id) => !isFar(exOf(C, id)));
+  if (far.length < 2 || near.length < far.length - 1) return ids;
+  const [first, second] = near.length > far.length ? [near, far] : [far, near];
+  const out = [];
+  first.forEach((id, i) => { out.push(id); if (second[i]) out.push(second[i]); });
+  second.slice(first.length).forEach((id) => out.push(id));
+  return out;
 }

@@ -58,6 +58,8 @@ for (const { name, ...opts } of profiles) {
     const clash = picked.some((id) => (cfg.excursions.find((e) => e.id === id).overlaps || []).some((o) => picked.includes(o)));
     check(!clash, 'в маршруте нет экскурсий, которые повторяют друг друга');
     check(await page.isVisible('[data-result-send]') && await page.isVisible('[data-result-keep]'), 'понятный следующий шаг');
+    const why = await page.textContent('.result__why');
+    check(why.includes('Поэтому') && !/[{}]/.test(why), `объяснение подбора: «${why}»`);
     if (qOpt('time', time).long) check(await page.isVisible('.quiz .note'), '4+ дней — плашка Travel Rider');
   }
   // Больше трёх интересов выбрать нельзя
@@ -78,6 +80,25 @@ for (const { name, ...opts } of profiles) {
   await click(`[data-route="${r3.id}"]`);
   const planIds = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan.map((p) => p.id));
   check(JSON.stringify(planIds) === JSON.stringify(r3.days), `маршрут «${r3.title}» добавлен по дням`);
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
+
+  // Советы консьержа: повторы, дальние выезды подряд, насыщенность дня
+  await page.evaluate(() => localStorage.setItem('tr-la-v1', JSON.stringify({ plan: [{ id: 'la6' }, { id: 'lagrand' }], group: 's' })));
+  await page.reload(); await page.waitForSelector('html[data-ready]');
+  await page.evaluate(() => document.querySelector('[data-open-plan-top]').click());
+  check((await page.textContent('#planSheet .advice')).includes('Гранд-тур'), 'совет: 6 часов и гранд-тур повторяются');
+  check((await page.textContent('#planSheet .plan-list')).includes(cfg.advice.pace[1].text), 'у дня есть насыщенность');
+  await page.evaluate(() => document.querySelector('#planSheet [data-advice^="keep"]').click());
+  check(JSON.stringify(await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan.map((p) => p.id))) === '["lagrand"]', '«Оставить Гранд-тур» убирает повтор');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => localStorage.setItem('tr-la-v1', JSON.stringify({ plan: [{ id: 'sandiego' }, { id: 'santabarbara' }], group: 's' })));
+  await page.reload(); await page.waitForSelector('html[data-ready]');
+  await page.evaluate(() => document.querySelector('[data-open-plan-top]').click());
+  await page.evaluate(() => document.querySelector('#planSheet [data-advice^="free"]').click());
+  check(JSON.stringify(await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).plan.map((p) => p.id))) === '["sandiego","free","santabarbara"]', 'два дальних выезда подряд → свободный день между ними');
+  check((await page.textContent('#planSheet .advice')).includes(cfg.advice.ok), 'после правки маршрут «логичный»');
+  check((await page.textContent('#planSheet .map__note')).includes('Сан-Диего'), 'над картой — фраза о дальних выездах');
+  await page.keyboard.press('Escape');
   await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
 
   // «Помочь выбрать»: сравнение экскурсий из поездки

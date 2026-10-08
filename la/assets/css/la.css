@@ -800,3 +800,17 @@ button.link-arrow { background: none; border: 0; border-bottom: 1px solid var(--
   .seg { display: grid; width: 100%; }
   .seg button { min-width: 0; padding: 4px 6px; white-space: normal; line-height: 1.15; }
 }
+
+/* ——— Советы консьержа ——— */
+.result__why { margin: 0 0 8px; font: 600 16px/1.4 var(--head); color: var(--title); }
+.advice { margin: 14px 0; padding: 16px 18px; border-radius: var(--shape); background: var(--salmon-soft); border: 1px solid rgba(168, 64, 44, .18); }
+.advice--ok { background: var(--surface); border-color: var(--line); }
+.advice__title { display: block; margin-bottom: 8px; font: 800 12px/1 var(--head); letter-spacing: .08em; text-transform: uppercase; color: var(--salmon-ink); }
+.advice ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.advice li { display: grid; gap: 6px; }
+.advice p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--ink); }
+.advice .link-arrow { justify-self: start; }
+.pace { font-weight: 600; }
+.pace--0, .pace--1 { color: var(--title); }
+.pace--2 { color: var(--salmon-ink); }
+.map__note { margin: 0; padding: 12px 16px 0; font: 600 14px/1.4 var(--head); color: var(--title); }

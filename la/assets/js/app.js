@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=10';
-import { drawGift } from './gift.js?v=10';
-import * as R from './render.js?v=10';
+import { UI } from './icons.js?v=11';
+import { drawGift } from './gift.js?v=11';
+import * as R from './render.js?v=11';
 
-const VERSION = '10';
+const VERSION = '11';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -247,7 +247,7 @@ function finishQuiz() {
   const who = optOf('who', Q.answers.who);
   if (who?.group) S.group = who.group;
   S.quiz = { ...Q.answers, likes: [...(Q.answers.likes || [])] };
-  S.picked = pickResults();
+  S.picked = R.spreadFar(C, pickResults());
   save();
   reach('quiz_done');
   logEvent('Квиз пройден');
@@ -266,6 +266,7 @@ function renderResult(box) {
   const sum = total == null ? C.plan.individual : `${usd(total)} за группу ${C.groups[S.group].short}`;
   box.innerHTML = `
     <h3 class="result__title">${esc(C.quiz.resultTitle)}</h3>
+    <p class="result__why">${esc(whyText(exs))}</p>
     <p class="result__lead">${esc(C.quiz.resultLead)}</p>
     <ol class="dayplan">${exs.map((ex, i) => {
       const pr = exPrice(ex, ex.perPerson ? { people: heliPeople() } : null);
@@ -274,11 +275,11 @@ function renderResult(box) {
         <span class="dayplan__day">День ${i + 1}</span>
         <span class="dayplan__art">${tile(ex.icon)}</span>
         <div class="dayplan__body"><b>${esc(ex.name)}</b><span>${esc(ex.hook)}</span>
-          <small>${esc(R.hoursText(ex.hours))} · ${esc(S.group === 'l' ? C.plan.individual : usd(pr.value))}${reason ? ` · ${esc(reason)}` : ''}</small></div>
+          <small>${esc(R.hoursText(ex.hours))} · ${esc(R.paceText(C, ex.hours))} · ${esc(S.group === 'l' ? C.plan.individual : usd(pr.value))}${reason ? ` · ${esc(reason)}` : ''}</small></div>
       </li>`;
     }).join('')}</ol>
     <details class="mapbox"><summary>${UI.trip}<span>${esc(C.quiz.mapShow)}</span>${UI.down}</summary>
-      <div class="map__frame">${R.mapSvg(C, { trip: S.picked })}</div>${R.mapLegend(C, S.picked)}<p class="map__hint">${esc(C.map.hint)}</p></details>
+      <p class="map__note">${esc(R.mapNote(C, S.picked))}</p><div class="map__frame">${R.mapSvg(C, { trip: S.picked })}</div>${R.mapLegend(C, S.picked)}<p class="map__hint">${esc(C.map.hint)}</p></details>
     <p class="result__sum">${esc(C.quiz.summary.replace('{days}', days(exs.length)).replace('{hours}', `≈ ${hours} ч`).replace('{sum}', sum))}</p>
     ${long ? `<div class="note"><p>${esc(C.quiz.longNote)}</p><a class="link-arrow" href="#riders">${esc(C.quiz.longLink)}</a></div>` : ''}
     <div class="result__next">
@@ -288,6 +289,17 @@ function renderResult(box) {
       <button class="btn btn--ghost btn--block" type="button" data-result-keep>${esc(C.quiz.keep)}</button>
       <button class="quiz__back result__restart" type="button" data-qrestart>${esc(C.quiz.restart)}</button>
     </div>`;
+}
+
+// «Почему именно это»: одна фраза из ответов
+function whyText(exs) {
+  const A = C.advice;
+  const who = A.who[S.quiz?.who] || '';
+  const likes = (S.quiz?.likes || []).map((id) => optOf('likes', id)?.text).filter(Boolean).map((t) => `«${t}»`);
+  const far = exs.filter(R.isFar).length;
+  const tail = far === 0 ? A.tailCity : far === 1 ? A.tailFar1 : A.tailFarN;
+  const list = likes.length > 1 ? `${likes.slice(0, -1).join(', ')} и ${likes.at(-1)}` : likes[0];
+  return (likes.length ? A.why : A.whyNoLikes).replace('{who}', who).replace('{likes}', list || '').replace('{days}', days(exs.length)).replace('{tail}', tail);
 }
 
 function takeResult() {
@@ -345,6 +357,14 @@ function bump() {
   for (const el of $$('[data-open-plan-top], [data-open-plan]')) {
     el.classList.remove('is-bump'); void el.offsetWidth; el.classList.add('is-bump');
   }
+}
+
+function applyAdvice(arg) {
+  const [kind, a, b] = arg.split(':');
+  if (kind === 'keep') { S.plan = S.plan.filter((p) => p.id !== b); toast(C.toasts.removed); }
+  if (kind === 'free') { S.plan.splice(+a, 0, { id: 'free' }); toast(C.toasts.freeAdded); }
+  reach('advice_apply');
+  save(); refreshCards(); renderPlan();
 }
 
 function toggleExcursion(id) {
@@ -500,6 +520,8 @@ function updateDock() {
   measureDock();
 }
 
+const paceKey = (h) => C.advice.pace.findIndex((p) => h <= p.max);
+
 function renderPlan() {
   const box = $('[data-plan]');
   const total = planTotal();
@@ -523,7 +545,7 @@ function renderPlan() {
     return `<li class="plan-item">
       <span class="plan-item__day">${esc(C.plan.day)} ${i + 1}</span>
       <div><div class="plan-item__name">${esc(ex.name)}</div>
-        <div class="plan-item__sub">${esc(R.hoursText(ex.hours))} · ${esc(S.group === 'l' ? C.plan.individual : usd(pr.value))}${ex.perPerson ? ` · ${esc(C.plan.heliPeople.toLowerCase())}` : ''}</div>${heli}</div>
+        <div class="plan-item__sub">${esc(R.hoursText(ex.hours))} · <span class="pace pace--${paceKey(ex.hours)}">${esc(R.paceText(C, ex.hours))}</span> · ${esc(S.group === 'l' ? C.plan.individual : usd(pr.value))}${ex.perPerson ? ` · ${esc(C.plan.heliPeople.toLowerCase())}` : ''}</div>${heli}</div>
       <div class="plan-item__right">${move(i)}<button class="icon-btn" type="button" data-remove-i="${i}" aria-label="Убрать ${esc(ex.name)}">${UI.close}</button></div>
     </li>`;
   }).join('');
@@ -541,12 +563,13 @@ function renderPlan() {
     <div class="seg" role="radiogroup" aria-label="Размер группы">${Object.entries(C.groups).map(([k, g]) =>
       `<button type="button" role="radio" aria-checked="${S.group === k}" data-group="${k}">${esc(g.short)}</button>`).join('')}</div>
     ${empty ? `<p class="plan-empty">${esc(C.plan.empty)}</p>` : `<ol class="plan-list">${items}</ol>${rider}`}
+    ${R.adviceHtml(C, S.plan.map((i) => i.id))}
     ${ex ? `<div class="plan-total">
       <div class="plan-total__facts"><span><b>${days(S.plan.length)}</b></span><span><b>${ex}</b> ${plural(ex, ['экскурсия', 'экскурсии', 'экскурсий'])}</span><span><b>≈${hours}</b> ч в пути и на месте</span></div>
       <div class="plan-total__sum"><span>${esc(C.plan.total)}${total == null ? '' : `, за группу ${esc(C.groups[S.group].short)}, ${esc(C.plan.totalNote)}`}</span>
       <b>${esc(total == null ? C.plan.individual : usd(total))}</b></div></div>` : ''}
     ${ex ? `<details class="mapbox"><summary>${UI.trip}<span>${esc(C.plan.mapShow)}</span>${UI.down}</summary>
-      <div class="map__frame">${R.mapSvg(C, { trip: exItems().map((i) => i.id) })}</div>${R.mapLegend(C, exItems().map((i) => i.id))}<p class="map__hint">${esc(C.map.hint)}</p></details>` : ''}
+      <p class="map__note">${esc(R.mapNote(C, exItems().map((i) => i.id)))}</p><div class="map__frame">${R.mapSvg(C, { trip: exItems().map((i) => i.id) })}</div>${R.mapLegend(C, exItems().map((i) => i.id))}<p class="map__hint">${esc(C.map.hint)}</p></details>` : ''}
     ${ex >= 2 ? `<button class="link-arrow plan-help" type="button" data-open-cmp>${esc(C.plan.help)}</button>` : ''}
     ${ex >= 2 && !S.rider ? `<div class="note"><p>${esc(C.plan.riderHint)}</p><a class="link-arrow" href="#riders" data-close-go>${esc(C.plan.riderLink)}</a></div>` : ''}
     <div class="plan-actions">
@@ -793,6 +816,7 @@ function bind() {
     else if (ds.add) toggleExcursion(ds.add);
     else if ('resultSend' in ds) { takeResult(); leadMode = 'plan'; renderLead(); openSheet($('#leadSheet')); }
     else if ('resultKeep' in ds) { takeResult(); toast(C.toasts.routeAdded); renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
+    else if (ds.advice) applyAdvice(ds.advice);
     else if (ds.route) addRoute(C.routes.items.find((r) => r.id === ds.route));
     else if ('openCmp' in ds) { S.compare = exItems().map((i) => i.id).slice(0, 3); closeSheet($('#planSheet')); renderCompare(); openSheet($('#cmpSheet')); reach('compare_open'); }
     else if (ds.move) {
