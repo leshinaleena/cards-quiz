@@ -40,6 +40,8 @@ for (const { name, ...opts } of profiles) {
   await page.waitForTimeout(500);
   check(await page.evaluate(() => [...document.images].every((i) => i.complete && i.naturalWidth > 0)), 'все фото показаны');
 
+  check((await page.locator('#why .review').count()) === cfg.reviews.items.length, `отзывы на месте: ${cfg.reviews.items.length}`);
+
   // Первый экран: написать менеджеру сразу, без квиза
   check(await page.isVisible('.hero [data-quick="tg"]') && await page.isVisible('.hero [data-quick="wa"]'), 'на первом экране — Telegram и WhatsApp');
   await page.evaluate(() => document.querySelector('.hero [data-quick="tg"]').click());
