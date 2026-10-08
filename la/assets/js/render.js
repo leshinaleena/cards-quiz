@@ -1,6 +1,6 @@
 // Чистые функции разметки: работают и в браузере, и в Node (tools/prerender.mjs),
 // чтобы каталог, маршруты и вопросы были в HTML сразу — для поисковиков и быстрого первого экрана.
-import { ILLUSTRATIONS, UI } from './icons.js?v=7';
+import { ILLUSTRATIONS, UI } from './icons.js?v=8';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const nf = (n) => Math.round(n).toLocaleString('ru-RU').replace(/\s/g, ' ');
@@ -59,8 +59,7 @@ export function card(C, ex, { group = 's', inPlan = false, reason = '', compared
       ${ex.terms ? `<p class="term">${esc(ex.terms)}</p>` : ''}
       ${ex.season ? `<p class="when"><b>Когда лучше:</b> ${esc(ex.season)}</p>` : ''}
     </details>
-    <div class="card__foot">${addBtn(C, ex.id, inPlan)}
-      <button class="cmp-toggle ${compared ? 'is-on' : ''}" type="button" data-compare="${ex.id}" aria-pressed="${compared}">${compared ? UI.check : UI.plus}<span>${esc(compared ? C.compare.on : C.compare.button)}</span></button></div>
+    <div class="card__foot">${addBtn(C, ex.id, inPlan)}</div>
   </article>`;
 }
 
@@ -115,65 +114,115 @@ export function conciergeHtml(C) {
     </div>`;
 }
 
-/* ——— Карта: схема Лос-Анджелеса с точками экскурсий ——— */
-const BOX = { w: 1000, h: 620, lon0: -118.82, lon1: -117.82, lat0: 33.66, lat1: 34.22 };
+/* ——— Карта: иллюстрированная схема в стиле травел-журнала ——— */
+const BOX = { w: 1000, h: 640, lon0: -118.86, lon1: -117.80, lat0: 33.62, lat1: 34.22 };
 const px = (lat, lon) => [
   Math.round(((lon - BOX.lon0) / (BOX.lon1 - BOX.lon0)) * BOX.w),
   Math.round(((BOX.lat1 - lat) / (BOX.lat1 - BOX.lat0)) * BOX.h),
 ];
-// Упрощённая береговая линия: Малибу → Санта-Моника → Палос-Вердес → Лонг-Бич → Хантингтон
-const COAST = [[34.04, -118.84], [34.036, -118.68], [34.02, -118.56], [34.005, -118.49], [33.97, -118.46], [33.90, -118.42], [33.83, -118.395],
-  [33.77, -118.42], [33.74, -118.40], [33.71, -118.30], [33.73, -118.27], [33.755, -118.20], [33.745, -118.12], [33.70, -118.05], [33.64, -117.95], [33.60, -117.86]];
-const HILLS = [[34.06, -118.84], [34.12, -118.80], [34.16, -118.62], [34.14, -118.45], [34.14, -118.34], [34.12, -118.30], [34.10, -118.36], [34.085, -118.46], [34.07, -118.60], [34.045, -118.70]];
-const FAR = { nw: [64, 70], se: [930, 560], s: [770, 590] };
+// Берег: Малибу → залив Санта-Моника → Палос-Вердес → Лонг-Бич → Хантингтон-Бич
+const COAST = [[34.045, -118.90], [34.038, -118.76], [34.034, -118.66], [34.03, -118.56], [34.01, -118.50], [33.975, -118.46], [33.92, -118.425],
+  [33.86, -118.40], [33.80, -118.405], [33.76, -118.42], [33.73, -118.37], [33.715, -118.30], [33.735, -118.26], [33.755, -118.20],
+  [33.745, -118.12], [33.71, -118.05], [33.66, -117.98], [33.60, -117.88], [33.56, -117.76]];
+const HILLS = [[34.06, -118.90], [34.13, -118.84], [34.17, -118.66], [34.155, -118.48], [34.15, -118.34], [34.125, -118.29], [34.10, -118.33],
+  [34.09, -118.44], [34.075, -118.58], [34.055, -118.72]];
+// Плавная кривая через точки (Catmull-Rom → Безье)
+function smooth(pts) {
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i += 1) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += ` C${c1.map(Math.round)} ${c2.map(Math.round)} ${p2}`;
+  }
+  return d;
+}
+const FAR = { nw: [28, 40, 'start'], se: [972, 560, 'end'], s: [972, 612, 'end'] };
 
-export function mapSvg(C, { focus = null, trip = [] } = {}) {
+// Остановки маршрута по дням: [{ n, ex, point | far }]
+export function mapStops(C, trip) {
+  return trip.map((id, i) => {
+    const ex = C.excursions.find((e) => e.id === id);
+    if (!ex) return null;
+    const m = ex.mapMain || ex.map[0];
+    return m.startsWith('far:') ? { n: i + 1, ex, far: m.slice(4) } : { n: i + 1, ex, point: m };
+  }).filter(Boolean);
+}
+
+export function mapSvg(C, { trip = [] } = {}) {
   const M = C.map;
   const P = Object.fromEntries(Object.entries(M.points).map(([k, v]) => [k, px(v.lat, v.lon)]));
   const coast = COAST.map(([a, b]) => px(a, b));
-  const sea = `M${coast.map((p) => p.join(',')).join(' L')} L${BOX.w},${BOX.h} L0,${BOX.h} Z`;
-  const hills = `M${HILLS.map(([a, b]) => px(a, b).join(',')).join(' L')} Z`;
-  const routeOf = (ex) => ex.map.map((id) => (id.startsWith('far:') ? FAR[M.far[id.slice(4)].dir] : P[id]));
-  const line = (ex, cls) => {
-    const pts = routeOf(ex);
-    const far = ex.map.find((id) => id.startsWith('far:'));
-    const start = far ? [P.downtown] : [];
-    const all = [...start, ...pts];
-    if (all.length < 2) return '';
-    return `<polyline class="map__route ${cls}" points="${all.map((p) => p.join(',')).join(' ')}"/>`;
+  const sea = `${smooth(coast)} L${BOX.w},${BOX.h} L0,${BOX.h} Z`;
+  const hills = `${smooth(HILLS.map(([a, b]) => px(a, b)))} Z`;
+  const stops = mapStops(C, trip);
+  // Повторная точка (две экскурсии в одном месте) — смещаем кружок, чтобы цифры не слипались
+  const seen = {};
+  const at = (s) => {
+    if (s.far) { const [x, y] = FAR[M.far[s.far].dir]; return [x, y]; }
+    const [x, y] = P[s.point]; const k = s.point; seen[k] = (seen[k] || 0) + 1;
+    return [x + (seen[k] - 1) * 30, y - (seen[k] - 1) * 22];
   };
-  const tripEx = C.excursions.filter((e) => trip.includes(e.id));
-  const focusEx = focus ? C.excursions.find((e) => e.id === focus) : null;
-  const used = new Set([...tripEx, ...(focusEx ? [focusEx] : [])].flatMap((e) => e.map));
-  const dot = (id) => {
-    const [x, y] = P[id];
-    const on = used.has(id);
-    const name = M.points[id].name;
-    const time = M.times[id];
-    const side = M.points[id].side || (x < 820 ? 'r' : 'l');
-    const tx = side === 'r' ? x + 14 : side === 'l' ? x - 14 : x;
-    const ty = side === 'b' ? y + 30 : y + 6;
-    const anchor = { r: 'start', l: 'end', b: 'middle' }[side];
-    return `<g class="map__pt ${on ? 'is-on' : ''}"><circle cx="${x}" cy="${y}" r="${on ? 9 : 6}"/>
-      <text x="${tx}" y="${ty}" text-anchor="${anchor}">${esc(name)}${time ? `<tspan class="map__time" dx="6">${esc(time)}</tspan>` : ''}</text></g>`;
-  };
-  const farMark = (k) => {
-    const f = M.far[k]; const [x, y] = FAR[f.dir];
-    const on = used.has(`far:${k}`);
-    const ax = f.dir === 'nw' ? -1 : 1; const ay = f.dir === 'nw' ? -1 : 1;
-    return `<g class="map__far ${on ? 'is-on' : ''}"><path d="M${x},${y} l${ax * 18},${ay * 18} M${x + ax * 18},${y + ay * 18} l${-ax * 12},0 M${x + ax * 18},${y + ay * 18} l0,${-ay * 12}"/>
-      <text x="${f.dir === 'nw' ? x + 30 : x - 10}" y="${f.dir === 'nw' ? y + 6 : y - 16}" text-anchor="${f.dir === 'nw' ? 'start' : 'end'}">${esc(f.name)} <tspan class="map__time">${esc(f.time)}</tspan></text></g>`;
-  };
-  return `<svg class="map__svg" viewBox="0 0 ${BOX.w} ${BOX.h}" role="img" aria-label="Схема Лос-Анджелеса с местами экскурсий">
+  const pos = stops.map((s) => ({ ...s, xy: at(s) }));
+  const local = pos.filter((s) => !s.far);
+  // Изогнутый пунктир между остановками в городе
+  let path = '';
+  for (let i = 0; i < local.length - 1; i += 1) {
+    const [x1, y1] = local[i].xy; const [x2, y2] = local[i + 1].xy;
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1;
+    const k = 0.22;
+    path += `M${x1},${y1} Q${Math.round(mx - dy * k)},${Math.round(my + dx * k)} ${x2},${y2} `;
+  }
+  const used = new Set(local.map((s) => s.point));
+  const anchors = ['santamonica', 'hollywood', 'downtown', 'malibu', 'anaheim'];
+  const faint = Object.keys(M.points).map((k) => {
+    if (used.has(k)) return '';
+    const [x, y] = P[k];
+    const label = anchors.includes(k) ? `<text class="map__soft" x="${x + 12}" y="${y + 6}">${esc(M.points[k].name)}</text>` : '';
+    return `<circle class="map__dot" cx="${x}" cy="${y}" r="5"/>${label}`;
+  }).join('');
+  const pins = local.map((s) => {
+    const [x, y] = s.xy;
+    const name = M.points[s.point].name;
+    // Подпись справа от кружка; у правого края — над ним; если справа близко другая точка — под ним
+    const left = x > 760;
+    const crowded = local.some((o) => o !== s && o.xy[0] > x && o.xy[0] - x < 320 && Math.abs(o.xy[1] - y) < 90);
+    const [lx, ly, la] = left ? [x + 10, y - 40, 'end'] : crowded ? [x, y - 42, 'middle'] : [x + 36, y + 10, 'start'];
+    return `<g class="map__pin"><circle cx="${x}" cy="${y}" r="26"/><text class="map__n" x="${x}" y="${y + 9}">${s.n}</text>
+      <text class="map__label" x="${lx}" y="${ly}" text-anchor="${la}">${esc(name)}</text></g>`;
+  }).join('');
+  const farTags = Object.entries(M.far).map(([k, f]) => {
+    const on = pos.filter((s) => s.far === k);
+    const [x, y, anchor] = FAR[f.dir];
+    const text = `${f.name} · ${f.time}`;
+    const w = Math.round(text.length * 13.4) + (on.length ? 66 : 34);
+    const rx = anchor === 'end' ? x - w : x;
+    return `<g class="map__far ${on.length ? 'is-on' : ''}"><rect x="${rx}" y="${y - 22}" width="${w}" height="44" rx="22"/>
+      ${on.length ? `<circle cx="${rx + 24}" cy="${y}" r="15"/><text class="map__n map__n--sm" x="${rx + 24}" y="${y + 6}">${on.map((s) => s.n).join(',')}</text>` : ''}
+      <text x="${rx + (on.length ? 48 : 16)}" y="${y + 7}">${esc(text)}</text></g>`;
+  }).join('');
+  return `<svg class="map__svg" viewBox="0 0 ${BOX.w} ${BOX.h}" role="img" aria-label="Схема Лос-Анджелеса: Ваш маршрут по дням">
+    <defs><pattern id="waves" width="46" height="18" patternUnits="userSpaceOnUse"><path d="M0 9 q11.5 -7 23 0 t23 0" class="map__wave"/></pattern></defs>
     <rect class="map__land" width="${BOX.w}" height="${BOX.h}"/>
     <path class="map__hills" d="${hills}"/>
-    <path class="map__sea" d="${sea}"/>
-    <text class="map__ocean" x="250" y="470">Тихий океан</text>
-    ${tripEx.map((e) => line(e, 'is-trip')).join('')}
-    ${focusEx ? line(focusEx, 'is-focus') : ''}
-    ${Object.keys(M.far).map(farMark).join('')}
-    ${Object.keys(M.points).map(dot).join('')}
+    <path class="map__sea" d="${sea}"/><path d="${sea}" fill="url(#waves)"/>
+    <path class="map__coast" d="${smooth(coast)}"/>
+    <text class="map__ocean" x="70" y="560">Тихий океан</text>
+    ${faint}
+    ${path ? `<path class="map__path" d="${path}"/>` : ''}
+    ${pins}
+    ${farTags}
   </svg>`;
+}
+
+export function mapLegend(C, trip) {
+  const M = C.map;
+  const stops = mapStops(C, trip);
+  if (!stops.length) return '';
+  return `<ol class="map__legend">${stops.map((s) => {
+    const where = s.far ? `${M.far[s.far].name}, ${M.far[s.far].time} ${M.fromCenter}` : `${M.points[s.point].name}${M.times[s.point] ? `, ${M.times[s.point] === 'в центре' ? 'в центре' : `${M.times[s.point]} ${M.fromCenter}`}` : ''}`;
+    return `<li><span class="map__ln">${s.n}</span><b>${esc(s.ex.name)}</b><span>${esc(where)}</span></li>`;
+  }).join('')}</ol>`;
 }
 
 /* ——— Сравнение ——— */
