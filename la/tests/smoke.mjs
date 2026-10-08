@@ -40,27 +40,37 @@ for (const { name, ...opts } of profiles) {
   await page.waitForTimeout(500);
   check(await page.evaluate(() => [...document.images].every((i) => i.complete && i.naturalWidth > 0)), 'все фото показаны');
 
-  // Квиз проходится при разных ответах и всегда даёт выдачу
+  // Квиз из трёх вопросов: проходится при любых ответах и сразу даёт маршрут
+  check(cfg.quiz.questions.length === 3, 'в квизе ровно 3 вопроса');
+  const qOpt = (qid, oid) => cfg.quiz.questions.find((q) => q.id === qid).options.find((o) => o.id === oid);
   const combos = [
-    ['kids', 'd5', ['ocean'], 'm'], ['solo', 'd2', ['unsure'], null], ['friends', 'd4', ['city', 'wine', 'height'], 'l'], ['couple', 'd4', ['parks'], 's'],
+    ['kids', ['ocean'], 't4'], ['solo', [], 'tx'], ['friends', ['hollywood', 'views', 'unusual'], 't3'], ['couple', ['calm'], 't1'],
   ];
-  for (const [who, d, likes, people] of combos) {
+  for (const [who, likes, time] of combos) {
     if (await page.isVisible('[data-qrestart]')) await click('[data-qrestart]');
     await click(`[data-opt="${who}"]`); await page.waitForTimeout(300);
-    await click(`[data-opt="${d}"]`); await page.waitForTimeout(300);
     for (const l of likes) await click(`[data-opt="${l}"]`);
     await click('[data-qnext]'); await page.waitForTimeout(300);
-    if (people) { await click(`[data-opt="${people}"]`); await page.waitForTimeout(400); }
+    await click(`[data-opt="${time}"]`); await page.waitForTimeout(400);
     const n = await page.locator('.dayplan__row').count();
-    const want = cfg.quiz.questions[1].options.find((o) => o.id === d).count;
-    check(n === want, `квиз ${who}/${d}/${likes.join('+')}: маршрут на ${n} дн.`);
-    if (people === 'l') check((await page.textContent('.dayplan')).includes(cfg.plan.individual), '7+ — цены «рассчитаем индивидуально»');
+    check(n === qOpt('time', time).count, `квиз ${who}/${likes.join('+') || 'без интересов'}/${time}: маршрут на ${n} дн.`);
     const picked = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).picked);
     const clash = picked.some((id) => (cfg.excursions.find((e) => e.id === id).overlaps || []).some((o) => picked.includes(o)));
     check(!clash, 'в маршруте нет экскурсий, которые повторяют друг друга');
-    check(await page.isVisible('[data-result-send]') && await page.isVisible('[data-result-keep]'), 'понятный следующий шаг: отправить или сохранить');
-    if (d === 'd5') check(await page.isVisible('.quiz .note'), '5+ дней — плашка Travel Rider');
+    check(await page.isVisible('[data-result-send]') && await page.isVisible('[data-result-keep]'), 'понятный следующий шаг');
+    if (qOpt('time', time).long) check(await page.isVisible('.quiz .note'), '4+ дней — плашка Travel Rider');
   }
+  // Больше трёх интересов выбрать нельзя
+  await click('[data-qrestart]'); await click('[data-opt="couple"]'); await page.waitForTimeout(300);
+  for (const l of ['first', 'ocean', 'hollywood', 'views']) await click(`[data-opt="${l}"]`);
+  check((await page.locator('[data-opt][aria-pressed="true"]').count()) === 3, 'интересов — не больше трёх');
+  // Карта в результате: раскрывается и рисует маршрут
+  await click('[data-qnext]'); await page.waitForTimeout(300); await click('[data-opt="t3"]'); await page.waitForTimeout(400);
+  await page.evaluate(() => { document.querySelector('.quiz .mapbox').open = true; });
+  const pickedMap = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).picked);
+  check(await page.isVisible('.quiz .map__svg') && (await page.locator('.quiz .map__legend li').count()) === pickedMap.length, 'карта маршрута в результате, дни подписаны');
+  check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'карта не даёт горизонтальной прокрутки страницы');
+  check(!(await page.isVisible('[data-viewseg]')) && (await page.locator('[data-grid] [data-compare]').count()) === 0, 'в каталоге нет лишних переключателей');
 
   // Готовый маршрут добавляется целиком
   await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
@@ -70,27 +80,17 @@ for (const { name, ...opts } of profiles) {
   check(JSON.stringify(planIds) === JSON.stringify(r3.days), `маршрут «${r3.title}» добавлен по дням`);
   await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
 
-  // Карта: переключается, подсвечивает маршрут выбранной экскурсии
-  await click('[data-view="map"]');
-  check(await page.isVisible('.map__svg'), 'карта показывается');
-  await click('[data-mapfocus="lagrand"]');
-  check((await page.locator('.map__route.is-focus').count()) === 1 && (await page.locator('.map__pt.is-on').count()) >= 5, 'маршрут экскурсии подсвечен на карте');
-  check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'карта не даёт горизонтальной прокрутки страницы');
-  await click('[data-view="cards"]');
-
-  // Сравнение: до трёх экскурсий, таблица
-  const cmpIds = cfg.excursions.slice(0, 4).map((e) => e.id);
-  for (const id of cmpIds) await click(`[data-grid] [data-compare="${id}"]`);
-  check((await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).compare.length)) === 3, 'в сравнении не больше трёх');
-  await page.evaluate(() => document.querySelector('[data-open-cmp]').click());
-  check((await page.locator('.cmp thead th').count()) === 4, 'таблица сравнения на три экскурсии');
+  // «Помочь выбрать»: сравнение экскурсий из поездки
+  for (const e of cfg.excursions.slice(0, 2)) await click(`[data-grid] [data-add="${e.id}"]`);
+  await page.evaluate(() => document.querySelector('[data-open-plan]').click());
+  await page.evaluate(() => document.querySelector('#planSheet [data-open-cmp]').click());
+  check((await page.locator('#cmpSheet .cmp thead th').count()) === 3, 'сравнение двух экскурсий из поездки');
   await page.keyboard.press('Escape');
-  await page.evaluate(() => document.querySelector('[data-cmp-clear]').click());
 
   // Из результата квиза — сразу в заявку с маршрутом
   await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
-  await click('[data-opt="couple"]'); await page.waitForTimeout(300); await click('[data-opt="d4"]'); await page.waitForTimeout(300);
-  await click('[data-opt="first"]'); await click('[data-qnext]'); await page.waitForTimeout(300); await click('[data-opt="s"]'); await page.waitForTimeout(400);
+  await click('[data-opt="couple"]'); await page.waitForTimeout(300);
+  await click('[data-opt="first"]'); await click('[data-qnext]'); await page.waitForTimeout(300); await click('[data-opt="t3"]'); await page.waitForTimeout(400);
   const picked0 = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).picked);
   check(!(picked0.includes('la6') && picked0.includes('lagrand')), '«впервые»: не предлагаем 6-часовой и гранд-тур вместе');
   await page.evaluate(() => document.querySelector('[data-result-send]').click());

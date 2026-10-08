@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=7';
-import { drawGift } from './gift.js?v=7';
-import * as R from './render.js?v=7';
+import { UI } from './icons.js?v=9';
+import { drawGift } from './gift.js?v=9';
+import * as R from './render.js?v=9';
 
-const VERSION = '7';
+const VERSION = '9';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -28,8 +28,6 @@ const S = {       // состояние, сохраняется в браузе�
 const Q = { screen: 'q', idx: 0, answers: { likes: [] } };
 let quizStarted = false;
 let filter = 'all';
-let view = 'cards';
-let mapFocus = null;
 
 /* ——— Утилиты ——— */
 const get = (path) => path.split('.').reduce((o, k) => o?.[k], C);
@@ -41,6 +39,9 @@ const plural = (n, f) => f[(n % 100 > 4 && n % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2
 const days = (n) => `${n} ${plural(n, ['день', 'дня', 'дней'])}`;
 const tile = R.tile;
 const exById = (id) => C.excursions.find((e) => e.id === id);
+const qById = (id) => C.quiz.questions.find((q) => q.id === id);
+const optOf = (qid, oid) => qById(qid)?.options.find((o) => o.id === oid);
+const isLong = () => !!optOf('time', S.quiz?.time)?.long;
 const isFree = (item) => item.id === 'free';
 const exItems = () => S.plan.filter((p) => !isFree(p));
 let leadMode = 'plan';
@@ -119,7 +120,7 @@ const head = (key) => R.head(C, key);
 
 /* ——— Квиз ——— */
 function visibleQuestions() {
-  const who = C.quiz.questions[0].options.find((o) => o.id === Q.answers.who);
+  const who = optOf('who', Q.answers.who);
   const skip = who?.skip || [];
   return C.quiz.questions.filter((q) => !skip.includes(q.id));
 }
@@ -156,7 +157,7 @@ function renderQuiz() {
     </div>
     <div class="quiz__nav">
       ${Q.idx > 0 ? `<button class="quiz__back" type="button" data-qback>${UI.back}<span>Назад</span></button>` : '<span></span>'}
-      ${q.multi ? `<button class="btn btn--main" type="button" data-qnext ${(val || []).length ? '' : 'disabled'}>Дальше</button>` : ''}
+      ${q.multi ? `<button class="btn btn--main" type="button" data-qnext>${(val || []).length ? 'Дальше' : 'Пропустить'}</button>` : ''}
     </div>`;
 }
 
@@ -170,6 +171,7 @@ function answer(optId) {
     if (opt.exclusive) list = list.includes(optId) ? [] : [optId];
     else {
       list = list.filter((id) => !q.options.find((o) => o.id === id)?.exclusive);
+      if (!list.includes(optId) && q.max && list.length >= q.max) { toast(C.quiz.maxToast); return; }
       list = list.includes(optId) ? list.filter((x) => x !== optId) : [...list, optId];
     }
     Q.answers[q.id] = list;
@@ -203,9 +205,9 @@ function quizTags() {
 }
 
 function pickResults() {
-  const [qWho, qDays, qLikes] = C.quiz.questions;
-  const who = qWho.options.find((o) => o.id === Q.answers.who);
-  const dayOpt = qDays.options.find((o) => o.id === Q.answers.days) || qDays.options[1];
+  const qLikes = qById('likes');
+  const who = optOf('who', Q.answers.who);
+  const dayOpt = optOf('time', Q.answers.time) || { count: 3 };
   const likes = (Q.answers.likes || []).map((id) => qLikes.options.find((o) => o.id === id)).filter(Boolean);
   const kids = Q.answers.who === 'kids';
   const base = kids ? C.quiz.kidsFirst : C.quiz.popular;
@@ -232,7 +234,7 @@ function pickResults() {
 }
 
 function reasonFor(ex) {
-  const qLikes = C.quiz.questions[2];
+  const qLikes = qById('likes');
   const parts = (Q.answers.likes || [])
     .map((id) => qLikes.options.find((o) => o.id === id))
     .filter((o) => o?.reason && o.tags.some((t) => ex.tags.includes(t)))
@@ -242,9 +244,8 @@ function reasonFor(ex) {
 }
 
 function finishQuiz() {
-  const who = C.quiz.questions[0].options.find((o) => o.id === Q.answers.who);
-  const people = C.quiz.questions[3].options.find((o) => o.id === Q.answers.people);
-  S.group = who?.group || people?.group || S.group;
+  const who = optOf('who', Q.answers.who);
+  if (who?.group) S.group = who.group;
   S.quiz = { ...Q.answers, likes: [...(Q.answers.likes || [])] };
   S.picked = pickResults();
   save();
@@ -258,7 +259,7 @@ function finishQuiz() {
 const card = (ex, opts = {}) => R.card(C, ex, { group: S.group, inPlan: S.plan.some((p) => p.id === ex.id), compared: (S.compare || []).includes(ex.id), ...opts });
 
 function renderResult(box) {
-  const long = S.quiz?.days === 'd5';
+  const long = isLong();
   const exs = S.picked.map(exById);
   const hours = exs.reduce((h, ex) => h + (ex.hours || 0), 0);
   const total = S.group === 'l' ? null : exs.reduce((t, ex) => t + exPrice(ex, ex.perPerson ? { people: heliPeople() } : null).value, 0);
@@ -276,6 +277,8 @@ function renderResult(box) {
           <small>${esc(R.hoursText(ex.hours))} · ${esc(S.group === 'l' ? C.plan.individual : usd(pr.value))}${reason ? ` · ${esc(reason)}` : ''}</small></div>
       </li>`;
     }).join('')}</ol>
+    <details class="mapbox"><summary>${UI.trip}<span>${esc(C.quiz.mapShow)}</span>${UI.down}</summary>
+      <div class="map__frame">${R.mapSvg(C, { trip: S.picked })}</div>${R.mapLegend(C, S.picked)}<p class="map__hint">${esc(C.map.hint)}</p></details>
     <p class="result__sum">${esc(C.quiz.summary.replace('{days}', days(exs.length)).replace('{hours}', `≈ ${hours} ч`).replace('{sum}', sum))}</p>
     ${long ? `<div class="note"><p>${esc(C.quiz.longNote)}</p><a class="link-arrow" href="#riders">${esc(C.quiz.longLink)}</a></div>` : ''}
     <div class="result__next">
@@ -304,49 +307,9 @@ function renderFilters() {
 }
 function renderCatalog() {
   $('[data-grid]').innerHTML = R.catalogHtml(C, { group: S.group, filter, plan: S.plan, compare: S.compare || [] });
-  $('[data-grid]').hidden = view === 'map';
-  $('[data-map]').hidden = view !== 'map';
-  if (view === 'map') renderMap();
-  renderCompareBar();
+
   $('[data-routes]').innerHTML = R.routesHtml(C, { group: S.group, plan: S.plan });
   if (Q.screen === 'result') renderQuiz();
-}
-function renderViewSeg() {
-  $('[data-viewseg]').innerHTML = [['cards', C.map.cards], ['map', C.map.title]].map(([k, t]) =>
-    `<button type="button" role="radio" aria-checked="${view === k}" data-view="${k}">${esc(t)}</button>`).join('');
-}
-function renderMap() {
-  const list = C.excursions.filter((ex) => filter === 'all' || ex.filters.includes(filter));
-  const trip = exItems().map((i) => i.id);
-  const box = $('[data-map]');
-  const scrollX = box.querySelector('.map__frame')?.scrollLeft;
-  box.innerHTML = `
-    <p class="map__hint">${esc(C.map.lead)}</p>
-    <div class="map__frame">${R.mapSvg(C, { focus: mapFocus, trip })}</div>
-    <p class="map__hint">${esc(C.map.hint)} <span class="mobile-only">${esc(C.map.hintMobile)}</span></p>
-    <div class="map__list" role="radiogroup" aria-label="Показать маршрут">${list.map((ex) =>
-      `<button class="chip ${trip.includes(ex.id) ? 'is-trip' : ''}" type="button" role="radio" aria-checked="${mapFocus === ex.id}" data-mapfocus="${ex.id}">${esc(ex.name)}</button>`).join('')}</div>
-    ${mapFocus ? `<div class="map__focus">${card(exById(mapFocus), { compared: (S.compare || []).includes(mapFocus) })}</div>` : ''}`;
-  const frame = box.querySelector('.map__frame');
-  if (scrollX != null) frame.scrollLeft = scrollX;
-  else if (frame.scrollWidth > frame.clientWidth) frame.scrollLeft = (frame.scrollWidth - frame.clientWidth) * 0.3;
-}
-function renderCompareBar() {
-  const n = (S.compare || []).length;
-  const bar = $('[data-cmpbar]');
-  bar.hidden = n === 0;
-  $('[data-cmpcount]').textContent = n < 2 ? 'Выберите ещё одну' : `${n} ${plural(n, ['экскурсия', 'экскурсии', 'экскурсий'])}`;
-  const btn = $('[data-open-cmp]');
-  btn.textContent = `${C.compare.bar}${n ? ` (${n})` : ''}`;
-  btn.disabled = n < 2;
-}
-function toggleCompare(id) {
-  const list = S.compare || (S.compare = []);
-  const i = list.indexOf(id);
-  if (i >= 0) list.splice(i, 1);
-  else if (list.length >= 3) { toast(C.compare.max); return; }
-  else list.push(id);
-  save(); renderCatalog();
 }
 function renderCompare() {
   $('[data-cmp]').innerHTML = `
@@ -522,6 +485,7 @@ function updateDock() {
   $('[data-dock-summary]').textContent = has ? planSummary() : '';
   const n = $('[data-trip-count]');
   if (n) { n.textContent = S.plan.length || ''; n.hidden = !S.plan.length; }
+  $('[data-open-plan-top]').hidden = !has;
   measureDock();
 }
 
@@ -570,6 +534,9 @@ function renderPlan() {
       <div class="plan-total__facts"><span><b>${days(S.plan.length)}</b></span><span><b>${ex}</b> ${plural(ex, ['экскурсия', 'экскурсии', 'экскурсий'])}</span><span><b>≈${hours}</b> ч в пути и на месте</span></div>
       <div class="plan-total__sum"><span>${esc(C.plan.total)}${total == null ? '' : `, за группу ${esc(C.groups[S.group].short)}, ${esc(C.plan.totalNote)}`}</span>
       <b>${esc(total == null ? C.plan.individual : usd(total))}</b></div></div>` : ''}
+    ${ex ? `<details class="mapbox"><summary>${UI.trip}<span>${esc(C.plan.mapShow)}</span>${UI.down}</summary>
+      <div class="map__frame">${R.mapSvg(C, { trip: exItems().map((i) => i.id) })}</div>${R.mapLegend(C, exItems().map((i) => i.id))}<p class="map__hint">${esc(C.map.hint)}</p></details>` : ''}
+    ${ex >= 2 ? `<button class="link-arrow plan-help" type="button" data-open-cmp>${esc(C.plan.help)}</button>` : ''}
     ${ex >= 2 && !S.rider ? `<div class="note"><p>${esc(C.plan.riderHint)}</p><a class="link-arrow" href="#riders" data-close-go>${esc(C.plan.riderLink)}</a></div>` : ''}
     <div class="plan-actions">
       <button class="btn btn--main btn--block" type="button" data-open-lead>${esc(C.plan.send)}</button>
@@ -607,9 +574,9 @@ function giftBonus() {
   const q = S.quiz || {};
   const when = {
     kids: q.who === 'kids',
-    long: q.days === 'd5',
-    wine: (q.likes || []).includes('wine'),
-    height: (q.likes || []).includes('height'),
+    long: isLong(),
+    wine: (q.likes || []).includes('unusual'),
+    height: (q.likes || []).includes('views'),
     default: true,
   };
   return C.gift.bonuses.find((b) => when[b.when]);
@@ -756,12 +723,12 @@ function utm() {
 function logEvent(event, extra = {}) {
   const ep = C.leads?.endpoint;
   const q = S.quiz || {};
-  const opt = (qi, id) => C.quiz.questions[qi].options.find((o) => o.id === id)?.text || '';
+  const opt = (qid, id) => optOf(qid, id)?.text || '';
   const payload = {
     'Событие': event,
-    'С кем': opt(0, q.who),
-    'Дней': opt(1, q.days),
-    'Интересы': (q.likes || []).map((id) => opt(2, id)).join(', '),
+    'С кем': opt('who', q.who),
+    'Дней': opt('time', q.time),
+    'Интересы': (q.likes || []).map((id) => opt('likes', id)).join(', '),
     'Группа': C.groups[S.group].short,
     'Подобрано': (S.picked || []).map((id) => exById(id)?.name).join(', '),
     'План': S.plan.map((i) => (isFree(i) ? 'свободный день' : exById(i.id).name)).join(', '),
@@ -816,11 +783,7 @@ function bind() {
     else if ('resultSend' in ds) { takeResult(); leadMode = 'plan'; renderLead(); openSheet($('#leadSheet')); }
     else if ('resultKeep' in ds) { takeResult(); toast(C.toasts.routeAdded); renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
     else if (ds.route) addRoute(C.routes.items.find((r) => r.id === ds.route));
-    else if (ds.view) { view = ds.view; renderViewSeg(); renderCatalog(); if (view === 'map') reach('map_open'); }
-    else if (ds.mapfocus) { mapFocus = mapFocus === ds.mapfocus ? null : ds.mapfocus; renderMap(); }
-    else if (ds.compare) toggleCompare(ds.compare);
-    else if ('openCmp' in ds) { renderCompare(); openSheet($('#cmpSheet')); reach('compare_open'); }
-    else if ('cmpClear' in ds) { S.compare = []; save(); renderCatalog(); }
+    else if ('openCmp' in ds) { S.compare = exItems().map((i) => i.id).slice(0, 3); closeSheet($('#planSheet')); renderCompare(); openSheet($('#cmpSheet')); reach('compare_open'); }
     else if (ds.move) {
       const i = +ds.move; const j = i + +ds.d;
       [S.plan[i], S.plan[j]] = [S.plan[j], S.plan[i]];
@@ -872,6 +835,7 @@ function bind() {
   });
 
   $('[data-lead]').addEventListener('submit', (e) => e.preventDefault());
+  document.addEventListener('toggle', (e) => { if (e.target.matches?.('.mapbox') && e.target.open) reach('map_open'); }, true);
   $$('dialog').forEach((d) => d.addEventListener('close', () => {
     if (!$$('dialog').some((x) => x.open)) document.documentElement.style.overflow = '';
   }));
@@ -909,7 +873,6 @@ async function init() {
   renderStatic();
   renderQuiz();
   renderGroupSeg();
-  renderViewSeg();
   renderFilters();
   renderCatalog();
   renderSeasons();

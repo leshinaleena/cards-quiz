@@ -330,12 +330,6 @@ a { color: inherit; }
 .visa__big { font: 800 clamp(56px, 16vw, 88px)/.9 var(--head); letter-spacing: -.03em; color: var(--cream); }
 .visa__title { font: 800 20px/1.2 var(--head); margin: 0; }
 .visa p { margin: 0; opacity: .85; }
-.loyal { padding: 24px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
-.loyal__title { font: 800 18px/1.2 var(--head); color: var(--title); margin: 0 0 16px; }
-.loyal__row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border-radius: 14px; overflow: hidden; }
-.loyal__row div { background: var(--surface); padding: 16px; display: grid; gap: 4px; }
-.loyal__row b { font: 800 26px/1 var(--head); color: var(--accent); }
-.loyal__row span { font-size: 14px; color: var(--muted); }
 
 /* ——— Вопросы ——— */
 .faq { border-top: 1px solid var(--line); }
@@ -440,7 +434,7 @@ a { color: inherit; }
 /* ——— Появление при прокрутке ——— */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .card, .rider, .season, .visa, .loyal, .calc, .final__card, .riders__photo {
+    .card, .rider, .season, .visa, .calc, .final__card, .riders__photo {
       animation: rise linear both;
       animation-timeline: view();
       animation-range: entry 0% entry 35%;
@@ -461,7 +455,6 @@ a { color: inherit; }
   .hero__actions .btn { width: auto; }
   .grid, .result__grid { grid-template-columns: repeat(2, 1fr); }
   .options--2 { grid-template-columns: repeat(2, 1fr); }
-  .loyal__row { grid-template-columns: repeat(4, 1fr); }
   .calc__fields { grid-template-columns: repeat(2, 1fr); }
   .calc__fields .field--wide { grid-column: 1 / -1; }
   .choice { grid-template-columns: repeat(2, 1fr); }
@@ -487,7 +480,6 @@ a { color: inherit; }
   .rider--hot { transform: translateY(-12px); }
   .calc { grid-template-columns: 1.3fr 1fr; padding: 34px; gap: 34px; align-items: start; }
   .calc__title { grid-column: 1 / -1; }
-  .benefits { grid-template-columns: 1fr 1.2fr; }
   .season { grid-template-columns: 80px 1fr; padding: 34px; column-gap: 30px; }
   .season > :not(.season__art) { grid-column: 2; }
   .season__art { grid-row: 1 / span 4; }
@@ -736,3 +728,62 @@ button.link-arrow { background: none; border: 0; border-bottom: 1px solid var(--
 .giftbox__cta svg { width: 18px; height: 18px; }
 .giftbox { grid-template-columns: 72px 1fr; column-gap: 16px; align-items: center; }
 .giftbox__cover { grid-row: 1 / span 3; width: 72px; height: auto; border-radius: 8px; box-shadow: 0 10px 20px -12px rgba(76, 13, 21, .6); }
+
+/* ——— v8: простой вход и второстепенные карта и сравнение ——— */
+.btn--cta { flex-direction: column; gap: 2px; min-height: 64px; padding: 10px 28px; }
+.btn--cta small { font: 400 12px/1.2 var(--body); opacity: .82; letter-spacing: 0; }
+.mapbox { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; margin-bottom: 16px; }
+.mapbox summary { list-style: none; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 16px; cursor: pointer; font: 600 14px/1 var(--head); color: var(--title); }
+.mapbox summary::-webkit-details-marker { display: none; }
+.mapbox summary svg { width: 18px; height: 18px; flex: none; color: var(--salmon-ink); }
+.mapbox summary svg:last-child { margin-left: auto; color: var(--muted); transition: transform .25s var(--ease); }
+.mapbox[open] summary svg:last-child { transform: rotate(180deg); }
+.mapbox .map__frame { border: 0; border-radius: 0; border-top: 1px solid var(--line); margin: 0; }
+.mapbox .map__hint { padding: 10px 16px 14px; }
+.plan-help { justify-self: start; }
+@media (max-width: 759px) { .mapbox .map__frame { margin: 0; } }
+
+/* ——— Карта v2: травел-журнал ——— */
+.map__land { fill: #FBF4EE; }
+.map__hills { fill: #F1E1D8; }
+.map__sea { fill: #E6ECEC; }
+.map__wave { fill: none; stroke: #D3DDDD; stroke-width: 2; stroke-linecap: round; }
+.map__coast { fill: none; stroke: #E8957F; stroke-width: 3; stroke-linecap: round; opacity: .7; }
+.map__ocean { fill: #9FB0B0; font: 600 22px var(--head); letter-spacing: .4em; text-transform: uppercase; }
+.map__dot { fill: #D9C4BC; }
+.map__soft { fill: #A89490; font: 600 20px var(--body); paint-order: stroke; stroke: #FBF4EE; stroke-width: 6px; }
+.map__path { fill: none; stroke: var(--wine); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 2 12; opacity: .8; }
+.map__pin circle { fill: var(--wine); stroke: #FBF4EE; stroke-width: 5; }
+.map__n { fill: #F2EAE3; font: 800 22px var(--head); text-anchor: middle; }
+.map__n--sm { font-size: 15px; }
+.map__label { fill: var(--wine); font: 800 26px var(--head); paint-order: stroke; stroke: #FBF4EE; stroke-width: 8px; stroke-linejoin: round; }
+.map__far rect { fill: #FBF4EE; stroke: #D9C4BC; stroke-width: 2; }
+.map__far text { fill: #8A7A7C; font: 600 19px var(--body); }
+.map__far circle { fill: var(--wine); }
+.map__far .map__n { fill: #F2EAE3; }
+.map__far.is-on rect { stroke: var(--wine); stroke-width: 2.5; }
+.map__far.is-on text:not(.map__n) { fill: var(--wine); }
+.map__legend { list-style: none; margin: 0; padding: 12px 16px 0; display: grid; gap: 10px; border-top: 1px solid var(--line); }
+.map__legend li { display: grid; grid-template-columns: 28px 1fr; column-gap: 10px; font-size: 14px; }
+.map__legend b { font: 600 14px/1.3 var(--head); color: var(--ink); }
+.map__legend span:last-child { grid-column: 2; color: var(--muted); font-size: 13px; }
+.map__ln { grid-row: 1 / span 2; width: 26px; height: 26px; border-radius: 50%; background: var(--wine); color: var(--cream); display: grid; place-items: center; font: 800 13px/1 var(--head); }
+@media (max-width: 759px) {
+  .mapbox .map__frame { overflow: visible; margin: 0; }
+  .mapbox .map__svg { width: 100%; max-width: 100%; }
+}
+.map__far .map__n { font: 800 16px var(--head); text-anchor: middle; fill: #F2EAE3; }
+.map__n { font-size: 26px; }
+.map__label { font-size: 30px; }
+@media (max-width: 599px) {
+  .map__label { font-size: 40px; stroke-width: 10px; }
+  .map__pin circle { r: 34px; }
+  .map__pin .map__n { font-size: 34px; }
+  .map__soft { font-size: 30px; }
+  .map__far text { font-size: 26px; }
+  .map__ocean { font-size: 30px; }
+}
+.map__far text { stroke: none; font-size: 24px; }
+.map__far .map__n { stroke: none; font-size: 17px; }
+@media (max-width: 599px) { .map__far text { font-size: 24px; } }
+.map__far.is-on .map__n, .map__far .map__n { fill: #F2EAE3; }
