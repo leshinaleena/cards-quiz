@@ -21,6 +21,9 @@ const browser = await chromium.launch();
 for (const { name, ...opts } of profiles) {
   console.log(`\n— ${name}`);
   const ctx = await browser.newContext({ ...opts, reducedMotion: 'reduce', permissions: ['clipboard-read', 'clipboard-write'] });
+  // Тест не пишет в настоящую Google Таблицу: запросы к Apps Script перехватываем
+  const logged = [];
+  await ctx.route('https://script.google.com/**', (r) => { logged.push(r.request().postData()); r.fulfill({ status: 200, body: 'ok' }); });
   const page = await ctx.newPage();
   const errors = []; const goals = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -160,6 +163,9 @@ for (const { name, ...opts } of profiles) {
   await click('[data-send="tg"]');
   await page.waitForTimeout(300);
   check((await page.evaluate(() => window.__opened))?.startsWith(`https://t.me/${cfg.contacts.telegram}?text=`), 'Telegram открывается с набранным текстом');
+
+  check(logged.some((b) => b?.includes('Квиз пройден')) && logged.some((b) => b?.includes('Заявка')), 'события уходят в таблицу (перехвачены тестом)');
+  check(!logged.some((b) => /Анна|\+7|@/.test(b || '')), 'в таблицу не уходят имя и контакты');
 
   for (const g of ['quiz_start', 'quiz_done', 'excursion_add', 'rider_calc', 'plan_open', 'lead_wa', 'lead_tg', 'map_open', 'compare_open']) check(goals.includes(g), `цель ${g}`);
   check(!errors.length, `нет ошибок JS ${errors.join(' | ')}`);
