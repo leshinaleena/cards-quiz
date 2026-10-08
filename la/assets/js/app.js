@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=3';
-import { drawGift } from './gift.js?v=3';
-import * as R from './render.js?v=3';
+import { UI } from './icons.js?v=4';
+import { drawGift } from './gift.js?v=4';
+import * as R from './render.js?v=4';
 
-const VERSION = '3';
+const VERSION = '4';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -21,12 +21,15 @@ const S = {       // состояние, сохраняется в браузе�
   travelPkg: 7,
   month: null,
   calc: { days: 7, adults: 2, need: 'route', goal: 'rest' },
+  compare: [],
   quiz: null,     // { who, days, likes:[], people }
   picked: [],
 };
 const Q = { screen: 'q', idx: 0, answers: { likes: [] } };
 let quizStarted = false;
 let filter = 'all';
+let view = 'cards';
+let mapFocus = null;
 let leadName = '';
 
 /* ——— Утилиты ——— */
@@ -250,7 +253,7 @@ function finishQuiz() {
   if (top < -40) $('#quiz').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
 }
 
-const card = (ex, opts = {}) => R.card(C, ex, { group: S.group, inPlan: S.plan.some((p) => p.id === ex.id), ...opts });
+const card = (ex, opts = {}) => R.card(C, ex, { group: S.group, inPlan: S.plan.some((p) => p.id === ex.id), compared: (S.compare || []).includes(ex.id), ...opts });
 
 function renderResult(box) {
   const long = S.quiz?.days === 'd5';
@@ -289,10 +292,58 @@ function renderFilters() {
     `<button class="chip" type="button" role="tab" aria-selected="${filter === f.id}" data-filter="${f.id}">${esc(f.text)}</button>`).join('');
 }
 function renderCatalog() {
-  $('[data-grid]').innerHTML = R.catalogHtml(C, { group: S.group, filter, plan: S.plan });
+  $('[data-grid]').innerHTML = R.catalogHtml(C, { group: S.group, filter, plan: S.plan, compare: S.compare || [] });
+  $('[data-grid]').hidden = view === 'map';
+  $('[data-map]').hidden = view !== 'map';
+  if (view === 'map') renderMap();
+  renderCompareBar();
   $('[data-routes]').innerHTML = R.routesHtml(C, { group: S.group, plan: S.plan });
   if (Q.screen === 'result') renderQuiz();
 }
+function renderViewSeg() {
+  $('[data-viewseg]').innerHTML = [['cards', C.map.cards], ['map', C.map.title]].map(([k, t]) =>
+    `<button type="button" role="radio" aria-checked="${view === k}" data-view="${k}">${esc(t)}</button>`).join('');
+}
+function renderMap() {
+  const list = C.excursions.filter((ex) => filter === 'all' || ex.filters.includes(filter));
+  const trip = exItems().map((i) => i.id);
+  const box = $('[data-map]');
+  const scrollX = box.querySelector('.map__frame')?.scrollLeft;
+  box.innerHTML = `
+    <p class="map__hint">${esc(C.map.lead)}</p>
+    <div class="map__frame">${R.mapSvg(C, { focus: mapFocus, trip })}</div>
+    <p class="map__hint">${esc(C.map.hint)} <span class="mobile-only">${esc(C.map.hintMobile)}</span></p>
+    <div class="map__list" role="radiogroup" aria-label="Показать маршрут">${list.map((ex) =>
+      `<button class="chip ${trip.includes(ex.id) ? 'is-trip' : ''}" type="button" role="radio" aria-checked="${mapFocus === ex.id}" data-mapfocus="${ex.id}">${esc(ex.name)}</button>`).join('')}</div>
+    ${mapFocus ? `<div class="map__focus">${card(exById(mapFocus), { compared: (S.compare || []).includes(mapFocus) })}</div>` : ''}`;
+  const frame = box.querySelector('.map__frame');
+  if (scrollX != null) frame.scrollLeft = scrollX;
+  else if (frame.scrollWidth > frame.clientWidth) frame.scrollLeft = (frame.scrollWidth - frame.clientWidth) * 0.3;
+}
+function renderCompareBar() {
+  const n = (S.compare || []).length;
+  const bar = $('[data-cmpbar]');
+  bar.hidden = n === 0;
+  $('[data-cmpcount]').textContent = n < 2 ? 'Выберите ещё одну' : `${n} ${plural(n, ['экскурсия', 'экскурсии', 'экскурсий'])}`;
+  const btn = $('[data-open-cmp]');
+  btn.textContent = `${C.compare.bar}${n ? ` (${n})` : ''}`;
+  btn.disabled = n < 2;
+}
+function toggleCompare(id) {
+  const list = S.compare || (S.compare = []);
+  const i = list.indexOf(id);
+  if (i >= 0) list.splice(i, 1);
+  else if (list.length >= 3) { toast(C.compare.max); return; }
+  else list.push(id);
+  save(); renderCatalog();
+}
+function renderCompare() {
+  $('[data-cmp]').innerHTML = `
+    <div class="sheet__head"><h2 class="sheet__title" id="cmp-h">${esc(C.compare.title)}</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Закрыть">${UI.close}</button></div>
+    ${R.compareHtml(C, S.compare, S.group)}`;
+}
+
 function addRoute(route) {
   const ids = route.days;
   const allIn = ids.filter((d) => d !== 'free').every((id) => S.plan.some((p) => p.id === id));
@@ -324,6 +375,7 @@ function toggleExcursion(id) {
   save();
   refreshCards();
   if ($('#planSheet').open) renderPlan();
+  if ($('#cmpSheet').open) renderCompare();
 }
 
 /* ——— Сезоны ——— */
@@ -456,7 +508,7 @@ function planSummary() {
 function updateDock() {
   const has = S.plan.length || S.rider;
   $('[data-open-plan]').hidden = !has;
-  $('[data-dock-summary]').textContent = has ? `· ${planSummary()}` : '';
+  $('[data-dock-summary]').textContent = has ? planSummary() : '';
   const n = $('[data-trip-count]');
   if (n) { n.textContent = S.plan.length || ''; n.hidden = !S.plan.length; }
   measureDock();
@@ -770,6 +822,11 @@ function bind() {
       save(); refreshCards();
     }
     else if (ds.route) addRoute(C.routes.items.find((r) => r.id === ds.route));
+    else if (ds.view) { view = ds.view; renderViewSeg(); renderCatalog(); if (view === 'map') reach('map_open'); }
+    else if (ds.mapfocus) { mapFocus = mapFocus === ds.mapfocus ? null : ds.mapfocus; renderMap(); }
+    else if (ds.compare) toggleCompare(ds.compare);
+    else if ('openCmp' in ds) { renderCompare(); openSheet($('#cmpSheet')); reach('compare_open'); }
+    else if ('cmpClear' in ds) { S.compare = []; save(); renderCatalog(); }
     else if (ds.move) {
       const i = +ds.move; const j = i + +ds.d;
       [S.plan[i], S.plan[j]] = [S.plan[j], S.plan[i]];
@@ -856,6 +913,7 @@ async function init() {
   renderStatic();
   renderQuiz();
   renderGroupSeg();
+  renderViewSeg();
   renderFilters();
   renderCatalog();
   renderSeasons();

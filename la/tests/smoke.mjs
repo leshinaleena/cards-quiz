@@ -63,6 +63,23 @@ for (const { name, ...opts } of profiles) {
   check(JSON.stringify(planIds) === JSON.stringify(r3.days), `маршрут «${r3.title}» добавлен по дням`);
   await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
 
+  // Карта: переключается, подсвечивает маршрут выбранной экскурсии
+  await click('[data-view="map"]');
+  check(await page.isVisible('.map__svg'), 'карта показывается');
+  await click('[data-mapfocus="lagrand"]');
+  check((await page.locator('.map__route.is-focus').count()) === 1 && (await page.locator('.map__pt.is-on').count()) >= 5, 'маршрут экскурсии подсвечен на карте');
+  check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'карта не даёт горизонтальной прокрутки страницы');
+  await click('[data-view="cards"]');
+
+  // Сравнение: до трёх экскурсий, таблица
+  const cmpIds = cfg.excursions.slice(0, 4).map((e) => e.id);
+  for (const id of cmpIds) await click(`[data-grid] [data-compare="${id}"]`);
+  check((await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).compare.length)) === 3, 'в сравнении не больше трёх');
+  await page.evaluate(() => document.querySelector('[data-open-cmp]').click());
+  check((await page.locator('.cmp thead th').count()) === 4, 'таблица сравнения на три экскурсии');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => document.querySelector('[data-cmp-clear]').click());
+
   // Переключатель группы меняет цены в каталоге
   await click('[data-group="s"]');
   const ex = cfg.excursions.find((e) => e.price);
@@ -126,7 +143,7 @@ for (const { name, ...opts } of profiles) {
   await page.waitForTimeout(300);
   check((await page.evaluate(() => window.__opened))?.startsWith(`https://t.me/${cfg.contacts.telegram}?text=`), 'Telegram открывается с набранным текстом');
 
-  for (const g of ['quiz_start', 'quiz_done', 'excursion_add', 'rider_calc', 'plan_open', 'lead_wa', 'lead_tg']) check(goals.includes(g), `цель ${g}`);
+  for (const g of ['quiz_start', 'quiz_done', 'excursion_add', 'rider_calc', 'plan_open', 'lead_wa', 'lead_tg', 'map_open', 'compare_open']) check(goals.includes(g), `цель ${g}`);
   check(!errors.length, `нет ошибок JS ${errors.join(' | ')}`);
   await ctx.close();
 }
