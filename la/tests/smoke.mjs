@@ -52,6 +52,10 @@ for (const { name, ...opts } of profiles) {
     const want = cfg.quiz.questions[1].options.find((o) => o.id === d).count;
     check(n === want, `квиз ${who}/${d}/${likes.join('+')}: маршрут на ${n} дн.`);
     if (people === 'l') check((await page.textContent('.dayplan')).includes(cfg.plan.individual), '7+ — цены «рассчитаем индивидуально»');
+    const picked = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).picked);
+    const clash = picked.some((id) => (cfg.excursions.find((e) => e.id === id).overlaps || []).some((o) => picked.includes(o)));
+    check(!clash, 'в маршруте нет экскурсий, которые повторяют друг друга');
+    check(await page.isVisible('[data-result-send]') && await page.isVisible('[data-result-keep]'), 'понятный следующий шаг: отправить или сохранить');
     if (d === 'd5') check(await page.isVisible('.quiz .note'), '5+ дней — плашка Travel Rider');
   }
 
@@ -79,6 +83,19 @@ for (const { name, ...opts } of profiles) {
   check((await page.locator('.cmp thead th').count()) === 4, 'таблица сравнения на три экскурсии');
   await page.keyboard.press('Escape');
   await page.evaluate(() => document.querySelector('[data-cmp-clear]').click());
+
+  // Из результата квиза — сразу в заявку с маршрутом
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
+  await click('[data-opt="couple"]'); await page.waitForTimeout(300); await click('[data-opt="d4"]'); await page.waitForTimeout(300);
+  await click('[data-opt="first"]'); await click('[data-qnext]'); await page.waitForTimeout(300); await click('[data-opt="s"]'); await page.waitForTimeout(400);
+  const picked0 = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).picked);
+  check(!(picked0.includes('la6') && picked0.includes('lagrand')), '«впервые»: не предлагаем 6-часовой и гранд-тур вместе');
+  await page.evaluate(() => document.querySelector('[data-result-send]').click());
+  await page.waitForTimeout(200);
+  const pv = await page.textContent('[data-preview]');
+  check(picked0.every((id) => pv.includes(cfg.excursions.find((e) => e.id === id).name)), 'форма открылась, маршрут в сообщении');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('html[data-ready]');
 
   // Переключатель группы меняет цены в каталоге
   await click('[data-group="s"]');

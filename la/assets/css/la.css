@@ -687,3 +687,14 @@ button.link-arrow { background: none; border: 0; border-bottom: 1px solid var(--
   .dock__label b { display: none; }
   .dock__label [data-dock-summary]::before { content: none !important; }
 }
+.dayplan__row { grid-template-columns: 52px 1fr; grid-template-areas: 'day day' 'art body'; }
+.result__sum { margin: 0 0 18px; font: 600 15px/1.4 var(--head); color: var(--title); }
+.result__next { display: grid; gap: 10px; padding: 20px; border-radius: var(--radius); background: var(--bg); border: 1px solid var(--line); }
+.result__next p { margin: 0; }
+.result__nexttitle { font: 800 17px/1.2 var(--head); color: var(--ink); }
+.result__restart { justify-self: center; }
+@media (min-width: 760px) {
+  .result__next { grid-template-columns: 1fr 1fr; align-items: center; }
+  .result__next p, .result__restart { grid-column: 1 / -1; }
+}
+.dayplan__row { align-items: start; }

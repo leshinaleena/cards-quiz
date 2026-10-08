@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=4';
-import { drawGift } from './gift.js?v=4';
-import * as R from './render.js?v=4';
+import { UI } from './icons.js?v=5';
+import { drawGift } from './gift.js?v=5';
+import * as R from './render.js?v=5';
 
-const VERSION = '4';
+const VERSION = '5';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -204,39 +204,42 @@ function quizTags() {
 }
 
 function pickResults() {
-  const qWho = C.quiz.questions[0];
-  const qDays = C.quiz.questions[1];
-  const qLikes = C.quiz.questions[2];
+  const [qWho, qDays, qLikes] = C.quiz.questions;
   const who = qWho.options.find((o) => o.id === Q.answers.who);
   const dayOpt = qDays.options.find((o) => o.id === Q.answers.days) || qDays.options[1];
-  const likes = (Q.answers.likes || []).map((id) => qLikes.options.find((o) => o.id === id));
+  const likes = (Q.answers.likes || []).map((id) => qLikes.options.find((o) => o.id === id)).filter(Boolean);
   const kids = Q.answers.who === 'kids';
-  const count = dayOpt.count;
+  const base = kids ? C.quiz.kidsFirst : C.quiz.popular;
 
-  let ids;
-  if (!likes.length || likes.some((o) => o.exclusive)) {
-    ids = kids ? [...C.quiz.kidsFirst] : [...C.quiz.popular];
-  } else {
+  let ranked = [];
+  if (likes.length && !likes.some((o) => o.exclusive)) {
     const likeTags = new Set(likes.flatMap((o) => o.tags));
-    const scored = C.excursions.map((ex, i) => {
+    ranked = C.excursions.map((ex, i) => {
       let s = ex.tags.filter((t) => likeTags.has(t)).length * 3;
       if (who?.tags?.some((t) => ex.tags.includes(t))) s += 1.5;
       if (kids && C.quiz.kidsFirst.includes(ex.id)) s += 4;
       return { id: ex.id, s: s - i * 0.01 };
-    }).sort((a, b) => b.s - a.s);
-    ids = scored.map((x) => x.id);
+    }).filter((x) => x.s > 1).sort((a, b) => b.s - a.s).map((x) => x.id);
   }
-  return ids.slice(0, count);
+  // Сначала совпадения, потом популярное; похожие экскурсии (одна включает другую) не ставим вместе
+  const out = [];
+  for (const id of [...ranked, ...base, ...C.excursions.map((e) => e.id)]) {
+    if (out.length >= dayOpt.count) break;
+    if (out.includes(id)) continue;
+    if (out.some((x) => (exById(x).overlaps || []).includes(id))) continue;
+    out.push(id);
+  }
+  return out;
 }
 
 function reasonFor(ex) {
   const qLikes = C.quiz.questions[2];
   const parts = (Q.answers.likes || [])
     .map((id) => qLikes.options.find((o) => o.id === id))
-    .filter((o) => o && !o.exclusive && o.tags.some((t) => ex.tags.includes(t)))
-    .map((o) => o.text.toLowerCase());
+    .filter((o) => o?.reason && o.tags.some((t) => ex.tags.includes(t)))
+    .map((o) => o.reason);
   if (Q.answers.who === 'kids' && ex.tags.includes('дети')) parts.push('с детьми');
-  return parts.length ? `${C.quiz.reasonPrefix} ${parts.join(' · ')}` : '';
+  return parts.length ? `${C.quiz.reasonPrefix} ${parts.join(', ')}` : '';
 }
 
 function finishQuiz() {
@@ -257,29 +260,38 @@ const card = (ex, opts = {}) => R.card(C, ex, { group: S.group, inPlan: S.plan.s
 
 function renderResult(box) {
   const long = S.quiz?.days === 'd5';
-  const allIn = S.picked.every((id) => S.plan.some((p) => p.id === id));
+  const exs = S.picked.map(exById);
+  const hours = exs.reduce((h, ex) => h + (ex.hours || 0), 0);
+  const total = S.group === 'l' ? null : exs.reduce((t, ex) => t + exPrice(ex, ex.perPerson ? { people: heliPeople() } : null).value, 0);
+  const sum = total == null ? C.plan.individual : `${usd(total)} за группу ${C.groups[S.group].short}`;
   box.innerHTML = `
     <h3 class="result__title">${esc(C.quiz.resultTitle)}</h3>
     <p class="result__lead">${esc(C.quiz.resultLead)}</p>
-    <ol class="dayplan">${S.picked.map((id, i) => {
-      const ex = exById(id);
-      const pr = exPrice(ex);
-      const on = S.plan.some((p) => p.id === id);
+    <ol class="dayplan">${exs.map((ex, i) => {
+      const pr = exPrice(ex, ex.perPerson ? { people: heliPeople() } : null);
       const reason = reasonFor(ex);
       return `<li class="dayplan__row">
         <span class="dayplan__day">День ${i + 1}</span>
         <span class="dayplan__art">${tile(ex.icon)}</span>
         <div class="dayplan__body"><b>${esc(ex.name)}</b><span>${esc(ex.hook)}</span>
-          <small>${esc(R.hoursText(ex.hours))} · ${esc(pr.label)}${reason ? ` · ${esc(reason)}` : ''}</small></div>
-        <button class="icon-btn icon-btn--add ${on ? 'is-on' : ''}" type="button" data-add="${id}" aria-pressed="${on}" aria-label="${on ? 'Убрать из поездки' : 'Добавить в поездку'}">${on ? UI.check : UI.plus}</button>
+          <small>${esc(R.hoursText(ex.hours))} · ${esc(S.group === 'l' ? C.plan.individual : usd(pr.value))}${reason ? ` · ${esc(reason)}` : ''}</small></div>
       </li>`;
     }).join('')}</ol>
-    <button class="btn ${allIn ? 'btn--ghost' : 'btn--main'} btn--block result__all" type="button" data-addall>${allIn ? `${UI.check}<span>${esc(C.quiz.addedAll)}</span>` : `${UI.plus}<span>${esc(C.quiz.addAll)}</span>`}</button>
+    <p class="result__sum">${esc(C.quiz.summary.replace('{days}', days(exs.length)).replace('{hours}', `≈ ${hours} ч`).replace('{sum}', sum))}</p>
     ${long ? `<div class="note"><p>${esc(C.quiz.longNote)}</p><a class="link-arrow" href="#riders">${esc(C.quiz.longLink)}</a></div>` : ''}
-    <div class="result__actions">
-      <a class="link-arrow" href="#catalog">${esc(C.quiz.toCatalog)}</a>
-      <button class="quiz__back" type="button" data-qrestart>${esc(C.quiz.restart)}</button>
+    <div class="result__next">
+      <p class="result__nexttitle">${esc(C.quiz.next)}</p>
+      <p>${esc(C.quiz.nextText)}</p>
+      <button class="btn btn--main btn--block" type="button" data-result-send>${esc(C.quiz.send)}</button>
+      <button class="btn btn--ghost btn--block" type="button" data-result-keep>${esc(C.quiz.keep)}</button>
+      <button class="quiz__back result__restart" type="button" data-qrestart>${esc(C.quiz.restart)}</button>
     </div>`;
+}
+
+function takeResult() {
+  S.picked.forEach((id) => { if (!S.plan.some((p) => p.id === id)) S.plan.push(id === 'heli' ? { id, people: heliPeople() } : { id }); });
+  save(); refreshCards();
+  reach('excursion_add');
 }
 
 /* ——— Каталог ——— */
@@ -814,13 +826,8 @@ function bind() {
     else if ('qback' in ds) back();
     else if ('qrestart' in ds) { Q.screen = 'q'; Q.idx = 0; Q.answers = { likes: [] }; swap(renderQuiz); }
     else if (ds.add) toggleExcursion(ds.add);
-    else if ('addall' in ds) {
-      const allIn = S.picked.every((id) => S.plan.some((p) => p.id === id));
-      if (allIn) S.plan = S.plan.filter((p) => !S.picked.includes(p.id));
-      else S.picked.forEach((id) => { if (!S.plan.some((p) => p.id === id)) S.plan.push(id === 'heli' ? { id, people: heliPeople() } : { id }); });
-      if (!allIn) { toast(C.toasts.routeAdded); reach('excursion_add'); }
-      save(); refreshCards();
-    }
+    else if ('resultSend' in ds) { takeResult(); leadMode = 'plan'; renderLead(); openSheet($('#leadSheet')); setTimeout(() => $('[data-lead]').name.focus(), 60); }
+    else if ('resultKeep' in ds) { takeResult(); toast(C.toasts.routeAdded); renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
     else if (ds.route) addRoute(C.routes.items.find((r) => r.id === ds.route));
     else if (ds.view) { view = ds.view; renderViewSeg(); renderCatalog(); if (view === 'map') reach('map_open'); }
     else if (ds.mapfocus) { mapFocus = mapFocus === ds.mapfocus ? null : ds.mapfocus; renderMap(); }
