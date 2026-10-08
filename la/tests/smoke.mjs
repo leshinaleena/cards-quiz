@@ -35,7 +35,7 @@ for (const { name, ...opts } of profiles) {
   const click = (sel) => page.locator(sel).first().click();
 
   // Нет горизонтальной прокрутки, все фото загрузились
-  check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'нет горизонтальной прокрутки');
+  check(await page.evaluate(() => document.documentElement.scrollWidth <= Math.min(innerWidth, screen.width)), 'нет горизонтальной прокрутки');
   await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 600) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 30)); } scrollTo(0, 0); });
   await page.waitForTimeout(500);
   check(await page.evaluate(() => [...document.images].every((i) => i.complete && i.naturalWidth > 0)), 'все фото показаны');
@@ -69,7 +69,7 @@ for (const { name, ...opts } of profiles) {
   await page.evaluate(() => { document.querySelector('.quiz .mapbox').open = true; });
   const pickedMap = await page.evaluate(() => JSON.parse(localStorage.getItem('tr-la-v1')).picked);
   check(await page.isVisible('.quiz .map__svg') && (await page.locator('.quiz .map__legend li').count()) === pickedMap.length, 'карта маршрута в результате, дни подписаны');
-  check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'карта не даёт горизонтальной прокрутки страницы');
+  check(await page.evaluate(() => document.documentElement.scrollWidth <= Math.min(innerWidth, screen.width)), 'карта не даёт горизонтальной прокрутки страницы');
   check(!(await page.isVisible('[data-viewseg]')) && (await page.locator('[data-grid] [data-compare]').count()) === 0, 'в каталоге нет лишних переключателей');
 
   // Готовый маршрут добавляется целиком

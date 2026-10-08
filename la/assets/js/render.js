@@ -1,6 +1,6 @@
 // Чистые функции разметки: работают и в браузере, и в Node (tools/prerender.mjs),
 // чтобы каталог, маршруты и вопросы были в HTML сразу — для поисковиков и быстрого первого экрана.
-import { ILLUSTRATIONS, UI } from './icons.js?v=9';
+import { ILLUSTRATIONS, UI } from './icons.js?v=10';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const nf = (n) => Math.round(n).toLocaleString('ru-RU').replace(/\s/g, ' ');
@@ -11,16 +11,16 @@ export const hoursText = (h) => `${h} ${plural(h, ['час', 'часа', 'час
 
 const GUESTS = { s: { max: 3, together: 'втроём' }, m: { max: 6, together: 'вшестером' } };
 
-// Цена экскурсии: { value, label, note, each }
+// Цена экскурсии: { value, label, short, note, each }
 export function exPrice(C, group, ex, people) {
-  if (group === 'l') return { value: null, label: C.plan.individual, note: 'для группы от 7 человек', each: '' };
+  if (group === 'l') return { value: null, label: C.plan.individual, short: '', note: 'для группы от 7 человек', each: '' };
   if (ex.perPerson) {
-    if (people) return { value: ex.perPerson * people, label: `от ${usd(ex.perPerson * people)}`, note: `${people} ${plural(people, ['человек', 'человека', 'человек'])}`, each: '' };
-    return { value: ex.perPerson, label: `от ${usd(ex.perPerson)}`, note: 'с человека, трансфер включён', each: '' };
+    if (people) return { value: ex.perPerson * people, label: `от ${usd(ex.perPerson * people)}`, short: '', note: `${people} ${plural(people, ['человек', 'человека', 'человек'])}`, each: '' };
+    return { value: ex.perPerson, label: `от ${usd(ex.perPerson)}`, short: 'с человека', note: 'Трансфер включён', each: '' };
   }
   const v = ex.price[group];
   const g = GUESTS[group];
-  return { value: v, label: usd(v), note: `за автомобиль с гидом · до ${g.max} гостей`, each: `≈ ${usd(v / g.max)} с человека, если поедете ${g.together}` };
+  return { value: v, label: usd(v), short: 'за автомобиль', note: `Автомобиль с гидом · до ${g.max} гостей`, each: `≈ ${usd(v / g.max)} с человека, если поедете ${g.together}` };
 }
 
 export function head(C, key) {
@@ -47,10 +47,11 @@ export function card(C, ex, { group = 's', inPlan = false, reason = '', compared
     </div>
     ${reason ? `<p class="card__reason">${esc(reason)}</p>` : ''}
     <p class="card__meta">${esc(ex.hours ? hoursText(ex.hours) : ex.duration)} · ${esc(ex.places)}</p>
-    <p class="card__lead">${esc(ex.lead)}</p>
-    <div class="card__price">${esc(pr.label)}<small>${esc(pr.note)}</small>${pr.each ? `<small class="card__each">${esc(pr.each)}</small>` : ''}</div>
+    <div class="card__price">${esc(pr.label)}${pr.short ? ` <small>${esc(pr.short)}</small>` : ''}</div>
     <details class="more">
       <summary>Подробнее ${UI.down}</summary>
+      <p class="card__lead">${esc(ex.lead)}</p>
+      <p class="more__price">${esc(pr.note)}${pr.each ? ` · ${esc(pr.each)}` : ''}</p>
       <div class="more__grid">
         ${ex.fits?.length ? `<div class="fit"><b>${esc(C.catalog.fits)}</b>${list(ex.fits)}</div>` : ''}
         ${ex.notFor?.length ? `<div class="fit fit--no"><b>${esc(C.catalog.notFor)}</b>${list(ex.notFor)}</div>` : ''}
