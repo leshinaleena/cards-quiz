@@ -178,7 +178,7 @@ export function mapSvg(C, { trip = [] } = {}) {
   const faint = Object.keys(M.points).map((k) => {
     if (used.has(k)) return '';
     const [x, y] = P[k];
-    const label = anchors.includes(k) ? `<text class="map__soft" x="${x + 12}" y="${y + 6}">${esc(M.points[k].name)}</text>` : '';
+    const label = anchors.includes(k) ? `<text class="map__soft" x="${x > 800 ? x - 12 : x + 12}" y="${y + 6}" text-anchor="${x > 800 ? 'end' : 'start'}">${esc(M.points[k].name)}</text>` : '';
     return `<circle class="map__dot" cx="${x}" cy="${y}" r="5"/>${label}`;
   }).join('');
   const pins = local.map((s) => {
@@ -187,7 +187,8 @@ export function mapSvg(C, { trip = [] } = {}) {
     // Подпись справа от кружка; у правого края — над ним; если справа близко другая точка — под ним
     const left = x > 760;
     const crowded = local.some((o) => o !== s && o.xy[0] > x && o.xy[0] - x < 320 && Math.abs(o.xy[1] - y) < 90);
-    const [lx, ly, la] = left ? [x + 10, y - 40, 'end'] : crowded ? [x, y - 42, 'middle'] : [x + 36, y + 10, 'start'];
+    let [lx, ly, la] = left ? [x + 10, y - 40, 'end'] : crowded ? [x, y - 42, 'middle'] : [x + 36, y + 10, 'start'];
+    if (la === 'middle' && x < name.length * 11) [lx, la] = [Math.max(16, x - 26), 'start']; // у левого края — внутрь карты
     return `<g class="map__pin"><circle cx="${x}" cy="${y}" r="26"/><text class="map__n" x="${x}" y="${y + 9}">${s.n}</text>
       <text class="map__label" x="${lx}" y="${ly}" text-anchor="${la}">${esc(name)}</text></g>`;
   }).join('');
