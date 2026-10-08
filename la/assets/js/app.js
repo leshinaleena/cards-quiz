@@ -1,9 +1,9 @@
 // TOP RIDERS · Лос-Анджелес. Все тексты и цены — в config.json.
-import { UI } from './icons.js?v=11';
-import { drawGift } from './gift.js?v=11';
-import * as R from './render.js?v=11';
+import { UI } from './icons.js?v=12';
+import { drawGift } from './gift.js?v=12';
+import * as R from './render.js?v=12';
 
-const VERSION = '11';
+const VERSION = '12';
 const STORE = 'tr-la-v1';
 const debug = new URLSearchParams(location.search).has('debug');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -766,7 +766,7 @@ function logEvent(event, extra = {}) {
     'Группа': C.groups[S.group].short,
     'Подобрано': (S.picked || []).map((id) => exById(id)?.name).join(', '),
     'План': S.plan.map((i) => (isFree(i) ? 'свободный день' : exById(i.id).name)).join(', '),
-    'Режим': leadMode === 'concierge' ? 'под ключ' : 'сам',
+    'Режим': { concierge: 'под ключ', direct: 'с первого экрана' }[leadMode] || 'сам',
     'Сумма': planTotal() ?? '',
     'Райдер': S.rider ? `${S.rider.id} · ${S.rider.days} дн · ${S.rider.adults} взр` : '',
     'UTM': utm(),
@@ -816,6 +816,7 @@ function bind() {
     else if (ds.add) toggleExcursion(ds.add);
     else if ('resultSend' in ds) { takeResult(); leadMode = 'plan'; renderLead(); openSheet($('#leadSheet')); }
     else if ('resultKeep' in ds) { takeResult(); toast(C.toasts.routeAdded); renderPlan(); openSheet($('#planSheet')); reach('plan_open'); }
+    else if (ds.quick) { leadMode = 'direct'; leadMonth = S.month; sendLead(ds.quick); }
     else if (ds.advice) applyAdvice(ds.advice);
     else if (ds.route) addRoute(C.routes.items.find((r) => r.id === ds.route));
     else if ('openCmp' in ds) { S.compare = exItems().map((i) => i.id).slice(0, 3); closeSheet($('#planSheet')); renderCompare(); openSheet($('#cmpSheet')); reach('compare_open'); }

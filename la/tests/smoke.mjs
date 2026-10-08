@@ -40,6 +40,14 @@ for (const { name, ...opts } of profiles) {
   await page.waitForTimeout(500);
   check(await page.evaluate(() => [...document.images].every((i) => i.complete && i.naturalWidth > 0)), 'все фото показаны');
 
+  // Первый экран: написать менеджеру сразу, без квиза
+  check(await page.isVisible('.hero [data-quick="tg"]') && await page.isVisible('.hero [data-quick="wa"]'), 'на первом экране — Telegram и WhatsApp');
+  await page.evaluate(() => document.querySelector('.hero [data-quick="tg"]').click());
+  const quick = await page.evaluate(() => ({ url: window.__opened, text: window.__lastLead?.text }));
+  check(quick.url?.startsWith(`https://t.me/${cfg.contacts.telegram}?text=`) && quick.text.includes(cfg.messages.nothing), 'быстрая заявка: Telegram с готовым текстом');
+  check(logged.some((x) => x.includes('с первого экрана')), 'быстрая заявка попала в таблицу');
+  await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+
   // Квиз из трёх вопросов: проходится при любых ответах и сразу даёт маршрут
   check(cfg.quiz.questions.length === 3, 'в квизе ровно 3 вопроса');
   const qOpt = (qid, oid) => cfg.quiz.questions.find((q) => q.id === qid).options.find((o) => o.id === oid);
